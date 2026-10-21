@@ -11,8 +11,8 @@ export function storedBounds(view: BoxView): Bounds {
   return { x: view.x, y: view.y, width: view.width, height: view.height };
 }
 
-export function boundsOf(diagram: UMLDiagram, view: BoxView, measure?: ViewMeasurer): Bounds {
-  return (measure ? measure(diagram, view) : null) ?? storedBounds(view);
+export function boundsOf(doc: ProjectDocument, diagram: UMLDiagram, view: BoxView, measure?: ViewMeasurer): Bounds {
+  return (measure ? measure(doc, diagram, view) : null) ?? storedBounds(view);
 }
 
 function contains(outer: Bounds, x: number, y: number, slack = 0): boolean {
@@ -48,7 +48,7 @@ export function findContainerFor(
 ): BoxView | null {
   const childKind = view.kind === 'note' ? 'note' : doc.modelElements[view.elementId]?.kind;
   if (!childKind) return null;
-  const b = boundsOf(diagram, view, measure);
+  const b = boundsOf(doc, diagram, view, measure);
   const cx = b.x + b.width / 2;
   const cy = b.y + b.height / 2;
   const excluded = new Set([view.id, ...visualDescendants(diagram, view.id)]);
@@ -58,7 +58,7 @@ export function findContainerFor(
     const containerEl = doc.modelElements[candidate.elementId];
     if (!containerEl || !CONTAINER_KINDS.has(containerEl.kind)) continue;
     if (!containmentEffect(containerEl.kind, childKind)) continue;
-    const cb = boundsOf(diagram, candidate, measure);
+    const cb = boundsOf(doc, diagram, candidate, measure);
     const slack = childKind === 'port' ? Math.max(b.width, b.height) : 0;
     if (!contains(cb, cx, cy, slack)) continue;
     const area = cb.width * cb.height;

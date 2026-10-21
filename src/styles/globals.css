@@ -1,0 +1,193 @@
+@import 'tailwindcss';
+@import '@xyflow/react/dist/base.css';
+
+/* ---------------------------------------------------------------------------------------------
+ * Design tokens. Dark-first graphite UI with a restrained blue accent; light theme via data-theme.
+ * ------------------------------------------------------------------------------------------- */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0e1014;
+  --surface-1: #15181e;
+  --surface-2: #1a1e25;
+  --surface-3: #222730;
+  --surface-4: #2a303a;
+  --border: #262c35;
+  --border-strong: #353d48;
+  --text: #e4e7ec;
+  --text-muted: #98a2b0;
+  --text-faint: #69727f;
+  --accent: #4b8bf5;
+  --accent-hover: #6a9ff7;
+  --accent-text: #ffffff;
+  --accent-muted: rgb(75 139 245 / 0.16);
+  --accent-border: rgb(75 139 245 / 0.55);
+  --danger: #ef6b73;
+  --danger-muted: rgb(239 107 115 / 0.14);
+  --warning: #e3a948;
+  --warning-muted: rgb(227 169 72 / 0.14);
+  --success: #4cc38a;
+  --success-muted: rgb(76 195 138 / 0.14);
+  --canvas: #161a20;
+  --canvas-grid: #262c36;
+  --selection: #4b8bf5;
+  --shadow: 0 8px 28px rgb(0 0 0 / 0.45), 0 1px 0 rgb(255 255 255 / 0.03) inset;
+  --scrollbar: #313844;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #eef0f3;
+  --surface-1: #ffffff;
+  --surface-2: #f6f7f9;
+  --surface-3: #eceef2;
+  --surface-4: #e2e5ea;
+  --border: #e0e3e8;
+  --border-strong: #c9ced6;
+  --text: #1a1e24;
+  --text-muted: #59626f;
+  --text-faint: #8a929e;
+  --accent: #2563eb;
+  --accent-hover: #1d4fd6;
+  --accent-text: #ffffff;
+  --accent-muted: rgb(37 99 235 / 0.1);
+  --accent-border: rgb(37 99 235 / 0.5);
+  --danger: #d43c47;
+  --danger-muted: rgb(212 60 71 / 0.1);
+  --warning: #b97a12;
+  --warning-muted: rgb(185 122 18 / 0.12);
+  --success: #1f9d61;
+  --success-muted: rgb(31 157 97 / 0.1);
+  --canvas: #fbfbfc;
+  --canvas-grid: #e3e6ea;
+  --selection: #2563eb;
+  --shadow: 0 8px 28px rgb(15 23 42 / 0.16);
+  --scrollbar: #c6ccd4;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-4: var(--surface-4);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-text: var(--accent-text);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-border: var(--accent-border);
+  --color-danger: var(--danger);
+  --color-danger-muted: var(--danger-muted);
+  --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-muted);
+  --color-success: var(--success);
+  --color-success-muted: var(--success-muted);
+  --color-canvas: var(--canvas);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --shadow-panel: var(--shadow);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  user-select: none;
+}
+
+input,
+textarea,
+select,
+[contenteditable='true'] {
+  user-select: text;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* React Flow surface tuned for UML editing. */
+.react-flow {
+  --xy-background-color: var(--canvas);
+  --xy-selection-background-color: rgb(75 139 245 / 0.08);
+  --xy-selection-border: 1px dashed var(--selection);
+}
+.react-flow__node {
+  cursor: default;
+}
+.react-flow__node.selectable:hover {
+  cursor: move;
+}
+.react-flow__handle {
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+}
+.react-flow__edge-path,
+.react-flow__connection-path {
+  stroke: none;
+}
+.react-flow__resize-control.handle {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--surface-1);
+  border: 1.5px solid var(--selection);
+}
+.react-flow__resize-control.line {
+  border-color: transparent;
+}
+.react-flow__minimap {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.uml-canvas[data-tool='connect'] .react-flow__node,
+.uml-canvas[data-tool='place'] .react-flow__pane {
+  cursor: crosshair;
+}
+.uml-canvas[data-tool='hand'] .react-flow__pane,
+.uml-canvas[data-tool='hand'] .react-flow__node {
+  cursor: grab;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-toast-in {
+  animation: toast-in 140ms ease-out;
+}

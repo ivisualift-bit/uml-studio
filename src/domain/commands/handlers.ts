@@ -298,6 +298,35 @@ function reconnect(draft: ProjectDocument, cmd: Extract<Command, { type: 'elemen
   }
 }
 
+function swapEnds(draft: ProjectDocument, cmd: Extract<Command, { type: 'element/swapEnds' }>, tx: Transaction): void {
+  const rel = requireElement(draft, cmd.relationshipId);
+  if (!isRelationship(rel)) throw new CommandError('invalidPayload', 'Only relationships can be reversed');
+  const source = requireElement(draft, rel.sourceId);
+  const target = requireElement(draft, rel.targetId);
+  const problem = checkRelationshipEndpoints(rel.kind, endpointInfo(target), endpointInfo(source));
+  if (problem) throw new CommandError('endpointNotAllowed', `Cannot reverse: ${problem}`, [problem]);
+  [rel.sourceId, rel.targetId] = [rel.targetId, rel.sourceId];
+  rel.ownerId = rel.sourceId;
+  if ('sourceEnd' in rel) [rel.sourceEnd, rel.targetEnd] = [rel.targetEnd, rel.sourceEnd];
+  if (rel.kind === 'extend') rel.extensionPointIds = [];
+  tx.touchElement(rel.id);
+  const swapKey: Record<string, string> = {
+    sourceRole: 'targetRole',
+    targetRole: 'sourceRole',
+    sourceMultiplicity: 'targetMultiplicity',
+    targetMultiplicity: 'sourceMultiplicity',
+  };
+  for (const diagram of Object.values(draft.diagrams)) {
+    for (const view of Object.values(diagram.views)) {
+      if (view.kind !== 'edge' || view.elementId !== rel.id) continue;
+      [view.sourceViewId, view.targetViewId] = [view.targetViewId, view.sourceViewId];
+      view.waypoints = view.waypoints.slice().reverse();
+      view.labelOffsets = Object.fromEntries(Object.entries(view.labelOffsets).map(([k, v]) => [swapKey[k] ?? k, v]));
+      tx.touchView(diagram.id, view.id);
+    }
+  }
+}
+
 // -------------------------------------------------------------------------------------------------
 // Views
 // -------------------------------------------------------------------------------------------------
@@ -493,6 +522,9 @@ export function applyCommand(draft: ProjectDocument, cmd: Command, tx: Transacti
       return;
     case 'element/reconnect':
       reconnect(draft, cmd, tx);
+      return;
+    case 'element/swapEnds':
+      swapEnds(draft, cmd, tx);
       return;
     case 'member/add':
       addMember(draft, cmd, tx);

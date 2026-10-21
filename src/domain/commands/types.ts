@@ -1,6 +1,6 @@
 import type { ID } from '../schemas/common';
 import type { ModelElement } from '../schemas/elements';
-import type { DiagramOptions, ProjectSettings, UMLDiagram, Viewport } from '../schemas/project';
+import type { DiagramOptions, ProjectDocument, ProjectSettings, UMLDiagram, Viewport } from '../schemas/project';
 import type { DiagramView } from '../schemas/views';
 
 /** Owned-member collections editable through member commands. */
@@ -41,6 +41,8 @@ export type Command =
       /** Edge views to re-attach (same command keeps semantic + views consistent). */
       edgeUpdates: Array<{ diagramId: ID; edgeViewId: ID; nodeViewId: ID }>;
     }
+  /** Reverse a relationship: swaps endpoints, end properties and every edge view's geometry. */
+  | { type: 'element/swapEnds'; relationshipId: ID }
   // ---- owned members (attributes, operations, parameters, literals, operands…)
   | {
       type: 'member/add';
@@ -118,4 +120,4 @@ export interface Bounds {
 }
 
 /** Injected by the application so domain geometry can use rendered (intrinsic) sizes. */
-export type ViewMeasurer = (diagram: UMLDiagram, view: DiagramView) => Bounds | null;
+export type ViewMeasurer = (doc: ProjectDocument, diagram: UMLDiagram, view: DiagramView) => Bounds | null;

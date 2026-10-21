@@ -567,6 +567,45 @@ export function pasteCommands(
   };
 }
 
+/**
+ * Rename an element and keep the displayed type text of features that reference it semantically
+ * (`typeElementId`) in sync — one transaction, one undo step.
+ */
+export function renameElementCommands(doc: ProjectDocument, elementId: ID, name: string): Command[] {
+  const commands: Command[] = [{ type: 'element/update', elementId, patch: { name } }];
+  const old = doc.modelElements[elementId]?.name;
+  if (old === undefined || old === name) return commands;
+  for (const el of Object.values(doc.modelElements)) {
+    if ('attributes' in el) {
+      for (const a of el.attributes) {
+        if (a.typeElementId === elementId) commands.push({ type: 'member/update', elementId: el.id, collection: 'attributes', memberId: a.id, patch: { type: name } });
+      }
+      for (const o of el.operations) {
+        if (o.returnTypeElementId === elementId) commands.push({ type: 'member/update', elementId: el.id, collection: 'operations', memberId: o.id, patch: { returnType: name } });
+        for (const p of o.parameters) {
+          if (p.typeElementId === elementId) {
+            commands.push({ type: 'member/update', elementId: el.id, collection: 'parameters', operationId: o.id, memberId: p.id, patch: { type: name } });
+          }
+        }
+      }
+    }
+    if ((el.kind === 'lifeline' || el.kind === 'part' || el.kind === 'port' || el.kind === 'objectNode') && el.typeElementId === elementId) {
+      commands.push({ type: 'element/update', elementId: el.id, patch: { typeName: name } });
+    }
+  }
+  return commands;
+}
+
+/** Resolve a typed type name to a unique classifier of the project (semantic type link). */
+export function resolveTypeElement(doc: ProjectDocument, typeText: string): ID | null {
+  const name = typeText.trim().replace(/\[\]$/, '');
+  if (!name) return null;
+  const matches = Object.values(doc.modelElements).filter(
+    (e) => e.name === name && (e.kind === 'class' || e.kind === 'interface' || e.kind === 'enumeration' || e.kind === 'dataType' || e.kind === 'primitiveType' || e.kind === 'signal' || e.kind === 'component'),
+  );
+  return matches.length === 1 ? matches[0]!.id : null;
+}
+
 /** All views (in all diagrams) of the given elements — used by the delete-from-model dialog. */
 export function viewCountOf(doc: ProjectDocument, elementIds: Iterable<ID>): number {
   let count = 0;

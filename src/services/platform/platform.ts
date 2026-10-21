@@ -1,0 +1,34 @@
+import { isTauri } from '@tauri-apps/api/core';
+import { BrowserProjectRepository } from '@/services/persistence/browserRepository';
+import { indexedDbRecovery } from '@/services/persistence/recovery';
+import { TauriProjectRepository } from '@/services/persistence/tauriRepository';
+import type { ProjectRepository, RecoveryRepository } from '@/services/persistence/types';
+
+/** Runtime capability detection (uses Tauri's own API, not user-agent sniffing — spec §21.3). */
+export function isDesktop(): boolean {
+  try {
+    return isTauri();
+  } catch {
+    return false;
+  }
+}
+
+export function isMac(): boolean {
+  try {
+    const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform;
+    return /mac|iphone|ipad/i.test(platform);
+  } catch {
+    return false;
+  }
+}
+
+let repository: ProjectRepository | null = null;
+
+export function projectRepository(): ProjectRepository {
+  repository ??= isDesktop() ? new TauriProjectRepository() : new BrowserProjectRepository();
+  return repository;
+}
+
+export function recoveryRepository(): RecoveryRepository {
+  return indexedDbRecovery;
+}
