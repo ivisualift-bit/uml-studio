@@ -551,13 +551,46 @@ export function pasteCommands(
   };
   const fallbackOwner = ownerFor(elements.find((e) => !isRelationship(e))?.kind ?? 'class') ?? diagram.ownerId;
   const cloned = cloneFragment({ ...options.payload, elements, views }, doc, options.ids, { ownerId: fallbackOwner, offset: options.offset });
-  // Re-own non-relationship clones whose owner was not copied using the per-kind default owner.
+  // Re-own non-relationship clones whose owner was not copied using the per-kind default owner, and
+  // give them names that are unique among their new siblings ("Person" → "Person2").
   const clonedIds = new Set(cloned.elements.map((e) => e.id));
+  const taken = new Map<string, Set<string>>();
+  const siblingNames = (ownerId: ID, kind: ElementKind) => {
+    const key = `${ownerId}\u0000${kind}`;
+    let names = taken.get(key);
+    if (!names) {
+      names = new Set(Object.values(doc.modelElements).filter((e) => e.ownerId === ownerId && e.kind === kind).map((e) => e.name));
+      taken.set(key, names);
+    }
+    return names;
+  };
   const finalElements = cloned.elements.map((el) => {
     if (isRelationship(el) || clonedIds.has(el.ownerId ?? '')) return el;
-    const owner = ownerFor(el.kind);
-    return owner ? { ...el, ownerId: owner } : el;
+    const owner = ownerFor(el.kind) ?? el.ownerId;
+    if (!owner) return el;
+    const names = siblingNames(owner, el.kind);
+    let name = el.name;
+    if (name && names.has(name)) {
+      const base = name.replace(/\d+$/, '');
+      for (let n = 2; names.has(name); n += 1) name = `${base}${n}`;
+    }
+    names.add(name);
+    return { ...el, ownerId: owner, name };
   });
+  // Type texts that reference a renamed clone follow its new name.
+  const renamed = new Map(finalElements.filter((e, i) => e.name !== cloned.elements[i]?.name).map((e) => [e.id, e.name]));
+  if (renamed.size) {
+    for (const el of finalElements) {
+      if ('attributes' in el) {
+        el.attributes = el.attributes.map((a) => (a.typeElementId && renamed.has(a.typeElementId) ? { ...a, type: renamed.get(a.typeElementId)! } : a));
+        el.operations = el.operations.map((o) => ({
+          ...o,
+          returnType: o.returnTypeElementId && renamed.has(o.returnTypeElementId) ? renamed.get(o.returnTypeElementId)! : o.returnType,
+          parameters: o.parameters.map((p) => (p.typeElementId && renamed.has(p.typeElementId) ? { ...p, type: renamed.get(p.typeElementId)! } : p)),
+        }));
+      }
+    }
+  }
   if (finalElements.length === 0 && cloned.views.length === 0) return { ok: false, reason: 'empty' };
   return {
     ok: true,

@@ -36,9 +36,11 @@ type Drag =
   | { kind: 'operand'; viewId: ID; operandId: ID; start: Point; originY: number; originYs: Record<ID, number> }
   | { kind: 'note'; viewId: ID; mode: 'move' | 'resize'; start: Point; origin: { x: number; y: number; width: number; height: number } }
   | { kind: 'marquee'; start: Point; current: Point }
-  | { kind: 'newMessage'; toolId: string; sourceViewId: ID; y: number; current: Point }
+  | { kind: 'newMessage'; toolId: string; sourceViewId: ID; y: number; start: Point; current: Point }
   | { kind: 'newFragment'; tool: Extract<ToolDef, { type: 'fragment' }>; start: Point; current: Point }
-  | { kind: 'newActivation'; lifelineViewId: ID; start: Point; current: Point };
+  | { kind: 'newActivation'; lifelineViewId: ID; start: Point; current: Point }
+  /** Click-to-place tools act on release (like a click) so the new inline editor keeps focus. */
+  | { kind: 'placeClick'; start: Point; hit: Hit | null };
 
 interface Hit {
   kind: string;
@@ -265,7 +267,7 @@ export function SequenceCanvas({ diagramId }: { diagramId: ID }) {
       if (activeTool.type === 'message' && activeTool.mode === 'between' && !pendingSource) {
         const lifeline = lifelineAt(p);
         if (lifeline) {
-          setDrag({ kind: 'newMessage', toolId: activeTool.id, sourceViewId: lifeline, y: p.y, current: p });
+          setDrag({ kind: 'newMessage', toolId: activeTool.id, sourceViewId: lifeline, y: p.y, start: p, current: p });
           return;
         }
       }
@@ -280,7 +282,7 @@ export function SequenceCanvas({ diagramId }: { diagramId: ID }) {
           return;
         }
       }
-      placeAt(p, hit);
+      setDrag({ kind: 'placeClick', start: p, hit });
       return;
     }
     if (tool.kind !== 'select') return;
@@ -490,6 +492,9 @@ export function SequenceCanvas({ diagramId }: { diagramId: ID }) {
         }
         break;
       }
+      case 'placeClick':
+        placeAt(d.start, d.hit);
+        break;
       case 'newActivation': {
         const y1 = Math.min(d.start.y, d.current.y);
         const y2 = Math.max(d.start.y, d.current.y);
@@ -705,7 +710,7 @@ export function SequenceCanvas({ diagramId }: { diagramId: ID }) {
                 <g key={f.view.id} data-testid="seq-fragment" data-view-id={f.view.id} data-operator={f.element.operator}>
                   <PrimitiveSvg primitives={f.primitives} />
                   <rect x={f.box.x} y={f.box.y} width={f.box.width} height={f.box.height} fill="none" stroke="transparent" strokeWidth={10 / z} data-hit-kind="fragment" data-view={f.view.id} pointerEvents="stroke" />
-                  <rect x={f.tagBox.x} y={f.tagBox.y} width={f.tagBox.width} height={f.tagBox.height} fill="transparent" data-hit-kind="fragment" data-view={f.view.id} style={{ cursor: 'move' }} />
+                  <rect x={f.tagBox.x} y={f.tagBox.y} width={f.tagBox.width} height={f.tagBox.height} fill="transparent" data-hit-kind="fragment" data-view={f.view.id} data-testid="seq-fragment-tag" style={{ cursor: 'move' }} />
                   {f.operands.map((o) => (
                     <rect key={o.id} x={o.guardBox.x} y={o.guardBox.y} width={o.guardBox.width} height={o.guardBox.height} fill="transparent" data-hit-kind="fragment" data-view={f.view.id} data-testid="seq-operand-guard" />
                   ))}

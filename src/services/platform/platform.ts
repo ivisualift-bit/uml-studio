@@ -13,9 +13,13 @@ export function isDesktop(): boolean {
   }
 }
 
+/**
+ * Keyboard conventions follow the OS that produces the key events. `navigator.platform` reports the
+ * real OS (User-Agent Client Hints can be overridden by device emulation), so it is checked first.
+ */
 export function isMac(): boolean {
   try {
-    const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform;
+    const platform = navigator.platform || (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || '';
     return /mac|iphone|ipad/i.test(platform);
   } catch {
     return false;

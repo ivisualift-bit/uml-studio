@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
 /**
  * End-to-end tests run against the production build served by `vite preview`,
@@ -20,7 +20,8 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
     acceptDownloads: true,
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } }],
+  // Real (non-emulated) Chromium so the user agent matches the host OS and its keyboard conventions.
+  projects: [{ name: 'chromium', use: { browserName: 'chromium', viewport: { width: 1440, height: 900 } } }],
   webServer: {
     command: 'pnpm exec vite build && pnpm exec vite preview --port 4173 --strictPort',
     url: 'http://localhost:4173',

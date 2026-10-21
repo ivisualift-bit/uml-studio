@@ -213,7 +213,8 @@ export function isTypingTarget(target: EventTarget | null): boolean {
     const type = (target as HTMLInputElement).type;
     return !['checkbox', 'radio', 'button', 'submit', 'range', 'color'].includes(type);
   }
-  return target.closest('[role="combobox"],[role="listbox"],[role="menu"],[role="menubar"]') !== null;
+  // Open menus/listboxes own their keys; a focused (closed) menubar trigger does not block shortcuts.
+  return target.closest('[role="combobox"],[role="listbox"],[role="menu"]') !== null;
 }
 
 /** Global keyboard dispatcher. Returns true when the event was handled. */

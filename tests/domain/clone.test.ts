@@ -71,9 +71,10 @@ describe('copy / paste', () => {
     expect(associations).toHaveLength(2);
     const pastedAssoc = associations.find((r) => r.id !== rel.relationshipId)!;
     expect(pastedAssoc.kind === 'association' && [pastedAssoc.sourceId, pastedAssoc.targetId].some((id) => id === a.elementId || id === b.elementId)).toBe(false);
-    const pastedOrder = classes.find((c) => c.name === 'Order' && c.id !== a.elementId);
-    const pastedCustomer = classes.find((c) => c.name === 'Customer' && c.id !== b.elementId);
-    expect(pastedOrder?.kind === 'class' && pastedOrder.attributes[0]?.typeElementId).toBe(pastedCustomer?.id);
+    // Clones get unique names among their siblings, and type texts follow the renamed clone.
+    const pastedOrder = classes.find((c) => c.name === 'Order2');
+    const pastedCustomer = classes.find((c) => c.name === 'Customer2');
+    expect(pastedOrder?.kind === 'class' && pastedOrder.attributes[0]).toMatchObject({ typeElementId: pastedCustomer?.id, type: 'Customer2' });
     expect(checkIntegrity(f.doc)).toEqual([]);
   });
 
@@ -83,7 +84,7 @@ describe('copy / paste', () => {
     const pasted = pasteCommands(f.doc, { diagramId: f.diagramId, payload: payload!, offset: { x: 20, y: 20 }, ids: f.ids });
     if (!pasted.ok) throw new Error(pasted.reason);
     f.doc = apply(f.doc, pasted.commands);
-    const copy = Object.values(f.doc.modelElements).find((e) => e.name === 'Order' && e.id !== a.elementId);
-    expect(copy?.kind === 'class' && copy.attributes[0]?.typeElementId).toBe(b.elementId);
+    const copy = Object.values(f.doc.modelElements).find((e) => e.name === 'Order2');
+    expect(copy?.kind === 'class' && copy.attributes[0]).toMatchObject({ typeElementId: b.elementId, type: 'Customer' });
   });
 });
