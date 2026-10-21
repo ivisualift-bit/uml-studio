@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { ID } from '@/domain/schemas/common';
 import type { DiagramKind, Viewport } from '@/domain/schemas/project';
 import type { ClipboardPayload } from '@/domain/services/cloneAndRemap';
+import type { MdjImportResult } from '@/services/import/mdjImport';
 import type { LoadError } from '@/domain/serialization/projectFile';
 import type { MemberCollectionKey } from '@/diagrams/render/nodeShapes';
 import type { EdgeLabelKey } from '@/domain/schemas/views';
@@ -52,7 +53,7 @@ export type DialogState =
   | { type: 'recovery'; snapshots: RecoverySnapshotInfo[] }
   | { type: 'commandPalette' }
   | { type: 'quickSearch' }
-  | { type: 'mdjImport' };
+  | { type: 'mdjImport'; fileName: string; result: MdjImportResult };
 
 export interface FocusRequest {
   diagramId: ID;

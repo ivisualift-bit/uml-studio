@@ -63,6 +63,7 @@ export const COMMANDS: AppCommand[] = [
     allowInInput: true,
     run: actions.openProject,
   },
+  { id: 'file.importMdj', labelKey: 'cmd.importMdj', run: actions.importStarUml },
   {
     id: 'file.save',
     labelKey: 'cmd.save',

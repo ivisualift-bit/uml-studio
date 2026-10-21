@@ -1,4 +1,8 @@
-import { PROJECT_FILE_EXTENSION, PROJECT_MIME_TYPE } from '@/domain/serialization/projectFile';
+import {
+  MAX_PROJECT_BYTES,
+  PROJECT_FILE_EXTENSION,
+  PROJECT_MIME_TYPE,
+} from '@/domain/serialization/projectFile';
 import { database } from './db';
 import {
   MAX_RECENTS,
@@ -153,6 +157,13 @@ export class BrowserProjectRepository implements ProjectRepository {
     const file = await pickFileWithInput(`.${PROJECT_FILE_EXTENSION},.json,application/json`);
     if (!file) return null;
     return { text: await file.text(), file: { kind: 'download', name: file.name } };
+  }
+
+  async importFile(filter: ExportFilter): Promise<{ name: string; text: string } | null> {
+    const file = await pickFileWithInput(filter.extensions.map((ext) => `.${ext}`).join(','));
+    if (!file) return null;
+    if (file.size > MAX_PROJECT_BYTES) throw new Error(`${file.name} is larger than 25 MB`);
+    return { name: file.name, text: await file.text() };
   }
 
   async save(text: string, file: FileRef | null, suggestedName: string): Promise<FileRef | null> {

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { discardRecovery, newProject, restoreRecovery } from '@/app/actions';
+import { discardRecovery, newProject, openImportedProject, restoreRecovery } from '@/app/actions';
 import { Button, Field, Input, Select } from '@/components/ui/controls';
 import { Modal } from '@/components/ui/dialog';
 import type { LoadError } from '@/domain/serialization/projectFile';
 import { renderDiagramSvg } from '@/diagrams/render/diagramSvg';
 import { useT } from '@/i18n';
 import { cn } from '@/lib/cn';
+import type { MdjImportResult } from '@/services/import/mdjImport';
 import { recoveryRepository } from '@/services/platform/platform';
 import { TEMPLATES } from '@/services/templates/templates';
 import { useEditorStore, type RecoverySnapshotInfo } from '@/stores/editorStore';
@@ -268,6 +269,126 @@ export function LoadErrorDialog({ fileName, error }: { fileName: string; error: 
           </pre>
         </details>
       )}
+    </Modal>
+  );
+}
+
+function CountList({ counts, testId }: { counts: Record<string, number>; testId: string }) {
+  const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  return (
+    <ul
+      className="grid grid-cols-2 gap-x-4 gap-y-0.5 font-mono text-[11.5px] text-muted"
+      data-testid={testId}
+    >
+      {rows.map(([type, count]) => (
+        <li key={type} className="flex justify-between gap-2" data-type={type}>
+          <span className="truncate">{type}</span>
+          <span className="text-fg">{count}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function MdjImportDialog({ fileName, result }: { fileName: string; result: MdjImportResult }) {
+  const t = useT();
+  if (!result.ok) {
+    return (
+      <Modal
+        open
+        onClose={close}
+        title={t('mdj.failed', { name: fileName })}
+        description={t('mdj.intro')}
+        testId="mdj-import-dialog"
+        footer={<Button onClick={close}>{t('common.close')}</Button>}
+      >
+        <p
+          className="mb-3 text-[13px] text-danger"
+          data-testid="mdj-import-error"
+          data-code={result.error.code}
+        >
+          {t(`mdj.error.${result.error.code}`)}
+        </p>
+        {result.error.details.length > 0 && (
+          <details open={result.error.details.length < 4}>
+            <summary className="cursor-pointer text-[12px] text-muted">{t('loadError.technical')}</summary>
+            <pre className="mt-2 max-h-56 overflow-auto rounded bg-surface-2 p-2 font-mono text-[11px] whitespace-pre-wrap text-muted">
+              {result.error.details.join('\n')}
+            </pre>
+          </details>
+        )}
+      </Modal>
+    );
+  }
+  const { doc, report } = result;
+  const skipped = Object.keys(report.unsupported).length > 0;
+  const warningCount = report.warnings.length + report.moreWarnings;
+  return (
+    <Modal
+      open
+      onClose={close}
+      title={t('mdj.title')}
+      description={t('mdj.intro')}
+      testId="mdj-import-dialog"
+      footer={
+        <>
+          <Button variant="ghost" onClick={close}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            variant="primary"
+            data-testid="mdj-open"
+            onClick={() => {
+              close();
+              void openImportedProject(doc);
+            }}
+          >
+            {t('mdj.open')}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-3 text-[12.5px]">
+        <p className="text-fg" data-testid="mdj-import-summary">
+          {t('mdj.summary', {
+            elements: report.elements,
+            diagrams: report.diagrams,
+            views: report.views,
+            name: fileName,
+          })}
+        </p>
+        <section>
+          <h3 className="mb-1 text-[12px] font-semibold text-fg">{t('mdj.translated')}</h3>
+          <CountList counts={report.imported} testId="mdj-imported" />
+        </section>
+        <section>
+          <h3 className="mb-1 text-[12px] font-semibold text-fg">{t('mdj.skipped')}</h3>
+          {skipped ? (
+            <CountList counts={report.unsupported} testId="mdj-unsupported" />
+          ) : (
+            <p className="text-muted">{t('mdj.nothingSkipped')}</p>
+          )}
+        </section>
+        {warningCount > 0 && (
+          <details>
+            <summary className="cursor-pointer text-[12px] text-muted">
+              {t('mdj.warnings', { count: warningCount })}
+            </summary>
+            <ul
+              className="mt-2 max-h-48 list-disc overflow-auto pl-5 text-[11.5px] text-muted"
+              data-testid="mdj-warnings"
+            >
+              {report.warnings.map((warning, i) => (
+                <li key={i}>{warning}</li>
+              ))}
+              {report.moreWarnings > 0 && <li>{t('mdj.moreWarnings', { count: report.moreWarnings })}</li>}
+            </ul>
+          </details>
+        )}
+        <p className="rounded border border-border bg-surface-2 px-2.5 py-2 text-[12px] text-muted">
+          {t('mdj.newProject')}
+        </p>
+      </div>
     </Modal>
   );
 }

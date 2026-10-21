@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FilePlus2, FolderOpen, LayoutTemplate, Trash2 } from 'lucide-react';
-import { newProject, openProject, openRecent } from '@/app/actions';
+import { importStarUml, newProject, openProject, openRecent } from '@/app/actions';
 import { primaryShortcut } from '@/app/commands';
 import { Kbd } from '@/components/ui/controls';
 import { UmlGlyph } from '@/diagrams/registry/glyphs';
@@ -93,6 +93,14 @@ export function StartScreen() {
             testId="start-templates"
           />
         </div>
+        <button
+          type="button"
+          onClick={() => void importStarUml()}
+          data-testid="start-import-mdj"
+          className="-mt-3 self-start text-[12.5px] text-muted underline-offset-2 hover:text-accent hover:underline"
+        >
+          {t('cmd.importMdj')}
+        </button>
         {!desktop && (
           <div className="rounded-lg border border-border bg-surface-1 px-4 py-3 text-[12.5px] text-muted">
             <span className="font-medium text-fg">{t('start.browserNoticeTitle')}: </span>

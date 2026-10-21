@@ -131,7 +131,7 @@ export const fr: Dictionary = {
     toolSelect: 'Outil de sélection',
     toolHand: 'Outil main',
     templates: 'Nouveau depuis un modèle…',
-    importMdj: 'Importer StarUML (.mdj)…',
+    importMdj: 'Importer StarUML .mdj (expérimental)…',
     duplicateProject: 'Dupliquer le projet',
   },
   toolbar: {
@@ -925,11 +925,27 @@ export const fr: Dictionary = {
   mdj: {
     title: 'Importer un projet StarUML (expérimental)',
     intro:
-      'Import au mieux du sous-ensemble classes, cas d’utilisation et paquetages des fichiers .mdj de StarUML. Ce n’est PAS une compatibilité complète avec StarUML ; les constructions non prises en charge sont listées dans le rapport.',
-    report: 'Rapport d’import',
-    imported: '{elements} éléments et {diagrams} diagrammes importés',
-    unsupported: 'Non pris en charge : {items}',
-    warnings: 'Avertissements',
-    openResult: 'Ouvrir le projet importé',
+      'Import au mieux du sous-ensemble diagrammes de classes, de cas d’utilisation et de paquetages des fichiers .mdj de StarUML. Ce n’est pas une compatibilité StarUML : l’import n’a été testé qu’avec des fichiers d’exemple écrits à la main, et tout ce qui n’a pas été traduit est listé ici.',
+    summary:
+      '{elements} éléments de modèle, {diagrams} diagrammes et {views} vues traduits depuis « {name} ».',
+    translated: 'Traduit',
+    skipped: 'Non importé',
+    nothingSkipped: 'Rien n’a été ignoré.',
+    warnings: 'Avertissements ({count})',
+    moreWarnings: '…et {count} de plus',
+    newProject:
+      'Le résultat s’ouvre comme un nouveau projet UML Studio non enregistré, avec de nouveaux identifiants. Le fichier .mdj n’est pas modifié.',
+    open: 'Ouvrir le projet importé',
+    opened: '« {name} » importé. Enregistrez-le pour le conserver comme projet .umls.',
+    failed: 'Impossible d’importer « {name} »',
+    error: {
+      tooLarge: 'Le fichier dépasse la limite de 25 Mo.',
+      empty: 'Le fichier est vide.',
+      tooDeep: 'Le fichier est trop profondément imbriqué.',
+      duplicateKeys: 'Le fichier contient des clés en double.',
+      invalidJson: 'Le fichier n’est pas un JSON valide.',
+      notMdj: 'Ce n’est pas un fichier de projet StarUML (.mdj).',
+      invalid: 'Le projet traduit n’a pas passé la validation ; rien n’a été ouvert.',
+    },
   },
 };

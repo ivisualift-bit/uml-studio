@@ -81,6 +81,13 @@ export class TauriProjectRepository implements ProjectRepository {
     await invoke('remember_recent', { path: file.path, projectName: info.projectName });
   }
 
+  async importFile(filter: ExportFilter): Promise<{ name: string; text: string } | null> {
+    const result = await invoke<NativeOpened | null>('pick_import_file', {
+      kind: filter.extensions[0] ?? '',
+    });
+    return result ? { name: result.name, text: result.contents } : null;
+  }
+
   async exportFile(data: Blob, suggestedName: string, filter: ExportFilter): Promise<string | null> {
     const ext = filter.extensions[0] ?? 'bin';
     const path = await invoke<string | null>('pick_save_path', {

@@ -41,6 +41,8 @@ export interface ProjectRepository {
   openRecent(entry: RecentEntry): Promise<OpenedFile | null>;
   removeRecent(id: string): Promise<void>;
   recordRecent(file: FileRef, info: { projectId: ID; projectName: string }, text?: string): Promise<void>;
+  /** Read an external file to import. Read-only: it never becomes the project's save target. */
+  importFile(filter: ExportFilter): Promise<{ name: string; text: string } | null>;
   /** Save an exported artifact. Returns the saved file name, or null when cancelled. */
   exportFile(data: Blob, suggestedName: string, filter: ExportFilter): Promise<string | null>;
 }

@@ -16,6 +16,7 @@ import { DIAGRAM_KIND_INFO } from '@/domain/model/metadata';
 import { t, type MessageKey } from '@/i18n';
 import { projectRepository, recoveryRepository } from '@/services/platform/platform';
 import type { RecentEntry } from '@/services/persistence/types';
+import { importMdj } from '@/services/import/mdjImport';
 import { instantiateTemplate } from '@/services/templates/templates';
 import { selectIsDirty, useDocumentStore, type DispatchOptions, type FileRef } from '@/stores/documentStore';
 import { activeSelection, useEditorStore } from '@/stores/editorStore';
@@ -161,6 +162,31 @@ export async function openRecent(entry: RecentEntry): Promise<void> {
       details: [error instanceof Error ? error.message : String(error)],
     });
   }
+}
+
+/** Experimental StarUML import: translate, then let the user review the report before opening. */
+export async function importStarUml(): Promise<void> {
+  try {
+    const picked = await projectRepository().importFile({
+      name: 'StarUML model',
+      extensions: ['mdj'],
+      mime: 'application/json',
+    });
+    if (!picked) return;
+    const result = importMdj(picked.text, { ids: uuidGenerator, now: new Date(), fileName: picked.name });
+    useEditorStore.getState().openDialog({ type: 'mdjImport', fileName: picked.name, result });
+  } catch (error) {
+    toast.error(t('project.readError'), {
+      details: [error instanceof Error ? error.message : String(error)],
+    });
+  }
+}
+
+/** Open an imported project as a new, unsaved project (it has no file yet). */
+export async function openImportedProject(doc: ProjectDocument): Promise<void> {
+  if (!(await confirmDiscardIfDirty())) return;
+  await replaceProject(doc, null, { dirty: true });
+  toast.success(t('mdj.opened', { name: doc.name }));
 }
 
 /** Persist per-diagram viewports into the document (bookkeeping, not an undoable edit). */

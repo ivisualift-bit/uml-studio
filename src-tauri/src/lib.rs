@@ -162,6 +162,20 @@ async fn pick_save_path(app: AppHandle, scope: State<'_, PathScope>, suggested_n
     Ok(Some(path.to_string_lossy().into_owned()))
 }
 
+/// Read-only pick for importers: the path is not added to the scope (nothing is written back).
+#[tauri::command]
+async fn pick_import_file(app: AppHandle, kind: String) -> Result<Option<OpenedProject>, String> {
+    let (label, extension) = match kind.as_str() {
+        "mdj" => ("StarUML model", "mdj"),
+        _ => return Err(format!("Unsupported import kind: {kind}")),
+    };
+    let picked = app.dialog().file().add_filter(label, &[extension]).blocking_pick_file();
+    let Some(picked) = picked else { return Ok(None) };
+    let path = picked.into_path().map_err(|e| e.to_string())?;
+    let contents = read_limited(&path)?;
+    Ok(Some(OpenedProject { name: file_name(&path), path: path.to_string_lossy().into_owned(), contents }))
+}
+
 #[tauri::command]
 fn read_text_file(scope: State<'_, PathScope>, path: String) -> Result<String, String> {
     let path = scope.check(Path::new(&path))?;
@@ -221,6 +235,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             pick_open_project,
             pick_save_path,
+            pick_import_file,
             read_text_file,
             write_text_file,
             write_binary_file,

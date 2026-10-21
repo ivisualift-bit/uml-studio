@@ -1,0 +1,200 @@
+{
+	"_type": "Project",
+	"_id": "P1",
+	"name": "Store use cases",
+	"ownedElements": [
+		{
+			"_type": "UMLModel",
+			"_id": "M1",
+			"_parent": { "$ref": "P1" },
+			"name": "Requirements",
+			"ownedElements": [
+				{
+					"_type": "UMLUseCaseDiagram",
+					"_id": "D1",
+					"_parent": { "$ref": "M1" },
+					"name": "Shopping",
+					"ownedViews": [
+						{
+							"_type": "UMLUseCaseSubjectView",
+							"_id": "V-SUBJECT",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-SUBJECT" },
+							"left": 200,
+							"top": 40,
+							"width": 520,
+							"height": 460
+						},
+						{
+							"_type": "UMLActorView",
+							"_id": "V-CUSTOMER",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-CUSTOMER" },
+							"left": 60,
+							"top": 180,
+							"width": 40,
+							"height": 80
+						},
+						{
+							"_type": "UMLActorView",
+							"_id": "V-CLERK",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-CLERK" },
+							"stereotypeDisplay": "label",
+							"left": 800,
+							"top": 180,
+							"width": 100,
+							"height": 50
+						},
+						{
+							"_type": "UMLUseCaseView",
+							"_id": "V-CHECKOUT",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-CHECKOUT" },
+							"containerView": { "$ref": "V-SUBJECT" },
+							"left": 300,
+							"top": 120,
+							"width": 160,
+							"height": 70
+						},
+						{
+							"_type": "UMLUseCaseView",
+							"_id": "V-LOGIN",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-LOGIN" },
+							"containerView": { "$ref": "V-SUBJECT" },
+							"left": 300,
+							"top": 340,
+							"width": 140,
+							"height": 60
+						},
+						{
+							"_type": "UMLUseCaseView",
+							"_id": "V-COUPON",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-COUPON" },
+							"containerView": { "$ref": "V-SUBJECT" },
+							"left": 540,
+							"top": 120,
+							"width": 150,
+							"height": 60
+						},
+						{
+							"_type": "UMLAssociationView",
+							"_id": "V-ASSOC",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-ASSOC" },
+							"tail": { "$ref": "V-CUSTOMER" },
+							"head": { "$ref": "V-CHECKOUT" },
+							"points": "100:220;300:155"
+						},
+						{
+							"_type": "UMLIncludeView",
+							"_id": "V-INCLUDE",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-INCLUDE" },
+							"tail": { "$ref": "V-CHECKOUT" },
+							"head": { "$ref": "V-LOGIN" },
+							"points": "380:190;370:340"
+						},
+						{
+							"_type": "UMLExtendView",
+							"_id": "V-EXTEND",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-EXTEND" },
+							"tail": { "$ref": "V-COUPON" },
+							"head": { "$ref": "V-CHECKOUT" },
+							"points": "540:150;460:155"
+						},
+						{
+							"_type": "UMLGeneralizationView",
+							"_id": "V-GEN",
+							"_parent": { "$ref": "D1" },
+							"model": { "$ref": "E-GEN" },
+							"tail": { "$ref": "V-CLERK" },
+							"head": { "$ref": "V-CUSTOMER" },
+							"points": "800:205;100:205"
+						}
+					]
+				},
+				{
+					"_type": "UMLUseCaseSubject",
+					"_id": "E-SUBJECT",
+					"_parent": { "$ref": "M1" },
+					"name": "Web shop"
+				},
+				{
+					"_type": "UMLActor",
+					"_id": "E-CUSTOMER",
+					"_parent": { "$ref": "M1" },
+					"name": "Customer",
+					"ownedElements": [
+						{
+							"_type": "UMLAssociation",
+							"_id": "E-ASSOC",
+							"_parent": { "$ref": "E-CUSTOMER" },
+							"end1": { "_type": "UMLAssociationEnd", "_id": "E-ASSOC-1", "_parent": { "$ref": "E-ASSOC" }, "reference": { "$ref": "E-CUSTOMER" } },
+							"end2": { "_type": "UMLAssociationEnd", "_id": "E-ASSOC-2", "_parent": { "$ref": "E-ASSOC" }, "reference": { "$ref": "E-CHECKOUT" } }
+						}
+					]
+				},
+				{
+					"_type": "UMLActor",
+					"_id": "E-CLERK",
+					"_parent": { "$ref": "M1" },
+					"name": "Clerk",
+					"ownedElements": [
+						{
+							"_type": "UMLGeneralization",
+							"_id": "E-GEN",
+							"_parent": { "$ref": "E-CLERK" },
+							"source": { "$ref": "E-CLERK" },
+							"target": { "$ref": "E-CUSTOMER" }
+						}
+					]
+				},
+				{
+					"_type": "UMLUseCase",
+					"_id": "E-CHECKOUT",
+					"_parent": { "$ref": "M1" },
+					"name": "Checkout",
+					"extensionPoints": [
+						{ "_type": "UMLExtensionPoint", "_id": "E-CHECKOUT-xp", "_parent": { "$ref": "E-CHECKOUT" }, "name": "payment" }
+					],
+					"ownedElements": [
+						{
+							"_type": "UMLInclude",
+							"_id": "E-INCLUDE",
+							"_parent": { "$ref": "E-CHECKOUT" },
+							"source": { "$ref": "E-CHECKOUT" },
+							"target": { "$ref": "E-LOGIN" }
+						}
+					]
+				},
+				{
+					"_type": "UMLUseCase",
+					"_id": "E-LOGIN",
+					"_parent": { "$ref": "M1" },
+					"name": "Log in"
+				},
+				{
+					"_type": "UMLUseCase",
+					"_id": "E-COUPON",
+					"_parent": { "$ref": "M1" },
+					"name": "Apply coupon",
+					"ownedElements": [
+						{
+							"_type": "UMLExtend",
+							"_id": "E-EXTEND",
+							"_parent": { "$ref": "E-COUPON" },
+							"source": { "$ref": "E-COUPON" },
+							"target": { "$ref": "E-CHECKOUT" },
+							"condition": "coupon entered",
+							"extensionLocations": [{ "$ref": "E-CHECKOUT-xp" }]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -24,6 +24,7 @@ const MENUS: Array<{ label: MessageKey; items: Entry[] }> = [
       'file.templates',
       'file.open',
       { recent: true },
+      'file.importMdj',
       '-',
       'file.save',
       'file.saveAs',

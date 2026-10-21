@@ -11,6 +11,7 @@ import {
 import { CodegenDialog, ExportDialog, TextExportDialog } from './ExportDialogs';
 import {
   LoadErrorDialog,
+  MdjImportDialog,
   NewProjectDialog,
   RecoveryDialog,
   TemplatesDialog,
@@ -33,6 +34,8 @@ export function DialogHost() {
       return <RecoveryDialog snapshots={dialog.snapshots} />;
     case 'loadError':
       return <LoadErrorDialog fileName={dialog.fileName} error={dialog.error} />;
+    case 'mdjImport':
+      return <MdjImportDialog fileName={dialog.fileName} result={dialog.result} />;
     case 'settings':
       return <SettingsDialog />;
     case 'shortcuts':

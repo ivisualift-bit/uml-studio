@@ -132,7 +132,7 @@ export const en = {
     toolSelect: 'Select Tool',
     toolHand: 'Hand Tool',
     templates: 'New from Template…',
-    importMdj: 'Import StarUML (.mdj)…',
+    importMdj: 'Import StarUML .mdj (experimental)…',
     duplicateProject: 'Duplicate Project',
   },
   toolbar: {
@@ -909,12 +909,27 @@ export const en = {
   mdj: {
     title: 'Import StarUML project (experimental)',
     intro:
-      'Best-effort import of the class, use case and package subset of StarUML .mdj files. This is NOT full StarUML compatibility; unsupported constructs are listed in the report.',
-    report: 'Import report',
-    imported: 'Imported {elements} elements and {diagrams} diagrams',
-    unsupported: 'Unsupported: {items}',
-    warnings: 'Warnings',
-    openResult: 'Open imported project',
+      'Best-effort import of the class, use case and package diagram subset of StarUML .mdj files. This is not StarUML compatibility: it was only tested with hand-written sample files, and everything that was not translated is listed here.',
+    summary: '{elements} model elements, {diagrams} diagrams and {views} views translated from “{name}”.',
+    translated: 'Translated',
+    skipped: 'Not imported',
+    nothingSkipped: 'Nothing was skipped.',
+    warnings: 'Warnings ({count})',
+    moreWarnings: '…and {count} more',
+    newProject:
+      'The result opens as a new, unsaved UML Studio project with new identifiers. The .mdj file is not modified.',
+    open: 'Open imported project',
+    opened: 'Imported “{name}”. Save it to keep it as a .umls project.',
+    failed: 'Cannot import “{name}”',
+    error: {
+      tooLarge: 'The file is larger than the 25 MB limit.',
+      empty: 'The file is empty.',
+      tooDeep: 'The file is nested too deeply.',
+      duplicateKeys: 'The file contains duplicate keys.',
+      invalidJson: 'The file is not valid JSON.',
+      notMdj: 'This is not a StarUML project file (.mdj).',
+      invalid: 'The translated project failed validation, so nothing was opened.',
+    },
   },
 } as const;
 

@@ -4,7 +4,12 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 /** Modules that must stay framework/platform independent (see AGENTS.md). */
-const PURE_MODULES = ['src/domain/**/*.ts', 'src/diagrams/render/**/*.ts', 'src/services/codegen/**/*.ts'];
+const PURE_MODULES = [
+  'src/domain/**/*.ts',
+  'src/diagrams/render/**/*.ts',
+  'src/services/codegen/**/*.ts',
+  'src/services/import/**/*.ts',
+];
 
 export default tseslint.config(
   {

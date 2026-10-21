@@ -1,0 +1,468 @@
+{
+	"_type": "Project",
+	"_id": "AAAAAAFF+h6SjaM2Hec=",
+	"name": "Shop",
+	"ownedElements": [
+		{
+			"_type": "UMLModel",
+			"_id": "AAAAAAFF+qBWK6M3Z8Y=",
+			"_parent": { "$ref": "AAAAAAFF+h6SjaM2Hec=" },
+			"name": "Model",
+			"documentation": "Hand-written fixture",
+			"ownedElements": [
+				{
+					"_type": "UMLClassDiagram",
+					"_id": "AAAAAAFF+qBtyKM79qY=",
+					"_parent": { "$ref": "AAAAAAFF+qBWK6M3Z8Y=" },
+					"name": "Main",
+					"defaultDiagram": true,
+					"ownedViews": [
+						{
+							"_type": "UMLPackageView",
+							"_id": "V-PKG",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-PKG" },
+							"subViews": [
+								{ "_type": "UMLNameCompartmentView", "_id": "V-PKG-name", "_parent": { "$ref": "V-PKG" }, "model": { "$ref": "E-PKG" } }
+							],
+							"containedViews": [{ "$ref": "V-CUSTOMER" }, { "$ref": "V-ORDER" }],
+							"left": 20,
+							"top": 20,
+							"width": 960,
+							"height": 620,
+							"fillColor": "#ffffff",
+							"lineColor": "#000000"
+						},
+						{
+							"_type": "UMLClassView",
+							"_id": "V-CUSTOMER",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-CUSTOMER" },
+							"subViews": [
+								{ "_type": "UMLNameCompartmentView", "_id": "V-CUSTOMER-name", "_parent": { "$ref": "V-CUSTOMER" }, "model": { "$ref": "E-CUSTOMER" } },
+								{ "_type": "UMLAttributeCompartmentView", "_id": "V-CUSTOMER-attrs", "_parent": { "$ref": "V-CUSTOMER" }, "model": { "$ref": "E-CUSTOMER" } }
+							],
+							"containerView": { "$ref": "V-PKG" },
+							"left": 60,
+							"top": 80,
+							"width": 200,
+							"height": 100,
+							"fillColor": "#fff2cc"
+						},
+						{
+							"_type": "UMLClassView",
+							"_id": "V-ORDER",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-ORDER" },
+							"containerView": { "$ref": "V-PKG" },
+							"left": 420,
+							"top": 80,
+							"width": 200,
+							"height": 110
+						},
+						{
+							"_type": "UMLClassView",
+							"_id": "V-LINE",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-LINE" },
+							"containerView": { "$ref": "V-PKG" },
+							"left": 420,
+							"top": 360,
+							"width": 200,
+							"height": 80,
+							"suppressOperations": true
+						},
+						{
+							"_type": "UMLClassView",
+							"_id": "V-SPECIAL",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-SPECIAL" },
+							"left": 740,
+							"top": 80,
+							"width": 180,
+							"height": 70
+						},
+						{
+							"_type": "UMLEnumerationView",
+							"_id": "V-STATUS",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-STATUS" },
+							"left": 60,
+							"top": 360,
+							"width": 160,
+							"height": 110
+						},
+						{
+							"_type": "UMLInterfaceView",
+							"_id": "V-PAYABLE",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-PAYABLE" },
+							"stereotypeDisplay": "icon",
+							"left": 760,
+							"top": 380,
+							"width": 30,
+							"height": 30
+						},
+						{
+							"_type": "UMLClassView",
+							"_id": "V-LOGGER",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-LOGGER" },
+							"left": 1100,
+							"top": 80,
+							"width": 160,
+							"height": 70
+						},
+						{
+							"_type": "UMLAssociationView",
+							"_id": "V-A1",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-A1" },
+							"subViews": [
+								{ "_type": "EdgeLabelView", "_id": "V-A1-name", "_parent": { "$ref": "V-A1" }, "model": { "$ref": "E-A1" } }
+							],
+							"tail": { "$ref": "V-CUSTOMER" },
+							"head": { "$ref": "V-ORDER" },
+							"lineStyle": 1,
+							"points": "260:130;420:130"
+						},
+						{
+							"_type": "UMLAssociationView",
+							"_id": "V-A2",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-A2" },
+							"tail": { "$ref": "V-LINE" },
+							"head": { "$ref": "V-ORDER" },
+							"lineStyle": 0,
+							"points": "520:360;520:300;540:300;540:190"
+						},
+						{
+							"_type": "UMLGeneralizationView",
+							"_id": "V-G1",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-G1" },
+							"tail": { "$ref": "V-SPECIAL" },
+							"head": { "$ref": "V-ORDER" },
+							"points": "740:115;620:115"
+						},
+						{
+							"_type": "UMLInterfaceRealizationView",
+							"_id": "V-R1",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-R1" },
+							"tail": { "$ref": "V-ORDER" },
+							"head": { "$ref": "V-PAYABLE" },
+							"points": "600:190;765:380"
+						},
+						{
+							"_type": "UMLDependencyView",
+							"_id": "V-D1",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"model": { "$ref": "E-D1" },
+							"tail": { "$ref": "V-CUSTOMER" },
+							"head": { "$ref": "V-LOGGER" },
+							"points": "160:80;160:10;1180:10;1180:80"
+						},
+						{
+							"_type": "UMLNoteView",
+							"_id": "V-NOTE",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"text": "Prices include VAT",
+							"left": 1100,
+							"top": 300,
+							"width": 160,
+							"height": 50
+						},
+						{
+							"_type": "UMLNoteLinkView",
+							"_id": "V-NOTELINK",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"head": { "$ref": "V-ORDER" },
+							"tail": { "$ref": "V-NOTE" },
+							"points": "1100:320;620:150"
+						},
+						{
+							"_type": "UMLTextView",
+							"_id": "V-TEXT",
+							"_parent": { "$ref": "AAAAAAFF+qBtyKM79qY=" },
+							"text": "Free text",
+							"left": 20,
+							"top": 700,
+							"width": 100,
+							"height": 20
+						}
+					]
+				},
+				{
+					"_type": "UMLPackage",
+					"_id": "E-PKG",
+					"_parent": { "$ref": "AAAAAAFF+qBWK6M3Z8Y=" },
+					"name": "domain",
+					"ownedElements": [
+						{
+							"_type": "UMLClass",
+							"_id": "E-CUSTOMER",
+							"_parent": { "$ref": "E-PKG" },
+							"name": "Customer",
+							"documentation": "A registered buyer.",
+							"stereotype": "entity",
+							"ownedElements": [
+								{
+									"_type": "UMLAssociation",
+									"_id": "E-A1",
+									"_parent": { "$ref": "E-CUSTOMER" },
+									"name": "places",
+									"end1": {
+										"_type": "UMLAssociationEnd",
+										"_id": "E-A1-end1",
+										"_parent": { "$ref": "E-A1" },
+										"name": "buyer",
+										"reference": { "$ref": "E-CUSTOMER" },
+										"multiplicity": "1"
+									},
+									"end2": {
+										"_type": "UMLAssociationEnd",
+										"_id": "E-A1-end2",
+										"_parent": { "$ref": "E-A1" },
+										"name": "orders",
+										"reference": { "$ref": "E-ORDER" },
+										"navigable": "navigable",
+										"multiplicity": "0..*"
+									}
+								},
+								{
+									"_type": "UMLDependency",
+									"_id": "E-D1",
+									"_parent": { "$ref": "E-CUSTOMER" },
+									"source": { "$ref": "E-CUSTOMER" },
+									"target": { "$ref": "E-LOGGER" }
+								},
+								{
+									"_type": "UMLDependency",
+									"_id": "E-D-DANGLING",
+									"_parent": { "$ref": "E-CUSTOMER" },
+									"name": "toNowhere",
+									"source": { "$ref": "E-CUSTOMER" },
+									"target": { "$ref": "DOES-NOT-EXIST" }
+								}
+							],
+							"attributes": [
+								{
+									"_type": "UMLAttribute",
+									"_id": "E-CUSTOMER-name",
+									"_parent": { "$ref": "E-CUSTOMER" },
+									"name": "name",
+									"visibility": "private",
+									"type": "String"
+								},
+								{
+									"_type": "UMLAttribute",
+									"_id": "E-CUSTOMER-email",
+									"_parent": { "$ref": "E-CUSTOMER" },
+									"name": "email",
+									"visibility": "private",
+									"type": "String",
+									"multiplicity": "0..1"
+								},
+								{
+									"_type": "UMLAttribute",
+									"_id": "E-CUSTOMER-count",
+									"_parent": { "$ref": "E-CUSTOMER" },
+									"name": "count",
+									"type": "Integer",
+									"isStatic": true,
+									"defaultValue": "0"
+								}
+							],
+							"operations": [
+								{
+									"_type": "UMLOperation",
+									"_id": "E-CUSTOMER-place",
+									"_parent": { "$ref": "E-CUSTOMER" },
+									"name": "placeOrder",
+									"parameters": [
+										{
+											"_type": "UMLParameter",
+											"_id": "E-CUSTOMER-place-p1",
+											"_parent": { "$ref": "E-CUSTOMER-place" },
+											"name": "lines",
+											"type": { "$ref": "E-LINE" },
+											"multiplicity": "*"
+										},
+										{
+											"_type": "UMLParameter",
+											"_id": "E-CUSTOMER-place-ret",
+											"_parent": { "$ref": "E-CUSTOMER-place" },
+											"type": { "$ref": "E-ORDER" },
+											"direction": "return"
+										}
+									]
+								}
+							]
+						},
+						{
+							"_type": "UMLClass",
+							"_id": "E-ORDER",
+							"_parent": { "$ref": "E-PKG" },
+							"name": "Order",
+							"ownedElements": [
+								{
+									"_type": "UMLAssociation",
+									"_id": "E-A2",
+									"_parent": { "$ref": "E-ORDER" },
+									"end1": {
+										"_type": "UMLAssociationEnd",
+										"_id": "E-A2-end1",
+										"_parent": { "$ref": "E-A2" },
+										"reference": { "$ref": "E-ORDER" },
+										"aggregation": "composite",
+										"multiplicity": "1"
+									},
+									"end2": {
+										"_type": "UMLAssociationEnd",
+										"_id": "E-A2-end2",
+										"_parent": { "$ref": "E-A2" },
+										"name": "lines",
+										"reference": { "$ref": "E-LINE" },
+										"navigable": true,
+										"multiplicity": "1..*"
+									}
+								},
+								{
+									"_type": "UMLInterfaceRealization",
+									"_id": "E-R1",
+									"_parent": { "$ref": "E-ORDER" },
+									"source": { "$ref": "E-ORDER" },
+									"target": { "$ref": "E-PAYABLE" }
+								},
+								{
+									"_type": "UMLStateMachine",
+									"_id": "E-SM",
+									"_parent": { "$ref": "E-ORDER" },
+									"name": "Lifecycle",
+									"ownedElements": [
+										{
+											"_type": "UMLStatechartDiagram",
+											"_id": "E-SM-diagram",
+											"_parent": { "$ref": "E-SM" },
+											"name": "Order lifecycle",
+											"ownedViews": []
+										}
+									],
+									"regions": [{ "_type": "UMLRegion", "_id": "E-SM-region", "_parent": { "$ref": "E-SM" } }]
+								}
+							],
+							"attributes": [
+								{
+									"_type": "UMLAttribute",
+									"_id": "E-ORDER-total",
+									"_parent": { "$ref": "E-ORDER" },
+									"name": "total",
+									"visibility": "protected",
+									"type": "Real",
+									"isReadOnly": true
+								},
+								{
+									"_type": "UMLAttribute",
+									"_id": "E-ORDER-status",
+									"_parent": { "$ref": "E-ORDER" },
+									"name": "status",
+									"type": { "$ref": "E-STATUS" }
+								}
+							]
+						},
+						{
+							"_type": "UMLClass",
+							"_id": "E-LINE",
+							"_parent": { "$ref": "E-PKG" },
+							"name": "OrderLine",
+							"attributes": [
+								{ "_type": "UMLAttribute", "_id": "E-LINE-qty", "_parent": { "$ref": "E-LINE" }, "name": "quantity", "type": "Integer" }
+							]
+						},
+						{
+							"_type": "UMLClass",
+							"_id": "E-SPECIAL",
+							"_parent": { "$ref": "E-PKG" },
+							"name": "SpecialOrder",
+							"isAbstract": true,
+							"ownedElements": [
+								{
+									"_type": "UMLGeneralization",
+									"_id": "E-G1",
+									"_parent": { "$ref": "E-SPECIAL" },
+									"source": { "$ref": "E-SPECIAL" },
+									"target": { "$ref": "E-ORDER" }
+								}
+							]
+						},
+						{
+							"_type": "UMLEnumeration",
+							"_id": "E-STATUS",
+							"_parent": { "$ref": "E-PKG" },
+							"name": "OrderStatus",
+							"literals": [
+								{ "_type": "UMLEnumerationLiteral", "_id": "E-STATUS-new", "_parent": { "$ref": "E-STATUS" }, "name": "NEW" },
+								{ "_type": "UMLEnumerationLiteral", "_id": "E-STATUS-paid", "_parent": { "$ref": "E-STATUS" }, "name": "PAID" },
+								{ "_type": "UMLEnumerationLiteral", "_id": "E-STATUS-shipped", "_parent": { "$ref": "E-STATUS" }, "name": "SHIPPED" }
+							]
+						},
+						{
+							"_type": "UMLInterface",
+							"_id": "E-PAYABLE",
+							"_parent": { "$ref": "E-PKG" },
+							"name": "Payable",
+							"operations": [
+								{
+									"_type": "UMLOperation",
+									"_id": "E-PAYABLE-pay",
+									"_parent": { "$ref": "E-PAYABLE" },
+									"name": "pay",
+									"isAbstract": true,
+									"parameters": [
+										{ "_type": "UMLParameter", "_id": "E-PAYABLE-pay-ret", "_parent": { "$ref": "E-PAYABLE-pay" }, "type": "Boolean", "direction": "return" }
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"_type": "UMLClass",
+					"_id": "E-LOGGER",
+					"_parent": { "$ref": "AAAAAAFF+qBWK6M3Z8Y=" },
+					"name": "Logger",
+					"ownedElements": [
+						{ "_type": "UMLClass", "_id": "E-LOGGER-inner", "_parent": { "$ref": "E-LOGGER" }, "name": "Entry" }
+					]
+				},
+				{
+					"_type": "UMLCollaboration",
+					"_id": "E-COLLAB",
+					"_parent": { "$ref": "AAAAAAFF+qBWK6M3Z8Y=" },
+					"name": "Collaboration1",
+					"ownedElements": [
+						{
+							"_type": "UMLInteraction",
+							"_id": "E-INTERACTION",
+							"_parent": { "$ref": "E-COLLAB" },
+							"name": "Checkout",
+							"ownedElements": [
+								{
+									"_type": "UMLSequenceDiagram",
+									"_id": "E-SEQ",
+									"_parent": { "$ref": "E-INTERACTION" },
+									"name": "Checkout sequence",
+									"ownedViews": []
+								}
+							],
+							"participants": [
+								{ "_type": "UMLLifeline", "_id": "E-LL1", "_parent": { "$ref": "E-INTERACTION" }, "name": "shop" }
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}
