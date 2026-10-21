@@ -16,7 +16,11 @@ export function Toaster() {
   const toasts = useToastStore((s) => s.toasts);
   const dismiss = useToastStore((s) => s.dismiss);
   return (
-    <div className="pointer-events-none fixed right-4 bottom-9 z-[80] flex w-[360px] max-w-[calc(100vw-32px)] flex-col gap-2" aria-live="polite" role="status">
+    <div
+      className="pointer-events-none fixed right-4 bottom-9 z-[80] flex w-[360px] max-w-[calc(100vw-32px)] flex-col gap-2"
+      aria-live="polite"
+      role="status"
+    >
       {toasts.map((toast) => (
         <div
           key={toast.id}
@@ -24,20 +28,31 @@ export function Toaster() {
           data-kind={toast.kind}
           className={cn(
             'animate-toast-in pointer-events-auto rounded-md border bg-surface-2 px-3 py-2 text-[12.5px] text-fg shadow-panel',
-            toast.kind === 'error' ? 'border-danger/50' : toast.kind === 'warning' ? 'border-warning/50' : 'border-border-strong',
+            toast.kind === 'error'
+              ? 'border-danger/50'
+              : toast.kind === 'warning'
+                ? 'border-warning/50'
+                : 'border-border-strong',
           )}
         >
           <div className="flex items-start gap-2">
             <span className="mt-0.5">{ICONS[toast.kind]}</span>
             <span className="flex-1 leading-snug">{toast.message}</span>
-            <button type="button" className="rounded p-0.5 text-faint hover:text-fg" onClick={() => dismiss(toast.id)} aria-label={t('common.close')}>
+            <button
+              type="button"
+              className="rounded p-0.5 text-faint hover:text-fg"
+              onClick={() => dismiss(toast.id)}
+              aria-label={t('common.close')}
+            >
               <X size={13} />
             </button>
           </div>
           {toast.details && toast.details.length > 0 && (
             <details className="mt-1 pl-6">
               <summary className="cursor-pointer text-[11.5px] text-muted">{t('common.details')}</summary>
-              <pre className="mt-1 max-h-32 overflow-auto font-mono text-[10.5px] whitespace-pre-wrap text-muted">{toast.details.join('\n')}</pre>
+              <pre className="mt-1 max-h-32 overflow-auto font-mono text-[10.5px] whitespace-pre-wrap text-muted">
+                {toast.details.join('\n')}
+              </pre>
             </details>
           )}
           {toast.action && (

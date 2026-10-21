@@ -184,7 +184,10 @@ export function checkRelationshipEndpoints(
   }
   if (kind === 'controlFlow' || kind === 'objectFlow') {
     if (target.kind === 'controlNode' && target.subKind === 'initial') return 'initialTarget';
-    if (source.kind === 'controlNode' && (source.subKind === 'activityFinal' || source.subKind === 'flowFinal')) {
+    if (
+      source.kind === 'controlNode' &&
+      (source.subKind === 'activityFinal' || source.subKind === 'flowFinal')
+    ) {
       return 'finalStateSource';
     }
   }

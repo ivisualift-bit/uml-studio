@@ -39,7 +39,11 @@ export function ProjectExplorer() {
   // Reveal the selection: expand its ancestors.
   useEffect(() => {
     if (!selected) return;
-    const ownerChain = doc.modelElements[selected] ? ancestorIds(doc, selected) : doc.diagrams[selected] ? [doc.diagrams[selected]!.ownerId, ...ancestorIds(doc, doc.diagrams[selected]!.ownerId)] : [];
+    const ownerChain = doc.modelElements[selected]
+      ? ancestorIds(doc, selected)
+      : doc.diagrams[selected]
+        ? [doc.diagrams[selected]!.ownerId, ...ancestorIds(doc, doc.diagrams[selected]!.ownerId)]
+        : [];
     if (ownerChain.some((id) => !expanded.has(id))) setExpanded((prev) => new Set([...prev, ...ownerChain]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
@@ -53,7 +57,13 @@ export function ProjectExplorer() {
   }, []);
 
   const rows = useMemo(
-    () => buildTreeRows(doc, { expanded, filter, showRelationships, kindLabel: (el) => t(`elementKind.${el.kind}`).toLowerCase() }),
+    () =>
+      buildTreeRows(doc, {
+        expanded,
+        filter,
+        showRelationships,
+        kindLabel: (el) => t(`elementKind.${el.kind}`).toLowerCase(),
+      }),
     [doc, expanded, filter, showRelationships, t],
   );
 
@@ -74,14 +84,21 @@ export function ProjectExplorer() {
   const commitRename = (row: TreeRow, value: string) => {
     setRenaming(null);
     const name = value.trim();
-    if (row.kind === 'diagram' && row.diagram && name && name !== row.diagram.name) run({ type: 'diagram/rename', diagramId: row.id, name }, { label: t('history.rename') });
-    if (row.kind === 'element' && row.element && name !== row.element.name) run({ type: 'element/update', elementId: row.id, patch: { name } }, { label: t('history.rename') });
+    if (row.kind === 'diagram' && row.diagram && name && name !== row.diagram.name)
+      run({ type: 'diagram/rename', diagramId: row.id, name }, { label: t('history.rename') });
+    if (row.kind === 'element' && row.element && name !== row.element.name)
+      run({ type: 'element/update', elementId: row.id, patch: { name } }, { label: t('history.rename') });
   };
 
   const addPackage = (ownerId: ID) => {
     const id = uuidGenerator.next();
     const name = uniqueChildName(doc, ownerId, 'package', t('defaultName.package'));
-    if (run({ type: 'element/add', elements: [makeElement('package', { id, name, ownerId })] }, { label: t('history.add', { name }) })) {
+    if (
+      run(
+        { type: 'element/add', elements: [makeElement('package', { id, name, ownerId })] },
+        { label: t('history.add', { name }) },
+      )
+    ) {
       setExpanded((prev) => new Set([...prev, ownerId]));
       useEditorStore.getState().selectInExplorer(id);
       setRenaming(id);
@@ -98,7 +115,8 @@ export function ProjectExplorer() {
         select(target);
         const top = Math.max(0, Math.min(rows.length - 1, to)) * ROW_HEIGHT;
         const list = listRef.current;
-        if (list && (top < list.scrollTop || top > list.scrollTop + list.clientHeight - ROW_HEIGHT)) list.scrollTop = top - list.clientHeight / 2;
+        if (list && (top < list.scrollTop || top > list.scrollTop + list.clientHeight - ROW_HEIGHT))
+          list.scrollTop = top - list.clientHeight / 2;
       }
     };
     switch (e.key) {
@@ -160,9 +178,16 @@ export function ProjectExplorer() {
         { label: t('explorer.open'), onSelect: () => useEditorStore.getState().openDiagram(row.id) },
         { label: t('cmd.rename'), shortcut: 'F2', onSelect: () => setRenaming(row.id) },
         { type: 'separator' },
-        { label: t('cmd.exportImage'), onSelect: () => useEditorStore.getState().openDialog({ type: 'export', diagramId: row.id }) },
+        {
+          label: t('cmd.exportImage'),
+          onSelect: () => useEditorStore.getState().openDialog({ type: 'export', diagramId: row.id }),
+        },
         { type: 'separator' },
-        { label: t('cmd.deleteDiagram'), danger: true, onSelect: () => useEditorStore.getState().openDialog({ type: 'deleteDiagram', diagramId: row.id }) },
+        {
+          label: t('cmd.deleteDiagram'),
+          danger: true,
+          onSelect: () => useEditorStore.getState().openDialog({ type: 'deleteDiagram', diagramId: row.id }),
+        },
       ];
     }
     const el = row.element!;
@@ -171,21 +196,43 @@ export function ProjectExplorer() {
     entries.push({ label: t('cmd.showInDiagram'), onSelect: () => revealElement(el.id) });
     const diagramKinds = CATALOG_ORDER.filter((k) => isEditable(k)).filter((k) => {
       const info = DIAGRAM_KIND_INFO[k];
-      return info.ownerKinds.includes(el.kind) || (!!info.behaviorKind && PACKAGE_LIKE.includes(el.kind)) || PACKAGE_LIKE.includes(el.kind);
+      return (
+        info.ownerKinds.includes(el.kind) ||
+        (!!info.behaviorKind && PACKAGE_LIKE.includes(el.kind)) ||
+        PACKAGE_LIKE.includes(el.kind)
+      );
     });
     if (diagramKinds.length) {
       entries.push({
         type: 'submenu',
         label: t('explorer.addDiagram'),
-        children: diagramKinds.map((k) => ({ label: t(`diagramKind.${k}`), onSelect: () => void createDiagram(k, t(`diagramKind.${k}`), el.id) })),
+        children: diagramKinds.map((k) => ({
+          label: t(`diagramKind.${k}`),
+          onSelect: () => void createDiagram(k, t(`diagramKind.${k}`), el.id),
+        })),
       });
     }
-    if (canOwn(el.kind, 'package')) entries.push({ label: t('explorer.addPackage'), onSelect: () => addPackage(el.id) });
+    if (canOwn(el.kind, 'package'))
+      entries.push({ label: t('explorer.addPackage'), onSelect: () => addPackage(el.id) });
     if (!isRoot) {
-      entries.push({ type: 'separator' }, { label: t('cmd.rename'), shortcut: 'F2', onSelect: () => setRenaming(el.id) });
-      entries.push({ type: 'separator' }, { label: t('cmd.deleteFromModel'), shortcut: primaryShortcut('edit.deleteFromModel'), danger: true, onSelect: () => requestDeleteFromModel([el.id]) });
+      entries.push(
+        { type: 'separator' },
+        { label: t('cmd.rename'), shortcut: 'F2', onSelect: () => setRenaming(el.id) },
+      );
+      entries.push(
+        { type: 'separator' },
+        {
+          label: t('cmd.deleteFromModel'),
+          shortcut: primaryShortcut('edit.deleteFromModel'),
+          danger: true,
+          onSelect: () => requestDeleteFromModel([el.id]),
+        },
+      );
     } else {
-      entries.push({ type: 'separator' }, { label: t('cmd.rename'), shortcut: 'F2', onSelect: () => setRenaming(el.id) });
+      entries.push(
+        { type: 'separator' },
+        { label: t('cmd.rename'), shortcut: 'F2', onSelect: () => setRenaming(el.id) },
+      );
     }
     return entries;
   };
@@ -197,22 +244,59 @@ export function ProjectExplorer() {
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label={t('explorer.title')}>
       <div className="flex h-8 items-center justify-between pr-1.5 pl-3">
-        <h2 className="text-[11px] font-semibold tracking-wider text-muted uppercase">{t('explorer.title')}</h2>
+        <h2 className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+          {t('explorer.title')}
+        </h2>
         <div className="flex items-center">
-          <IconButton label={t('explorer.showRelationships')} active={showRelationships} onClick={() => setShowRelationships((v) => !v)}>
+          <IconButton
+            label={t('explorer.showRelationships')}
+            active={showRelationships}
+            onClick={() => setShowRelationships((v) => !v)}
+          >
             <ListTree size={14} />
           </IconButton>
-          <IconButton label={t('explorer.addPackage')} onClick={() => addPackage(selected && doc.modelElements[selected] && canOwn(doc.modelElements[selected]!.kind, 'package') ? selected : doc.rootModelId)}>
+          <IconButton
+            label={t('explorer.addPackage')}
+            onClick={() =>
+              addPackage(
+                selected &&
+                  doc.modelElements[selected] &&
+                  canOwn(doc.modelElements[selected]!.kind, 'package')
+                  ? selected
+                  : doc.rootModelId,
+              )
+            }
+          >
             <FolderPlus size={14} />
           </IconButton>
-          <IconButton label={t('explorer.addDiagram')} onClick={() => useEditorStore.getState().openDialog({ type: 'newDiagram', ownerId: selected && doc.modelElements[selected] ? selected : undefined })} data-testid="explorer-add-diagram">
+          <IconButton
+            label={t('explorer.addDiagram')}
+            onClick={() =>
+              useEditorStore.getState().openDialog({
+                type: 'newDiagram',
+                ownerId: selected && doc.modelElements[selected] ? selected : undefined,
+              })
+            }
+            data-testid="explorer-add-diagram"
+          >
             <Plus size={15} />
           </IconButton>
         </div>
       </div>
       <div className="relative px-2 pb-1.5">
-        <Search size={13} className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-faint" style={{ marginTop: -3 }} />
-        <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={t('explorer.filter')} className="pl-7" aria-label={t('explorer.filter')} data-testid="explorer-filter" />
+        <Search
+          size={13}
+          className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-faint"
+          style={{ marginTop: -3 }}
+        />
+        <Input
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder={t('explorer.filter')}
+          className="pl-7"
+          aria-label={t('explorer.filter')}
+          data-testid="explorer-filter"
+        />
       </div>
       <ContextMenu.Root onOpenChange={(open) => !open && setMenuRow(null)}>
         <ContextMenu.Trigger asChild>
@@ -226,11 +310,18 @@ export function ProjectExplorer() {
             onKeyDown={onKeyDown}
             data-testid="explorer-tree"
           >
-            {rows.length === 0 && filter && <div className="px-3 py-2 text-[12px] text-faint">{t('explorer.noMatch', { query: filter })}</div>}
+            {rows.length === 0 && filter && (
+              <div className="px-3 py-2 text-[12px] text-faint">
+                {t('explorer.noMatch', { query: filter })}
+              </div>
+            )}
             <div style={{ height: rows.length * ROW_HEIGHT, position: 'relative' }}>
               {rows.slice(first, last).map((row, i) => {
                 const index = first + i;
-                const label = row.kind === 'diagram' ? row.diagram!.name : row.element!.name || relationshipLabel(row.element!, doc, t);
+                const label =
+                  row.kind === 'diagram'
+                    ? row.diagram!.name
+                    : row.element!.name || relationshipLabel(row.element!, doc, t);
                 const isSelected = row.id === selected;
                 const isActiveDiagram = row.kind === 'diagram' && row.id === activeDiagram;
                 return (
@@ -247,7 +338,11 @@ export function ProjectExplorer() {
                     draggable={row.kind === 'element' && renaming !== row.id}
                     onDragStart={(e) => onDragStart(e, row)}
                     onDragOver={(e) => {
-                      if (row.element && PACKAGE_LIKE.includes(row.element.kind) && e.dataTransfer.types.includes(DRAG_ELEMENT_MIME)) {
+                      if (
+                        row.element &&
+                        PACKAGE_LIKE.includes(row.element.kind) &&
+                        e.dataTransfer.types.includes(DRAG_ELEMENT_MIME)
+                      ) {
                         e.preventDefault();
                         e.dataTransfer.dropEffect = 'move';
                       }
@@ -259,7 +354,11 @@ export function ProjectExplorer() {
                       select(row);
                       setMenuRow(row);
                     }}
-                    title={row.kind === 'element' ? `${t(`elementKind.${row.element!.kind}`)} — ${t('explorer.dragHint')}` : t(`diagramKind.${row.diagram!.kind}`)}
+                    title={
+                      row.kind === 'element'
+                        ? `${t(`elementKind.${row.element!.kind}`)} — ${t('explorer.dragHint')}`
+                        : t(`diagramKind.${row.diagram!.kind}`)
+                    }
                     className={cn(
                       'absolute right-0 left-0 flex cursor-default items-center gap-1 pr-2 text-[12.5px]',
                       isSelected ? 'bg-accent-muted text-fg' : 'text-fg hover:bg-surface-3',
@@ -274,17 +373,38 @@ export function ProjectExplorer() {
                         if (row.hasChildren) toggle(row.id);
                       }}
                     >
-                      {row.hasChildren ? row.expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} /> : null}
+                      {row.hasChildren ? (
+                        row.expanded ? (
+                          <ChevronDown size={13} />
+                        ) : (
+                          <ChevronRight size={13} />
+                        )
+                      ) : null}
                     </span>
                     <UmlGlyph
-                      name={row.kind === 'diagram' ? glyphForDiagram(row.diagram!.kind) : glyphForElement(row.element!.kind)}
+                      name={
+                        row.kind === 'diagram'
+                          ? glyphForDiagram(row.diagram!.kind)
+                          : glyphForElement(row.element!.kind)
+                      }
                       size={15}
                       className={cn('shrink-0', row.kind === 'diagram' ? 'text-accent' : 'text-muted')}
                     />
                     {renaming === row.id ? (
-                      <RenameInput initial={row.kind === 'diagram' ? row.diagram!.name : row.element!.name} onDone={(v) => (v === null ? setRenaming(null) : commitRename(row, v))} />
+                      <RenameInput
+                        initial={row.kind === 'diagram' ? row.diagram!.name : row.element!.name}
+                        onDone={(v) => (v === null ? setRenaming(null) : commitRename(row, v))}
+                      />
                     ) : (
-                      <span className={cn('truncate', isActiveDiagram && 'font-semibold', row.element && !row.element.name && 'text-faint italic')}>{label || t('common.unnamed')}</span>
+                      <span
+                        className={cn(
+                          'truncate',
+                          isActiveDiagram && 'font-semibold',
+                          row.element && !row.element.name && 'text-faint italic',
+                        )}
+                      >
+                        {label || t('common.unnamed')}
+                      </span>
                     )}
                   </div>
                 );
@@ -293,7 +413,9 @@ export function ProjectExplorer() {
           </div>
         </ContextMenu.Trigger>
         <ContextMenu.Portal>
-          <ContextMenu.Content className={menuContentClass}>{menuRow ? renderEntries(menuFor(menuRow), 'context') : null}</ContextMenu.Content>
+          <ContextMenu.Content className={menuContentClass}>
+            {menuRow ? renderEntries(menuFor(menuRow), 'context') : null}
+          </ContextMenu.Content>
         </ContextMenu.Portal>
       </ContextMenu.Root>
       {Object.keys(doc.diagrams).length === 0 && Object.keys(doc.modelElements).length <= 1 && (
@@ -304,7 +426,11 @@ export function ProjectExplorer() {
   );
 }
 
-function relationshipLabel(el: ModelElement, doc: ReturnType<typeof useDocumentStore.getState>['doc'], t: ReturnType<typeof useT>): string {
+function relationshipLabel(
+  el: ModelElement,
+  doc: ReturnType<typeof useDocumentStore.getState>['doc'],
+  t: ReturnType<typeof useT>,
+): string {
   if (!doc || !isRelationship(el)) return '';
   const target = doc.modelElements[el.targetId];
   return `${t(`elementKind.${el.kind}`)} → ${target?.name ?? ''}`;
@@ -313,7 +439,11 @@ function relationshipLabel(el: ModelElement, doc: ReturnType<typeof useDocumentS
 function DiagramCountFooter() {
   const t = useT();
   const count = useDocumentStore((s) => Object.keys(s.doc?.modelElements ?? {}).length);
-  return <div className="border-t border-border px-3 py-1 text-[11px] text-faint">{t('project.elements', { count: count - 1 })}</div>;
+  return (
+    <div className="border-t border-border px-3 py-1 text-[11px] text-faint">
+      {t('project.elements', { count: count - 1 })}
+    </div>
+  );
 }
 
 function RenameInput({ initial, onDone }: { initial: string; onDone: (value: string | null) => void }) {
@@ -340,4 +470,3 @@ function RenameInput({ initial, onDone }: { initial: string; onDone: (value: str
     />
   );
 }
-

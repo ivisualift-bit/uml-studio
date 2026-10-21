@@ -14,7 +14,9 @@ export const measureView: ViewMeasurer = (doc, diagram, view) => {
   if (view.kind !== 'node') return null;
   const element = doc.modelElements[view.elementId];
   if (!element) return null;
-  const hasChildren = Object.values(diagram.views).some((v) => (v.kind === 'node' || v.kind === 'note') && v.containerViewId === view.id);
+  const hasChildren = Object.values(diagram.views).some(
+    (v) => (v.kind === 'node' || v.kind === 'note') && v.containerViewId === view.id,
+  );
   const layout = layoutNode({ doc, diagram, theme: PRINT_THEME, hasChildren }, view, element);
   return { x: view.x, y: view.y, width: layout.width, height: layout.height };
 };

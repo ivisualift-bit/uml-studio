@@ -1,5 +1,11 @@
 import type { ID } from '../schemas/common';
-import { isRelationship, type ElementKind, type ElementOf, type ModelElement, type Relationship } from '../schemas/elements';
+import {
+  isRelationship,
+  type ElementKind,
+  type ElementOf,
+  type ModelElement,
+  type Relationship,
+} from '../schemas/elements';
 import type { ProjectDocument, UMLDiagram } from '../schemas/project';
 import type { DiagramView } from '../schemas/views';
 import type { EndpointInfo } from '../model/metadata';
@@ -140,7 +146,8 @@ export function nearestPackageId(doc: ProjectDocument, id: ID): ID {
   let current: ModelElement | undefined = doc.modelElements[id];
   const seen = new Set<ID>();
   while (current && !seen.has(current.id)) {
-    if (current.kind === 'model' || current.kind === 'package' || current.kind === 'profile') return current.id;
+    if (current.kind === 'model' || current.kind === 'package' || current.kind === 'profile')
+      return current.id;
     seen.add(current.id);
     current = current.ownerId ? doc.modelElements[current.ownerId] : undefined;
   }

@@ -33,7 +33,8 @@ export interface LoadError {
   version?: number | null;
 }
 
-export type LoadResult = { ok: true; doc: ProjectDocument; migrations: string[] } | { ok: false; error: LoadError };
+export type LoadResult =
+  { ok: true; doc: ProjectDocument; migrations: string[] } | { ok: false; error: LoadError };
 
 export interface LoadOptions {
   maxBytes?: number;
@@ -73,7 +74,10 @@ export function parseProjectText(text: string, options: LoadOptions = {}): LoadR
   const scan = scanJson(trimmed);
   if (scan.maxDepthExceeded) return fail('tooDeep', ['JSON nesting is too deep']);
   if (scan.duplicateKeys.length) {
-    return fail('duplicateKeys', scan.duplicateKeys.map((k) => `Duplicate key "${k}"`));
+    return fail(
+      'duplicateKeys',
+      scan.duplicateKeys.map((k) => `Duplicate key "${k}"`),
+    );
   }
   let raw: unknown;
   try {
@@ -87,7 +91,11 @@ export function parseProjectText(text: string, options: LoadOptions = {}): LoadR
   const migrated = migrateToCurrent(raw, options.migrations ?? MIGRATIONS);
   if (!migrated.ok) {
     if (migrated.reason === 'newer') {
-      return fail('newerVersion', [`File schema version ${migrated.version} is newer than this application supports`], migrated.version);
+      return fail(
+        'newerVersion',
+        [`File schema version ${migrated.version} is newer than this application supports`],
+        migrated.version,
+      );
     }
     return fail('unsupportedVersion', ['Unknown or unsupported schemaVersion'], migrated.version);
   }
@@ -95,10 +103,16 @@ export function parseProjectText(text: string, options: LoadOptions = {}): LoadR
   if (!parsed.success) {
     return fail(
       'schema',
-      parsed.error.issues.slice(0, 20).map((i) => `${i.path.map(String).join('.') || '(root)'}: ${i.message}`),
+      parsed.error.issues
+        .slice(0, 20)
+        .map((i) => `${i.path.map(String).join('.') || '(root)'}: ${i.message}`),
     );
   }
   const integrity = checkIntegrity(parsed.data);
-  if (integrity.length) return fail('integrity', integrity.slice(0, 20).map((i) => i.message));
+  if (integrity.length)
+    return fail(
+      'integrity',
+      integrity.slice(0, 20).map((i) => i.message),
+    );
   return { ok: true, doc: parsed.data, migrations: migrated.applied };
 }

@@ -11,7 +11,17 @@ export const menuItemClass =
 export const menuSeparatorClass = 'my-1 h-px bg-border';
 export const menuLabelClass = 'px-2 py-1 text-[11px] font-semibold tracking-wide text-faint uppercase';
 
-export function ItemContent({ label, shortcut, checked, icon }: { label: string; shortcut?: string; checked?: boolean; icon?: ReactNode }) {
+export function ItemContent({
+  label,
+  shortcut,
+  checked,
+  icon,
+}: {
+  label: string;
+  shortcut?: string;
+  checked?: boolean;
+  icon?: ReactNode;
+}) {
   return (
     <>
       <span className="flex w-4 items-center justify-center">{checked ? <Check size={13} /> : icon}</span>
@@ -49,7 +59,12 @@ export function renderEntries(entries: MenuEntry[], kind: 'dropdown' | 'context'
   const M = kind === 'dropdown' ? DropdownMenu : ContextMenu;
   return entries.map((entry, i) => {
     if (entry.type === 'separator') return <M.Separator key={i} className={menuSeparatorClass} />;
-    if (entry.type === 'label') return <M.Label key={i} className={menuLabelClass}>{entry.label}</M.Label>;
+    if (entry.type === 'label')
+      return (
+        <M.Label key={i} className={menuLabelClass}>
+          {entry.label}
+        </M.Label>
+      );
     if (entry.type === 'submenu') {
       return (
         <M.Sub key={i}>
@@ -67,12 +82,20 @@ export function renderEntries(entries: MenuEntry[], kind: 'dropdown' | 'context'
     return (
       <M.Item
         key={i}
-        className={cn(menuItemClass, entry.danger && 'text-danger data-[highlighted]:bg-danger data-[highlighted]:text-white')}
+        className={cn(
+          menuItemClass,
+          entry.danger && 'text-danger data-[highlighted]:bg-danger data-[highlighted]:text-white',
+        )}
         disabled={entry.disabled}
         onSelect={() => entry.onSelect?.()}
         data-testid={entry.testId}
       >
-        <ItemContent label={entry.label ?? ''} shortcut={entry.shortcut} checked={entry.checked} icon={entry.icon} />
+        <ItemContent
+          label={entry.label ?? ''}
+          shortcut={entry.shortcut}
+          checked={entry.checked}
+          icon={entry.icon}
+        />
       </M.Item>
     );
   });

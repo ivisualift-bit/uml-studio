@@ -10,7 +10,9 @@ export function distance(a: Point, b: Point): number {
 }
 
 export function pointInBounds(p: Point, b: Bounds, slack = 0): boolean {
-  return p.x >= b.x - slack && p.x <= b.x + b.width + slack && p.y >= b.y - slack && p.y <= b.y + b.height + slack;
+  return (
+    p.x >= b.x - slack && p.x <= b.x + b.width + slack && p.y >= b.y - slack && p.y <= b.y + b.height + slack
+  );
 }
 
 /**
@@ -60,7 +62,10 @@ export function pointAlong(points: Point[], d: number): { point: Point; angle: n
     const len = distance(a, b);
     if (remaining <= len || i === points.length - 1) {
       const t = len === 0 ? 0 : Math.min(1, remaining / len);
-      return { point: { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, angle: Math.atan2(b.y - a.y, b.x - a.x) };
+      return {
+        point: { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t },
+        angle: Math.atan2(b.y - a.y, b.x - a.x),
+      };
     }
     remaining -= len;
   }

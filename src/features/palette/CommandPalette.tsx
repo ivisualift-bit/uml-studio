@@ -34,7 +34,15 @@ function matches(query: string, haystack: string): boolean {
     .every((token) => text.includes(token));
 }
 
-function PaletteShell({ placeholder, items, testId }: { placeholder: string; items: (query: string) => PaletteItem[]; testId: string }) {
+function PaletteShell({
+  placeholder,
+  items,
+  testId,
+}: {
+  placeholder: string;
+  items: (query: string) => PaletteItem[];
+  testId: string;
+}) {
   const t = useT();
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
@@ -62,7 +70,10 @@ function PaletteShell({ placeholder, items, testId }: { placeholder: string; ite
     <Dialog.Root open onOpenChange={(open) => !open && close()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/30" />
-        <Dialog.Content className="fixed top-[14vh] left-1/2 z-50 w-[min(620px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-lg border border-border-strong bg-surface-1 shadow-panel" data-testid={testId}>
+        <Dialog.Content
+          className="fixed top-[14vh] left-1/2 z-50 w-[min(620px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-lg border border-border-strong bg-surface-1 shadow-panel"
+          data-testid={testId}
+        >
           <Dialog.Title className="sr-only">{placeholder}</Dialog.Title>
           <Dialog.Description className="sr-only">{placeholder}</Dialog.Description>
           <div className="flex items-center gap-2 border-b border-border px-3">
@@ -85,21 +96,39 @@ function PaletteShell({ placeholder, items, testId }: { placeholder: string; ite
             />
           </div>
           <ul ref={list} id={`${testId}-list`} role="listbox" className="max-h-[50vh] overflow-y-auto p-1">
-            {shown.length === 0 && <li className="px-3 py-2 text-[12.5px] text-faint">{t('palette.noResults')}</li>}
+            {shown.length === 0 && (
+              <li className="px-3 py-2 text-[12.5px] text-faint">{t('palette.noResults')}</li>
+            )}
             {shown.map((item, i) => (
               <li key={item.id} role="option" aria-selected={i === active} aria-disabled={item.disabled}>
                 <button
                   type="button"
-                  className={cn('flex h-8 w-full items-center gap-2 rounded px-2 text-left text-[13px]', i === active ? 'bg-accent text-accent-text' : 'text-fg', item.disabled && 'opacity-45')}
+                  className={cn(
+                    'flex h-8 w-full items-center gap-2 rounded px-2 text-left text-[13px]',
+                    i === active ? 'bg-accent text-accent-text' : 'text-fg',
+                    item.disabled && 'opacity-45',
+                  )}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => choose(item)}
                   data-testid="palette-item"
                 >
                   <span className="flex w-5 justify-center">{item.icon}</span>
                   <span className="flex-1 truncate">{item.label}</span>
-                  {item.detail && <span className={cn('truncate text-[11.5px]', i === active ? 'opacity-80' : 'text-faint')}>{item.detail}</span>}
+                  {item.detail && (
+                    <span
+                      className={cn('truncate text-[11.5px]', i === active ? 'opacity-80' : 'text-faint')}
+                    >
+                      {item.detail}
+                    </span>
+                  )}
                   {item.disabled && <span className="text-[11px]">{t('palette.disabled')}</span>}
-                  {item.shortcut && <Kbd className={i === active ? 'border-white/40 bg-transparent text-accent-text' : undefined}>{item.shortcut}</Kbd>}
+                  {item.shortcut && (
+                    <Kbd
+                      className={i === active ? 'border-white/40 bg-transparent text-accent-text' : undefined}
+                    >
+                      {item.shortcut}
+                    </Kbd>
+                  )}
                 </button>
               </li>
             ))}
@@ -115,7 +144,13 @@ export function CommandPalette() {
   const items = useMemo(
     () => (query: string) =>
       COMMANDS.filter((c) => c.id !== 'view.palette')
-        .map<PaletteItem>((c) => ({ id: c.id, label: t(c.labelKey), shortcut: primaryShortcut(c.id), disabled: !isEnabled(c), run: () => void c.run() }))
+        .map<PaletteItem>((c) => ({
+          id: c.id,
+          label: t(c.labelKey),
+          shortcut: primaryShortcut(c.id),
+          disabled: !isEnabled(c),
+          run: () => void c.run(),
+        }))
         .filter((item) => !query || matches(query, item.label))
         .sort((a, b) => Number(!!a.disabled) - Number(!!b.disabled)),
     [t],
@@ -139,7 +174,11 @@ export function QuickSearch() {
         }));
       const elements = Object.values(doc.modelElements)
         .filter((e) => e.id !== doc.rootModelId && !isRelationship(e) && (e.name || e.stereotype))
-        .filter((e) => !query || matches(query, `${e.name} ${t(`elementKind.${e.kind}`)} ${e.stereotype} ${e.documentation}`))
+        .filter(
+          (e) =>
+            !query ||
+            matches(query, `${e.name} ${t(`elementKind.${e.kind}`)} ${e.stereotype} ${e.documentation}`),
+        )
         .map<PaletteItem>((e) => ({
           id: e.id,
           label: e.name || t('common.unnamed'),

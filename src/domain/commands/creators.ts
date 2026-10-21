@@ -23,7 +23,13 @@ import {
 } from '../model/metadata';
 import { visualDescendants } from '../services/containment';
 import { cloneFragment, type ClipboardPayload } from '../services/cloneAndRemap';
-import { endpointInfo, nearestPackageId, relationshipsOf, uniqueChildName, viewsOfElement } from '../services/queries';
+import {
+  endpointInfo,
+  nearestPackageId,
+  relationshipsOf,
+  uniqueChildName,
+  viewsOfElement,
+} from '../services/queries';
 import type { Command } from './types';
 
 /**
@@ -31,7 +37,8 @@ import type { Command } from './types';
  * the engine executes atomically. They never mutate the document.
  */
 
-export type CreatorResult<T = Command[]> = { ok: true; commands: T; createdViewIds: ID[] } | { ok: false; reason: string };
+export type CreatorResult<T = Command[]> =
+  { ok: true; commands: T; createdViewIds: ID[] } | { ok: false; reason: string };
 
 // -------------------------------------------------------------------------------------------------
 // Diagrams
@@ -63,8 +70,18 @@ export function createDiagramCommands(
       diagramOwner = nearestPackageId(doc, owner.id);
     }
   }
-  const diagram = makeDiagram({ id: options.ids.next(), kind: options.kind, name: options.name, ownerId: diagramOwner });
-  return { ok: true, commands: [{ type: 'diagram/add', diagram, elements }], createdViewIds: [], diagramId: diagram.id };
+  const diagram = makeDiagram({
+    id: options.ids.next(),
+    kind: options.kind,
+    name: options.name,
+    ownerId: diagramOwner,
+  });
+  return {
+    ok: true,
+    commands: [{ type: 'diagram/add', diagram, elements }],
+    createdViewIds: [],
+    diagramId: diagram.id,
+  };
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -84,7 +101,12 @@ export function defaultOwnerFor(doc: ProjectDocument, diagram: UMLDiagram, kind:
  * Innermost element shown at `point` that may own `kind` (e.g. a port dropped on a component, a part
  * inside a structured class). Uses stored view bounds; visual containment refines it afterwards.
  */
-export function containingOwnerFor(doc: ProjectDocument, diagram: UMLDiagram, kind: ElementKind, point: Point): ID | null {
+export function containingOwnerFor(
+  doc: ProjectDocument,
+  diagram: UMLDiagram,
+  kind: ElementKind,
+  point: Point,
+): ID | null {
   let best: { id: ID; area: number } | null = null;
   for (const view of Object.values(diagram.views)) {
     if (view.kind !== 'node') continue;
@@ -92,7 +114,10 @@ export function containingOwnerFor(doc: ProjectDocument, diagram: UMLDiagram, ki
     if (!el || !canOwn(el.kind, kind)) continue;
     const slack = kind === 'port' ? 14 : 0;
     const inside =
-      point.x >= view.x - slack && point.x <= view.x + view.width + slack && point.y >= view.y - slack && point.y <= view.y + view.height + slack;
+      point.x >= view.x - slack &&
+      point.x <= view.x + view.width + slack &&
+      point.y >= view.y - slack &&
+      point.y <= view.y + view.height + slack;
     if (!inside) continue;
     const area = view.width * view.height;
     if (!best || area < best.area) best = { id: el.id, area };
@@ -140,18 +165,29 @@ const UNNAMED_BY_DEFAULT = new Set<string>(['pseudostate', 'controlNode', 'final
 
 export function createNodeCommands(
   doc: ProjectDocument,
-  options: { diagramId: ID; spec: NodeSpec; position: Point; size: { width: number; height: number }; ids: IdGenerator },
+  options: {
+    diagramId: ID;
+    spec: NodeSpec;
+    position: Point;
+    size: { width: number; height: number };
+    ids: IdGenerator;
+  },
 ): CreatorResult & { elementId?: ID; viewId?: ID } {
   const diagram = doc.diagrams[options.diagramId];
   if (!diagram) return { ok: false, reason: 'notFound' };
   const { spec } = options;
   if (!diagramAllowsElement(diagram.kind, spec.kind)) return { ok: false, reason: 'notAllowed' };
-  const center = { x: options.position.x + options.size.width / 2, y: options.position.y + options.size.height / 2 };
-  const ownerId = containingOwnerFor(doc, diagram, spec.kind, center) ?? defaultOwnerFor(doc, diagram, spec.kind);
+  const center = {
+    x: options.position.x + options.size.width / 2,
+    y: options.position.y + options.size.height / 2,
+  };
+  const ownerId =
+    containingOwnerFor(doc, diagram, spec.kind, center) ?? defaultOwnerFor(doc, diagram, spec.kind);
   if (!ownerId) return { ok: false, reason: 'noOwner' };
   const elementId = options.ids.next();
   const name =
-    spec.name ?? (UNNAMED_BY_DEFAULT.has(spec.kind) ? '' : uniqueChildName(doc, ownerId, spec.kind, spec.baseName));
+    spec.name ??
+    (UNNAMED_BY_DEFAULT.has(spec.kind) ? '' : uniqueChildName(doc, ownerId, spec.kind, spec.baseName));
   const element = initFor(spec, elementId, name, ownerId, options.ids);
   const view = makeView('node', {
     id: options.ids.next(),
@@ -177,16 +213,31 @@ export function createNoteCommands(
   text: string,
   ids: IdGenerator,
 ): CreatorResult {
-  const view = makeView('note', { id: ids.next(), text, x: Math.round(position.x), y: Math.round(position.y), ...size });
+  const view = makeView('note', {
+    id: ids.next(),
+    text,
+    x: Math.round(position.x),
+    y: Math.round(position.y),
+    ...size,
+  });
   return { ok: true, commands: [{ type: 'view/add', diagramId, views: [view] }], createdViewIds: [view.id] };
 }
 
-export function createNoteLinkCommands(diagram: UMLDiagram, noteViewId: ID, targetViewId: ID, ids: IdGenerator): CreatorResult {
+export function createNoteLinkCommands(
+  diagram: UMLDiagram,
+  noteViewId: ID,
+  targetViewId: ID,
+  ids: IdGenerator,
+): CreatorResult {
   const note = diagram.views[noteViewId];
   const target = diagram.views[targetViewId];
   if (note?.kind !== 'note' || !target || target.id === note.id) return { ok: false, reason: 'notAllowed' };
   const view = makeView('noteLink', { id: ids.next(), sourceViewId: note.id, targetViewId: target.id });
-  return { ok: true, commands: [{ type: 'view/add', diagramId: diagram.id, views: [view] }], createdViewIds: [view.id] };
+  return {
+    ok: true,
+    commands: [{ type: 'view/add', diagramId: diagram.id, views: [view] }],
+    createdViewIds: [view.id],
+  };
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -275,7 +326,13 @@ export function checkConnection(
 
 export function createRelationshipCommands(
   doc: ProjectDocument,
-  options: { diagramId: ID; preset: RelationshipPreset; sourceViewId: ID; targetViewId: ID; ids: IdGenerator },
+  options: {
+    diagramId: ID;
+    preset: RelationshipPreset;
+    sourceViewId: ID;
+    targetViewId: ID;
+    ids: IdGenerator;
+  },
 ): RelationshipCreation {
   const diagram = doc.diagrams[options.diagramId];
   if (!diagram) return { ok: false, reason: 'notFound' };
@@ -319,12 +376,19 @@ export function createRelationshipCommands(
  */
 export function showElementCommands(
   doc: ProjectDocument,
-  options: { diagramId: ID; elementId: ID; position: Point; size: { width: number; height: number }; ids: IdGenerator },
+  options: {
+    diagramId: ID;
+    elementId: ID;
+    position: Point;
+    size: { width: number; height: number };
+    ids: IdGenerator;
+  },
 ): CreatorResult {
   const diagram = doc.diagrams[options.diagramId];
   const element = doc.modelElements[options.elementId];
   if (!diagram || !element) return { ok: false, reason: 'notFound' };
-  if (isRelationship(element) || !diagramAllowsElement(diagram.kind, element.kind)) return { ok: false, reason: 'notAllowed' };
+  if (isRelationship(element) || !diagramAllowsElement(diagram.kind, element.kind))
+    return { ok: false, reason: 'notAllowed' };
   if (DIAGRAM_KIND_INFO[diagram.kind].renderMode !== 'graph') return { ok: false, reason: 'notAllowed' };
   const node = makeView('node', {
     id: options.ids.next(),
@@ -335,9 +399,14 @@ export function showElementCommands(
   });
   const views: DiagramView[] = [node];
   const nodeViewsByElement = new Map<ID, NodeView>();
-  for (const v of Object.values(diagram.views)) if (v.kind === 'node' && !nodeViewsByElement.has(v.elementId)) nodeViewsByElement.set(v.elementId, v);
+  for (const v of Object.values(diagram.views))
+    if (v.kind === 'node' && !nodeViewsByElement.has(v.elementId)) nodeViewsByElement.set(v.elementId, v);
   nodeViewsByElement.set(element.id, nodeViewsByElement.get(element.id) ?? node);
-  const shownRelationships = new Set(Object.values(diagram.views).filter((v): v is EdgeView => v.kind === 'edge').map((v) => v.elementId));
+  const shownRelationships = new Set(
+    Object.values(diagram.views)
+      .filter((v): v is EdgeView => v.kind === 'edge')
+      .map((v) => v.elementId),
+  );
   for (const rel of relationshipsOf(doc, element.id)) {
     if (shownRelationships.has(rel.id) || !diagramAllowsRelationship(diagram.kind, rel.kind)) continue;
     const sourceView = rel.sourceId === element.id ? node : nodeViewsByElement.get(rel.sourceId);
@@ -353,7 +422,11 @@ export function showElementCommands(
       }),
     );
   }
-  return { ok: true, commands: [{ type: 'view/add', diagramId: diagram.id, views }], createdViewIds: [node.id] };
+  return {
+    ok: true,
+    commands: [{ type: 'view/add', diagramId: diagram.id, views }],
+    createdViewIds: [node.id],
+  };
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -364,7 +437,15 @@ export const LIFELINE_TOP = 40;
 
 export function createLifelineCommands(
   doc: ProjectDocument,
-  options: { diagramId: ID; x: number; baseName: string; headStyle: 'object' | 'actor'; typeElementId?: ID | null; name?: string; ids: IdGenerator },
+  options: {
+    diagramId: ID;
+    x: number;
+    baseName: string;
+    headStyle: 'object' | 'actor';
+    typeElementId?: ID | null;
+    name?: string;
+    ids: IdGenerator;
+  },
 ): CreatorResult & { elementId?: ID; viewId?: ID } {
   const diagram = doc.diagrams[options.diagramId];
   if (diagram?.kind !== 'sequence') return { ok: false, reason: 'notFound' };
@@ -418,9 +499,11 @@ export function createMessageCommands(
   };
   const source = lifelineOf(options.sourceViewId);
   const target = lifelineOf(options.targetViewId);
-  if (source === undefined || target === undefined || (source === null && target === null)) return { ok: false, reason: 'notFound' };
+  if (source === undefined || target === undefined || (source === null && target === null))
+    return { ok: false, reason: 'notFound' };
   const isSelf = source !== null && source === target;
-  if (isSelf && (options.sort === 'create' || options.sort === 'destroy')) return { ok: false, reason: 'selfNotAllowed' };
+  if (isSelf && (options.sort === 'create' || options.sort === 'destroy'))
+    return { ok: false, reason: 'selfNotAllowed' };
   const elementId = options.ids.next();
   const element = makeElement('message', {
     id: elementId,
@@ -456,7 +539,12 @@ export function createActivationCommands(
   const lifelineView = diagram?.views[options.lifelineViewId];
   if (!diagram || lifelineView?.kind !== 'lifeline') return { ok: false, reason: 'notFound' };
   const elementId = options.ids.next();
-  const element = makeElement('activation', { id: elementId, name: '', ownerId: diagram.ownerId, lifelineId: lifelineView.elementId });
+  const element = makeElement('activation', {
+    id: elementId,
+    name: '',
+    ownerId: diagram.ownerId,
+    lifelineId: lifelineView.elementId,
+  });
   const view = makeView('activation', {
     id: options.ids.next(),
     elementId,
@@ -483,7 +571,13 @@ export function createFragmentCommands(
   const diagram = doc.diagrams[options.diagramId];
   if (diagram?.kind !== 'sequence') return { ok: false, reason: 'notFound' };
   const elementId = options.ids.next();
-  const element = initFor({ kind: 'combinedFragment', subKind: options.operator, baseName: '' }, elementId, '', diagram.ownerId, options.ids);
+  const element = initFor(
+    { kind: 'combinedFragment', subKind: options.operator, baseName: '' },
+    elementId,
+    '',
+    diagram.ownerId,
+    options.ids,
+  );
   if (element.kind !== 'combinedFragment') return { ok: false, reason: 'internal' };
   const { x, y, width, height } = options.bounds;
   const operandYs: Record<ID, number> = {};
@@ -511,7 +605,11 @@ export function createFragmentCommands(
 // -------------------------------------------------------------------------------------------------
 
 /** Expand a selection into a self-contained copy set (children, internal edges, timeline parts). */
-export function copySelection(doc: ProjectDocument, diagramId: ID, viewIds: readonly ID[]): ClipboardPayload | null {
+export function copySelection(
+  doc: ProjectDocument,
+  diagramId: ID,
+  viewIds: readonly ID[],
+): ClipboardPayload | null {
   const diagram = doc.diagrams[diagramId];
   if (!diagram) return null;
   const included = new Set<ID>();
@@ -520,7 +618,8 @@ export function copySelection(doc: ProjectDocument, diagramId: ID, viewIds: read
     if (!view) continue;
     if (view.kind === 'edge' || view.kind === 'noteLink' || view.kind === 'message') continue; // added below when ends are included
     included.add(id);
-    if (view.kind === 'node' || view.kind === 'note') for (const d of visualDescendants(diagram, id)) included.add(d);
+    if (view.kind === 'node' || view.kind === 'note')
+      for (const d of visualDescendants(diagram, id)) included.add(d);
   }
   const explicit = new Set(viewIds);
   for (const view of Object.values(diagram.views)) {
@@ -533,8 +632,10 @@ export function copySelection(doc: ProjectDocument, diagramId: ID, viewIds: read
   for (const view of Object.values(diagram.views)) {
     if (view.kind !== 'message') continue;
     const endsOk =
-      (view.sourceViewId === null || included.has(view.sourceViewId)) && (view.targetViewId === null || included.has(view.targetViewId));
-    if (endsOk && (explicit.has(view.id) || (view.sourceViewId !== null && view.targetViewId !== null))) included.add(view.id);
+      (view.sourceViewId === null || included.has(view.sourceViewId)) &&
+      (view.targetViewId === null || included.has(view.targetViewId));
+    if (endsOk && (explicit.has(view.id) || (view.sourceViewId !== null && view.targetViewId !== null)))
+      included.add(view.id);
   }
   const views = Object.values(diagram.views).filter((v) => included.has(v.id));
   if (views.length === 0) return null;
@@ -557,21 +658,32 @@ export function pasteCommands(
   const diagram = doc.diagrams[options.diagramId];
   if (!diagram) return { ok: false, reason: 'notFound' };
   const info = DIAGRAM_KIND_INFO[diagram.kind];
-  const allowedViewKinds = info.renderMode === 'sequence' ? ['lifeline', 'message', 'activation', 'fragment', 'note'] : ['node', 'edge', 'note', 'noteLink'];
+  const allowedViewKinds =
+    info.renderMode === 'sequence'
+      ? ['lifeline', 'message', 'activation', 'fragment', 'note']
+      : ['node', 'edge', 'note', 'noteLink'];
   // Keep only what this diagram kind can show.
   const elements = options.payload.elements.filter((el) =>
-    isRelationship(el) ? diagramAllowsRelationship(diagram.kind, el.kind) : diagramAllowsElement(diagram.kind, el.kind),
+    isRelationship(el)
+      ? diagramAllowsRelationship(diagram.kind, el.kind)
+      : diagramAllowsElement(diagram.kind, el.kind),
   );
   const elementIds = new Set(elements.map((e) => e.id));
-  const views = options.payload.views.filter((v) => allowedViewKinds.includes(v.kind) && (!('elementId' in v) || elementIds.has(v.elementId)));
+  const views = options.payload.views.filter(
+    (v) => allowedViewKinds.includes(v.kind) && (!('elementId' in v) || elementIds.has(v.elementId)),
+  );
   const filteredOut = options.payload.elements.length - elements.length;
   const owners = new Map<ElementKind, ID | null>();
   const ownerFor = (kind: ElementKind) => {
     if (!owners.has(kind)) owners.set(kind, defaultOwnerFor(doc, diagram, kind));
     return owners.get(kind) ?? null;
   };
-  const fallbackOwner = ownerFor(elements.find((e) => !isRelationship(e))?.kind ?? 'class') ?? diagram.ownerId;
-  const cloned = cloneFragment({ ...options.payload, elements, views }, doc, options.ids, { ownerId: fallbackOwner, offset: options.offset });
+  const fallbackOwner =
+    ownerFor(elements.find((e) => !isRelationship(e))?.kind ?? 'class') ?? diagram.ownerId;
+  const cloned = cloneFragment({ ...options.payload, elements, views }, doc, options.ids, {
+    ownerId: fallbackOwner,
+    offset: options.offset,
+  });
   // Re-own non-relationship clones whose owner was not copied using the per-kind default owner, and
   // give them names that are unique among their new siblings ("Person" → "Person2").
   const clonedIds = new Set(cloned.elements.map((e) => e.id));
@@ -580,7 +692,11 @@ export function pasteCommands(
     const key = `${ownerId}\u0000${kind}`;
     let names = taken.get(key);
     if (!names) {
-      names = new Set(Object.values(doc.modelElements).filter((e) => e.ownerId === ownerId && e.kind === kind).map((e) => e.name));
+      names = new Set(
+        Object.values(doc.modelElements)
+          .filter((e) => e.ownerId === ownerId && e.kind === kind)
+          .map((e) => e.name),
+      );
       taken.set(key, names);
     }
     return names;
@@ -599,15 +715,26 @@ export function pasteCommands(
     return { ...el, ownerId: owner, name };
   });
   // Type texts that reference a renamed clone follow its new name.
-  const renamed = new Map(finalElements.filter((e, i) => e.name !== cloned.elements[i]?.name).map((e) => [e.id, e.name]));
+  const renamed = new Map(
+    finalElements.filter((e, i) => e.name !== cloned.elements[i]?.name).map((e) => [e.id, e.name]),
+  );
   if (renamed.size) {
     for (const el of finalElements) {
       if ('attributes' in el) {
-        el.attributes = el.attributes.map((a) => (a.typeElementId && renamed.has(a.typeElementId) ? { ...a, type: renamed.get(a.typeElementId)! } : a));
+        el.attributes = el.attributes.map((a) =>
+          a.typeElementId && renamed.has(a.typeElementId) ? { ...a, type: renamed.get(a.typeElementId)! } : a,
+        );
         el.operations = el.operations.map((o) => ({
           ...o,
-          returnType: o.returnTypeElementId && renamed.has(o.returnTypeElementId) ? renamed.get(o.returnTypeElementId)! : o.returnType,
-          parameters: o.parameters.map((p) => (p.typeElementId && renamed.has(p.typeElementId) ? { ...p, type: renamed.get(p.typeElementId)! } : p)),
+          returnType:
+            o.returnTypeElementId && renamed.has(o.returnTypeElementId)
+              ? renamed.get(o.returnTypeElementId)!
+              : o.returnType,
+          parameters: o.parameters.map((p) =>
+            p.typeElementId && renamed.has(p.typeElementId)
+              ? { ...p, type: renamed.get(p.typeElementId)! }
+              : p,
+          ),
         }));
       }
     }
@@ -632,18 +759,42 @@ export function renameElementCommands(doc: ProjectDocument, elementId: ID, name:
   for (const el of Object.values(doc.modelElements)) {
     if ('attributes' in el) {
       for (const a of el.attributes) {
-        if (a.typeElementId === elementId) commands.push({ type: 'member/update', elementId: el.id, collection: 'attributes', memberId: a.id, patch: { type: name } });
+        if (a.typeElementId === elementId)
+          commands.push({
+            type: 'member/update',
+            elementId: el.id,
+            collection: 'attributes',
+            memberId: a.id,
+            patch: { type: name },
+          });
       }
       for (const o of el.operations) {
-        if (o.returnTypeElementId === elementId) commands.push({ type: 'member/update', elementId: el.id, collection: 'operations', memberId: o.id, patch: { returnType: name } });
+        if (o.returnTypeElementId === elementId)
+          commands.push({
+            type: 'member/update',
+            elementId: el.id,
+            collection: 'operations',
+            memberId: o.id,
+            patch: { returnType: name },
+          });
         for (const p of o.parameters) {
           if (p.typeElementId === elementId) {
-            commands.push({ type: 'member/update', elementId: el.id, collection: 'parameters', operationId: o.id, memberId: p.id, patch: { type: name } });
+            commands.push({
+              type: 'member/update',
+              elementId: el.id,
+              collection: 'parameters',
+              operationId: o.id,
+              memberId: p.id,
+              patch: { type: name },
+            });
           }
         }
       }
     }
-    if ((el.kind === 'lifeline' || el.kind === 'part' || el.kind === 'port' || el.kind === 'objectNode') && el.typeElementId === elementId) {
+    if (
+      (el.kind === 'lifeline' || el.kind === 'part' || el.kind === 'port' || el.kind === 'objectNode') &&
+      el.typeElementId === elementId
+    ) {
       commands.push({ type: 'element/update', elementId: el.id, patch: { typeName: name } });
     }
   }
@@ -655,7 +806,15 @@ export function resolveTypeElement(doc: ProjectDocument, typeText: string): ID |
   const name = typeText.trim().replace(/\[\]$/, '');
   if (!name) return null;
   const matches = Object.values(doc.modelElements).filter(
-    (e) => e.name === name && (e.kind === 'class' || e.kind === 'interface' || e.kind === 'enumeration' || e.kind === 'dataType' || e.kind === 'primitiveType' || e.kind === 'signal' || e.kind === 'component'),
+    (e) =>
+      e.name === name &&
+      (e.kind === 'class' ||
+        e.kind === 'interface' ||
+        e.kind === 'enumeration' ||
+        e.kind === 'dataType' ||
+        e.kind === 'primitiveType' ||
+        e.kind === 'signal' ||
+        e.kind === 'component'),
   );
   return matches.length === 1 ? matches[0]!.id : null;
 }

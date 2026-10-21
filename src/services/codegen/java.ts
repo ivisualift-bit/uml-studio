@@ -1,5 +1,15 @@
 import type { ProjectDocument } from '@/domain/schemas/project';
-import { extractModel, safeLiteral, sanitizeIdentifier, uniqueIn, type CgClassifier, type CgModel, type CgParam, type CgType, type GenerationResult } from './model';
+import {
+  extractModel,
+  safeLiteral,
+  sanitizeIdentifier,
+  uniqueIn,
+  type CgClassifier,
+  type CgModel,
+  type CgParam,
+  type CgType,
+  type GenerationResult,
+} from './model';
 
 const RESERVED = new Set(
   'abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for goto if implements import instanceof int interface long native new package private protected public return short static strictfp super switch synchronized this throw throws transient try void volatile while true false null var record yield sealed permits'.split(
@@ -30,7 +40,11 @@ const PRIMITIVES: Record<string, { type: string; boxed: string; import?: string 
   any: { type: 'Object', boxed: 'Object' },
 };
 
-const packageSegment = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}_]/gu, '_').replace(/^(\p{N})/u, '_$1');
+const packageSegment = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}_]/gu, '_')
+    .replace(/^(\p{N})/u, '_$1');
 const visibility = (v: string) => (v === 'package' ? '' : `${v} `);
 
 /** Java skeletons: one public top-level type per file, packages from the UML package tree. */
@@ -68,7 +82,10 @@ export function generateJava(source: ProjectDocument | CgModel): GenerationResul
           base = boxed || type.collection ? p.boxed : p.type;
           if (p.import) imports.add(p.import);
         } else {
-          if (type.name) warnings.push(`${c.name}: type "${type.name}" is not a classifier of the model; emitted as Object`);
+          if (type.name)
+            warnings.push(
+              `${c.name}: type "${type.name}" is not a classifier of the model; emitted as Object`,
+            );
           base = 'Object';
         }
       }
@@ -92,32 +109,61 @@ export function generateJava(source: ProjectDocument | CgModel): GenerationResul
 
 function javadoc(text: string, indent = ''): string[] {
   if (!text.trim()) return [];
-  return [`${indent}/**`, ...text.trim().replace(/\*\//g, '* /').split('\n').map((l) => `${indent} * ${l}`), `${indent} */`];
+  return [
+    `${indent}/**`,
+    ...text
+      .trim()
+      .replace(/\*\//g, '* /')
+      .split('\n')
+      .map((l) => `${indent} * ${l}`),
+    `${indent} */`,
+  ];
 }
 
-function renderParams(list: CgParam[], typeName: (t: CgType | null) => string, warnings: string[], context: string): string {
+function renderParams(
+  list: CgParam[],
+  typeName: (t: CgType | null) => string,
+  warnings: string[],
+  context: string,
+): string {
   const used = new Set<string>();
   return list
     .map((p, i) => {
-      const name = uniqueIn(used, sanitizeIdentifier(p.name || `arg${i}`, RESERVED, warnings, `${context} parameter`, `arg${i}`));
-      if (p.defaultValue) warnings.push(`${context}.${name}: Java has no default parameter values; "${p.defaultValue}" omitted`);
+      const name = uniqueIn(
+        used,
+        sanitizeIdentifier(p.name || `arg${i}`, RESERVED, warnings, `${context} parameter`, `arg${i}`),
+      );
+      if (p.defaultValue)
+        warnings.push(
+          `${context}.${name}: Java has no default parameter values; "${p.defaultValue}" omitted`,
+        );
       return `${typeName(p.type)} ${name}`;
     })
     .join(', ');
 }
 
-function renderJava(c: CgClassifier, self: string, model: CgModel, names: Map<string, string>, typeName: (t: CgType | null, boxed?: boolean) => string, warnings: string[]): string[] {
+function renderJava(
+  c: CgClassifier,
+  self: string,
+  model: CgModel,
+  names: Map<string, string>,
+  typeName: (t: CgType | null, boxed?: boolean) => string,
+  warnings: string[],
+): string[] {
   const out: string[] = [...javadoc(c.documentation)];
   const used = new Set<string>();
   const ref = (id: string) => {
     const n = names.get(id);
     const target = model.byId.get(id);
-    if (n && target && target.packagePath.join('.') !== c.packagePath.join('.')) typeName({ name: target.name, collection: false, classifierId: id });
+    if (n && target && target.packagePath.join('.') !== c.packagePath.join('.'))
+      typeName({ name: target.name, collection: false, classifierId: id });
     return n;
   };
   if (c.kind === 'enum') {
     out.push(`public enum ${self} {`);
-    const literals = c.literals.map((l) => uniqueIn(used, sanitizeIdentifier(l, RESERVED, warnings, `${c.name}.${l}`, 'VALUE')));
+    const literals = c.literals.map((l) =>
+      uniqueIn(used, sanitizeIdentifier(l, RESERVED, warnings, `${c.name}.${l}`, 'VALUE')),
+    );
     if (literals.length) out.push(`    ${literals.join(',\n    ')}`);
     out.push('}');
     return out;
@@ -137,15 +183,25 @@ function renderJava(c: CgClassifier, self: string, model: CgModel, names: Map<st
       const name = uniqueIn(used, sanitizeIdentifier(m.name, RESERVED, warnings, `${c.name}.${m.name}()`));
       if (m.isStatic) {
         const ret = typeName(m.returnType);
-        out.push(`    static ${ret} ${name}(${renderParams(m.params, typeName, warnings, `${c.name}.${name}`)}) {`, `        throw new UnsupportedOperationException("Not implemented: ${self}.${name}");`, '    }');
-      } else out.push(`    ${typeName(m.returnType)} ${name}(${renderParams(m.params, typeName, warnings, `${c.name}.${name}`)});`);
+        out.push(
+          `    static ${ret} ${name}(${renderParams(m.params, typeName, warnings, `${c.name}.${name}`)}) {`,
+          `        throw new UnsupportedOperationException("Not implemented: ${self}.${name}");`,
+          '    }',
+        );
+      } else
+        out.push(
+          `    ${typeName(m.returnType)} ${name}(${renderParams(m.params, typeName, warnings, `${c.name}.${name}`)});`,
+        );
     }
     out.push('}');
     return out;
   }
-  if (parents.length > 1) warnings.push(`${c.name}: Java has single class inheritance; only "${parents[0]}" is extended`);
+  if (parents.length > 1)
+    warnings.push(`${c.name}: Java has single class inheritance; only "${parents[0]}" is extended`);
   const abstract = c.isAbstract || c.methods.some((m) => m.isAbstract && !m.isStatic);
-  out.push(`public ${abstract ? 'abstract ' : c.isFinal ? 'final ' : ''}class ${self}${parents[0] ? ` extends ${parents[0]}` : ''}${interfaces.length ? ` implements ${interfaces.join(', ')}` : ''} {`);
+  out.push(
+    `public ${abstract ? 'abstract ' : c.isFinal ? 'final ' : ''}class ${self}${parents[0] ? ` extends ${parents[0]}` : ''}${interfaces.length ? ` implements ${interfaces.join(', ')}` : ''} {`,
+  );
   for (const f of c.fields) {
     const name = uniqueIn(used, sanitizeIdentifier(f.name, RESERVED, warnings, `${c.name}.${f.name}`));
     const type = typeName(f.type);
@@ -156,7 +212,9 @@ function renderJava(c: CgClassifier, self: string, model: CgModel, names: Map<st
       warnings.push(`${c.name}.${name}: static final field without default; not marked final`);
     }
     const isFinal = f.isReadOnly && !!init;
-    out.push(`    ${visibility(f.visibility)}${f.isStatic ? 'static ' : ''}${isFinal ? 'final ' : ''}${type} ${name}${init};`);
+    out.push(
+      `    ${visibility(f.visibility)}${f.isStatic ? 'static ' : ''}${isFinal ? 'final ' : ''}${type} ${name}${init};`,
+    );
   }
   for (const m of c.methods) {
     const name = uniqueIn(used, sanitizeIdentifier(m.name, RESERVED, warnings, `${c.name}.${m.name}()`));
@@ -165,7 +223,12 @@ function renderJava(c: CgClassifier, self: string, model: CgModel, names: Map<st
     const signature = `${visibility(m.visibility)}${m.isStatic ? 'static ' : ''}${isAbstract ? 'abstract ' : ''}${ret} ${name}(${renderParams(m.params, typeName, warnings, `${c.name}.${name}`)})`;
     out.push('');
     if (isAbstract) out.push(`    ${signature};`);
-    else out.push(`    ${signature} {`, `        throw new UnsupportedOperationException("Not implemented: ${self}.${name}");`, '    }');
+    else
+      out.push(
+        `    ${signature} {`,
+        `        throw new UnsupportedOperationException("Not implemented: ${self}.${name}");`,
+        '    }',
+      );
   }
   out.push('}');
   return out;

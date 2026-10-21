@@ -11,13 +11,21 @@ export function storedBounds(view: BoxView): Bounds {
   return { x: view.x, y: view.y, width: view.width, height: view.height };
 }
 
-export function boundsOf(doc: ProjectDocument, diagram: UMLDiagram, view: BoxView, measure?: ViewMeasurer): Bounds {
+export function boundsOf(
+  doc: ProjectDocument,
+  diagram: UMLDiagram,
+  view: BoxView,
+  measure?: ViewMeasurer,
+): Bounds {
   return (measure ? measure(doc, diagram, view) : null) ?? storedBounds(view);
 }
 
 function contains(outer: Bounds, x: number, y: number, slack = 0): boolean {
   return (
-    x >= outer.x - slack && x <= outer.x + outer.width + slack && y >= outer.y - slack && y <= outer.y + outer.height + slack
+    x >= outer.x - slack &&
+    x <= outer.x + outer.width + slack &&
+    y >= outer.y - slack &&
+    y <= outer.y + outer.height + slack
   );
 }
 
@@ -68,7 +76,11 @@ export function findContainerFor(
 }
 
 /** Owner used when an element leaves a semantic container: the diagram's owner when legal. */
-function fallbackOwner(doc: ProjectDocument, diagram: UMLDiagram, elementKind: Parameters<typeof canOwn>[1]): ID | null {
+function fallbackOwner(
+  doc: ProjectDocument,
+  diagram: UMLDiagram,
+  elementKind: Parameters<typeof canOwn>[1],
+): ID | null {
   const diagramOwner = doc.modelElements[diagram.ownerId];
   if (diagramOwner && canOwn(diagramOwner.kind, elementKind)) return diagramOwner.id;
   return null;
@@ -106,7 +118,8 @@ export function applyContainment(
 
     // Ownership effect.
     if (effect === 'owner' && containerEl && element.ownerId !== containerEl.id) {
-      const wouldCycle = containerEl.id === element.id || ancestorIds(draft, containerEl.id).includes(element.id);
+      const wouldCycle =
+        containerEl.id === element.id || ancestorIds(draft, containerEl.id).includes(element.id);
       if (!wouldCycle && canOwn(containerEl.kind, element.kind)) {
         element.ownerId = containerEl.id;
         tx.touchElement(element.id);

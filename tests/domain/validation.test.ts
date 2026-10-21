@@ -15,8 +15,22 @@ describe('class rules', () => {
     connect(f, f.diagramId, 'generalization', a.viewId, b.viewId);
     connect(f, f.diagramId, 'generalization', b.viewId, a.viewId);
     const assoc = connect(f, f.diagramId, 'association', a.viewId, b.viewId);
-    f.doc = apply(f.doc, { type: 'element/update', elementId: assoc.relationshipId, patch: { sourceEnd: { ...(f.doc.modelElements[assoc.relationshipId] as { sourceEnd: object }).sourceEnd, multiplicity: '3..1' } } });
-    f.doc = apply(f.doc, { type: 'member/add', elementId: a.elementId, collection: 'operations', member: { id: 'op', name: 'run', isAbstract: true } });
+    f.doc = apply(f.doc, {
+      type: 'element/update',
+      elementId: assoc.relationshipId,
+      patch: {
+        sourceEnd: {
+          ...(f.doc.modelElements[assoc.relationshipId] as { sourceEnd: object }).sourceEnd,
+          multiplicity: '3..1',
+        },
+      },
+    });
+    f.doc = apply(f.doc, {
+      type: 'member/add',
+      elementId: a.elementId,
+      collection: 'operations',
+      member: { id: 'op', name: 'run', isAbstract: true },
+    });
     const found = codes(f.doc);
     expect(found).toContain('inheritanceCycle');
     expect(found).toContain('invalidMultiplicity');
@@ -39,7 +53,15 @@ describe('class rules', () => {
     const outcome = executeCommands(f.doc, [
       {
         type: 'element/add',
-        elements: [makeElement('generalization', { id: 'g', name: '', ownerId: a.elementId, sourceId: a.elementId, targetId: i.elementId })],
+        elements: [
+          makeElement('generalization', {
+            id: 'g',
+            name: '',
+            ownerId: a.elementId,
+            sourceId: a.elementId,
+            targetId: i.elementId,
+          }),
+        ],
       },
     ]);
     expect(outcome.ok).toBe(true);
@@ -85,7 +107,11 @@ describe('state machine rules', () => {
     const draft = addNode(f, f.diagramId, { kind: 'state', name: 'Draft' }, 200);
     addNode(f, f.diagramId, { kind: 'state', name: 'Island' }, 400);
     const t = connect(f, f.diagramId, 'transition', init.viewId, draft.viewId);
-    f.doc = apply(f.doc, { type: 'element/update', elementId: t.relationshipId, patch: { trigger: 'start' } });
+    f.doc = apply(f.doc, {
+      type: 'element/update',
+      elementId: t.relationshipId,
+      patch: { trigger: 'start' },
+    });
     const issues = validateProject(f.doc);
     expect(issues.find((i) => i.code === 'unreachableState')?.params).toMatchObject({ name: 'Island' });
     expect(issues.map((i) => i.code)).toContain('initialTransitionTrigger');
@@ -97,13 +123,28 @@ describe('sequence rules', () => {
   it('reports messages after a destroy', () => {
     const f = withDiagram('sequence');
     const ll = (name: string, x: number) => {
-      const c = createLifelineCommands(f.doc, { diagramId: f.diagramId, x, baseName: 'L', headStyle: 'object', name, ids: f.ids });
+      const c = createLifelineCommands(f.doc, {
+        diagramId: f.diagramId,
+        x,
+        baseName: 'L',
+        headStyle: 'object',
+        name,
+        ids: f.ids,
+      });
       if (!c.ok) throw new Error(c.reason);
       f.doc = apply(f.doc, c.commands);
       return c.viewId!;
     };
     const msg = (from: string, to: string, sort: 'destroy' | 'synchronous', y: number) => {
-      const c = createMessageCommands(f.doc, { diagramId: f.diagramId, sourceViewId: from, targetViewId: to, sort, y, name: 'm', ids: f.ids });
+      const c = createMessageCommands(f.doc, {
+        diagramId: f.diagramId,
+        sourceViewId: from,
+        targetViewId: to,
+        sort,
+        y,
+        name: 'm',
+        ids: f.ids,
+      });
       if (!c.ok) throw new Error(c.reason);
       f.doc = apply(f.doc, c.commands);
     };

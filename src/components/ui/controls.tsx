@@ -1,4 +1,12 @@
-import { forwardRef, useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import {
+  forwardRef,
+  useId,
+  type ButtonHTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+} from 'react';
 import { Tooltip } from 'radix-ui';
 import { cn } from '@/lib/cn';
 
@@ -17,7 +25,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md';
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({ variant = 'default', size = 'md', className, type = 'button', ...props }, ref) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { variant = 'default', size = 'md', className, type = 'button', ...props },
+  ref,
+) {
   return (
     <button
       ref={ref}
@@ -43,7 +54,18 @@ export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { label, shortcut, active, disabledReason, className, children, tooltipSide = 'bottom', disabled, type = 'button', ...props },
+  {
+    label,
+    shortcut,
+    active,
+    disabledReason,
+    className,
+    children,
+    tooltipSide = 'bottom',
+    disabled,
+    type = 'button',
+    ...props
+  },
   ref,
 ) {
   const button = (
@@ -65,9 +87,15 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
   );
   return (
     <Tooltip.Root delayDuration={350}>
-      <Tooltip.Trigger asChild>{disabled ? <span className="inline-flex">{button}</span> : button}</Tooltip.Trigger>
+      <Tooltip.Trigger asChild>
+        {disabled ? <span className="inline-flex">{button}</span> : button}
+      </Tooltip.Trigger>
       <Tooltip.Portal>
-        <Tooltip.Content side={tooltipSide} sideOffset={6} className="z-[70] max-w-xs rounded-md border border-border-strong bg-surface-2 px-2 py-1 text-xs text-fg shadow-panel">
+        <Tooltip.Content
+          side={tooltipSide}
+          sideOffset={6}
+          className="z-[70] max-w-xs rounded-md border border-border-strong bg-surface-2 px-2 py-1 text-xs text-fg shadow-panel"
+        >
           <span>{label}</span>
           {shortcut && <Kbd className="ml-2">{shortcut}</Kbd>}
           {disabled && disabledReason && <div className="mt-0.5 text-faint">{disabledReason}</div>}
@@ -78,21 +106,56 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
 });
 
 export function Kbd({ children, className }: { children: ReactNode; className?: string }) {
-  return <kbd className={cn('rounded border border-border-strong bg-surface-1 px-1 font-mono text-[10.5px] text-muted', className)}>{children}</kbd>;
+  return (
+    <kbd
+      className={cn(
+        'rounded border border-border-strong bg-surface-1 px-1 font-mono text-[10.5px] text-muted',
+        className,
+      )}
+    >
+      {children}
+    </kbd>
+  );
 }
 
 const fieldBase =
   'w-full rounded-md border border-border-strong bg-surface-1 px-2 text-[13px] text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-muted disabled:opacity-50';
 
-export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }>(function Input({ className, invalid, ...props }, ref) {
-  return <input ref={ref} className={cn(fieldBase, 'h-7', invalid && 'border-danger focus:border-danger focus:ring-danger-muted', className)} aria-invalid={invalid || undefined} {...props} />;
+export const Input = forwardRef<
+  HTMLInputElement,
+  InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }
+>(function Input({ className, invalid, ...props }, ref) {
+  return (
+    <input
+      ref={ref}
+      className={cn(
+        fieldBase,
+        'h-7',
+        invalid && 'border-danger focus:border-danger focus:ring-danger-muted',
+        className,
+      )}
+      aria-invalid={invalid || undefined}
+      {...props}
+    />
+  );
 });
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(function Textarea({ className, ...props }, ref) {
-  return <textarea ref={ref} className={cn(fieldBase, 'min-h-20 resize-y py-1.5 leading-snug', className)} {...props} />;
-});
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  function Textarea({ className, ...props }, ref) {
+    return (
+      <textarea
+        ref={ref}
+        className={cn(fieldBase, 'min-h-20 resize-y py-1.5 leading-snug', className)}
+        {...props}
+      />
+    );
+  },
+);
 
-export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(function Select({ className, children, ...props }, ref) {
+export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(function Select(
+  { className, children, ...props },
+  ref,
+) {
   return (
     <select ref={ref} className={cn(fieldBase, 'h-7 pr-6', className)} {...props}>
       {children}
@@ -100,24 +163,68 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   );
 });
 
-export function Checkbox({ label, checked, onChange, disabled, title }: { label: string; checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean; title?: string }) {
+export function Checkbox({
+  label,
+  checked,
+  onChange,
+  disabled,
+  title,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  title?: string;
+}) {
   const id = useId();
   return (
-    <label htmlFor={id} className={cn('inline-flex cursor-pointer items-center gap-1.5 text-[12.5px] text-fg', disabled && 'opacity-50')} title={title}>
-      <input id={id} type="checkbox" className="h-3.5 w-3.5 accent-[var(--accent)]" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+    <label
+      htmlFor={id}
+      className={cn(
+        'inline-flex cursor-pointer items-center gap-1.5 text-[12.5px] text-fg',
+        disabled && 'opacity-50',
+      )}
+      title={title}
+    >
+      <input
+        id={id}
+        type="checkbox"
+        className="h-3.5 w-3.5 accent-[var(--accent)]"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+      />
       {label}
     </label>
   );
 }
 
-export function Field({ label, children, hint, error, className, htmlFor }: { label: string; children: ReactNode; hint?: string; error?: string | null; className?: string; htmlFor?: string }) {
+export function Field({
+  label,
+  children,
+  hint,
+  error,
+  className,
+  htmlFor,
+}: {
+  label: string;
+  children: ReactNode;
+  hint?: string;
+  error?: string | null;
+  className?: string;
+  htmlFor?: string;
+}) {
   return (
     <div className={cn('flex flex-col gap-1', className)}>
       <label htmlFor={htmlFor} className="text-[11px] font-medium tracking-wide text-muted uppercase">
         {label}
       </label>
       {children}
-      {error ? <span className="text-[11.5px] text-danger">{error}</span> : hint ? <span className="text-[11.5px] text-faint">{hint}</span> : null}
+      {error ? (
+        <span className="text-[11.5px] text-danger">{error}</span>
+      ) : hint ? (
+        <span className="text-[11.5px] text-faint">{hint}</span>
+      ) : null}
     </div>
   );
 }

@@ -34,7 +34,17 @@ function loadSizes(): PanelSizes {
 }
 
 /** Drag handle resizing an adjacent panel. */
-function Splitter({ orientation, onDrag, onEnd, label }: { orientation: 'vertical' | 'horizontal'; onDrag: (delta: number) => void; onEnd: () => void; label: string }) {
+function Splitter({
+  orientation,
+  onDrag,
+  onEnd,
+  label,
+}: {
+  orientation: 'vertical' | 'horizontal';
+  onDrag: (delta: number) => void;
+  onEnd: () => void;
+  label: string;
+}) {
   const start = useRef<number | null>(null);
   const down = (e: ReactPointerEvent) => {
     start.current = orientation === 'vertical' ? e.clientX : e.clientY;
@@ -108,7 +118,12 @@ export function WorkspaceShell({ children }: { children?: ReactNode }) {
         <div className="flex min-h-0 flex-1">
           {sidebarVisible && (
             <>
-              <aside ref={sidebarRef} className="flex min-h-0 shrink-0 flex-col bg-surface-1" style={{ width: sizes.sidebar }} aria-label={t('explorer.title')}>
+              <aside
+                ref={sidebarRef}
+                className="flex min-h-0 shrink-0 flex-col bg-surface-1"
+                style={{ width: sizes.sidebar }}
+                aria-label={t('explorer.title')}
+              >
                 <div className="flex min-h-0 flex-col" style={{ flex: `${1 - sizes.toolbox} 1 0` }}>
                   <ProjectExplorer />
                 </div>
@@ -123,12 +138,19 @@ export function WorkspaceShell({ children }: { children?: ReactNode }) {
                 />
                 <div className="flex min-h-0 flex-col" style={{ flex: `${sizes.toolbox} 1 0` }}>
                   <div className="flex h-8 shrink-0 items-center px-3">
-                    <h2 className="text-[11px] font-semibold tracking-wider text-muted uppercase">{t('toolbox.title')}</h2>
+                    <h2 className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+                      {t('toolbox.title')}
+                    </h2>
                   </div>
                   <Toolbox />
                 </div>
               </aside>
-              <Splitter orientation="vertical" label={t('explorer.title')} onDrag={(d) => setSizes((s) => ({ ...s, sidebar: clamp(s.sidebar + d, 180, 520) }))} onEnd={persist} />
+              <Splitter
+                orientation="vertical"
+                label={t('explorer.title')}
+                onDrag={(d) => setSizes((s) => ({ ...s, sidebar: clamp(s.sidebar + d, 180, 520) }))}
+                onEnd={persist}
+              />
             </>
           )}
           <main className="flex min-w-0 flex-1 flex-col">
@@ -138,7 +160,12 @@ export function WorkspaceShell({ children }: { children?: ReactNode }) {
             </div>
             {bottomVisible && (
               <>
-                <Splitter orientation="horizontal" label={t('problems.title')} onDrag={(d) => setSizes((s) => ({ ...s, bottom: clamp(s.bottom - d, 80, 480) }))} onEnd={persist} />
+                <Splitter
+                  orientation="horizontal"
+                  label={t('problems.title')}
+                  onDrag={(d) => setSizes((s) => ({ ...s, bottom: clamp(s.bottom - d, 80, 480) }))}
+                  onEnd={persist}
+                />
                 <div className="shrink-0" style={{ height: sizes.bottom }}>
                   <BottomPanel issues={issues} />
                 </div>
@@ -147,7 +174,12 @@ export function WorkspaceShell({ children }: { children?: ReactNode }) {
           </main>
           {inspectorVisible && (
             <>
-              <Splitter orientation="vertical" label={t('inspector.title')} onDrag={(d) => setSizes((s) => ({ ...s, inspector: clamp(s.inspector - d, 240, 560) }))} onEnd={persist} />
+              <Splitter
+                orientation="vertical"
+                label={t('inspector.title')}
+                onDrag={(d) => setSizes((s) => ({ ...s, inspector: clamp(s.inspector - d, 240, 560) }))}
+                onEnd={persist}
+              />
               <div className="min-h-0 shrink-0 border-l border-border" style={{ width: sizes.inspector }}>
                 <Inspector />
               </div>

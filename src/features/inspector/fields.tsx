@@ -85,7 +85,15 @@ export function TextField({
       }}
     />
   );
-  if (compact || !label) return error ? <div className="flex flex-col">{input}<span className="text-[11px] text-danger">{error}</span></div> : input;
+  if (compact || !label)
+    return error ? (
+      <div className="flex flex-col">
+        {input}
+        <span className="text-[11px] text-danger">{error}</span>
+      </div>
+    ) : (
+      input
+    );
   return (
     <Field label={label} htmlFor={id} hint={hint} error={error}>
       {input}
@@ -93,7 +101,13 @@ export function TextField({
   );
 }
 
-export function MultiplicityField(props: { label?: string; value: string; onCommit: (value: string) => void; compact?: boolean; testId?: string }) {
+export function MultiplicityField(props: {
+  label?: string;
+  value: string;
+  onCommit: (value: string) => void;
+  compact?: boolean;
+  testId?: string;
+}) {
   const t = useT();
   return (
     <>
@@ -121,7 +135,21 @@ export function MultiplicityDatalist() {
   );
 }
 
-export function AreaField({ label, value, onCommit, placeholder, testId, rows = 6 }: { label: string; value: string; onCommit: (value: string) => void; placeholder?: string; testId?: string; rows?: number }) {
+export function AreaField({
+  label,
+  value,
+  onCommit,
+  placeholder,
+  testId,
+  rows = 6,
+}: {
+  label: string;
+  value: string;
+  onCommit: (value: string) => void;
+  placeholder?: string;
+  testId?: string;
+  rows?: number;
+}) {
   const [draft, setDraft] = useState(value);
   const editing = useRef(false);
   const id = useId();
@@ -174,7 +202,14 @@ export function SelectField<T extends string>({
 }) {
   const id = useId();
   const select = (
-    <Select id={id} value={value} onChange={(e) => onChange(e.target.value as T)} aria-label={compact ? label : undefined} title={compact ? label : undefined} data-testid={testId}>
+    <Select
+      id={id}
+      value={value}
+      onChange={(e) => onChange(e.target.value as T)}
+      aria-label={compact ? label : undefined}
+      title={compact ? label : undefined}
+      data-testid={testId}
+    >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
           {o.label}
@@ -190,7 +225,23 @@ export function SelectField<T extends string>({
   );
 }
 
-export function NumberField({ label, value, onCommit, min, max, step = 1, testId }: { label: string; value: number; onCommit: (value: number) => void; min?: number; max?: number; step?: number; testId?: string }) {
+export function NumberField({
+  label,
+  value,
+  onCommit,
+  min,
+  max,
+  step = 1,
+  testId,
+}: {
+  label: string;
+  value: number;
+  onCommit: (value: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  testId?: string;
+}) {
   return (
     <TextField
       label={label}
@@ -208,7 +259,17 @@ export function NumberField({ label, value, onCommit, min, max, step = 1, testId
   );
 }
 
-export function CheckField({ label, checked, onChange, testId }: { label: string; checked: boolean; onChange: (value: boolean) => void; testId?: string }) {
+export function CheckField({
+  label,
+  checked,
+  onChange,
+  testId,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+  testId?: string;
+}) {
   return (
     <span data-testid={testId}>
       <Checkbox label={label} checked={checked} onChange={onChange} />
@@ -216,16 +277,38 @@ export function CheckField({ label, checked, onChange, testId }: { label: string
   );
 }
 
-export function ColorField({ label, value, fallback, onChange }: { label: string; value: string | undefined; fallback: string; onChange: (value: string | undefined) => void }) {
+export function ColorField({
+  label,
+  value,
+  fallback,
+  onChange,
+}: {
+  label: string;
+  value: string | undefined;
+  fallback: string;
+  onChange: (value: string | undefined) => void;
+}) {
   const t = useT();
   const id = useId();
   return (
     <Field label={label} htmlFor={id}>
       <div className="flex items-center gap-1.5">
-        <input id={id} type="color" className="h-7 w-10 cursor-pointer rounded border border-border-strong bg-surface-1 p-0.5" value={value ?? fallback} onChange={(e) => onChange(e.target.value)} />
+        <input
+          id={id}
+          type="color"
+          className="h-7 w-10 cursor-pointer rounded border border-border-strong bg-surface-1 p-0.5"
+          value={value ?? fallback}
+          onChange={(e) => onChange(e.target.value)}
+        />
         <span className="font-mono text-[11.5px] text-muted">{value ?? '—'}</span>
         {value && (
-          <button type="button" className="ml-auto rounded p-1 text-faint hover:bg-surface-3 hover:text-fg" onClick={() => onChange(undefined)} aria-label={t('inspector.resetStyle')} title={t('inspector.resetStyle')}>
+          <button
+            type="button"
+            className="ml-auto rounded p-1 text-faint hover:bg-surface-3 hover:text-fg"
+            onClick={() => onChange(undefined)}
+            aria-label={t('inspector.resetStyle')}
+            title={t('inspector.resetStyle')}
+          >
             <RotateCcw size={12} />
           </button>
         )}
@@ -234,12 +317,24 @@ export function ColorField({ label, value, fallback, onChange }: { label: string
   );
 }
 
-export function Section({ title, children, actions, className }: { title?: string; children: ReactNode; actions?: ReactNode; className?: string }) {
+export function Section({
+  title,
+  children,
+  actions,
+  className,
+}: {
+  title?: string;
+  children: ReactNode;
+  actions?: ReactNode;
+  className?: string;
+}) {
   return (
     <section className={cn('flex flex-col gap-2.5 border-b border-border px-3 py-3', className)}>
       {(title || actions) && (
         <div className="flex items-center justify-between">
-          {title && <h3 className="text-[11px] font-semibold tracking-wider text-muted uppercase">{title}</h3>}
+          {title && (
+            <h3 className="text-[11px] font-semibold tracking-wider text-muted uppercase">{title}</h3>
+          )}
           {actions}
         </div>
       )}

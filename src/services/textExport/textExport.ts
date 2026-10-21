@@ -1,5 +1,10 @@
 import type { ID } from '@/domain/schemas/common';
-import { isRelationship, type ElementOf, type ModelElement, type Relationship } from '@/domain/schemas/elements';
+import {
+  isRelationship,
+  type ElementOf,
+  type ModelElement,
+  type Relationship,
+} from '@/domain/schemas/elements';
 import type { ProjectDocument, UMLDiagram } from '@/domain/schemas/project';
 import type { FragmentView, MessageView } from '@/domain/schemas/views';
 import { formatGuard, formatMessageLabel, formatTransitionLabel } from '@/domain/notation/labels';
@@ -22,7 +27,12 @@ function aliases(elements: ModelElement[]): Map<ID, string> {
   const map = new Map<ID, string>();
   const used = new Set<string>();
   for (const el of elements) {
-    let base = el.name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9_]/g, '_').replace(/^(\d)/, '_$1') || el.kind;
+    let base =
+      el.name
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^A-Za-z0-9_]/g, '_')
+        .replace(/^(\d)/, '_$1') || el.kind;
     if (base.length > 40) base = base.slice(0, 40);
     let alias = base;
     for (let i = 2; used.has(alias); i += 1) alias = `${base}_${i}`;
@@ -44,7 +54,9 @@ function shown(doc: ProjectDocument, diagram: UMLDiagram): { nodes: ModelElement
   }
   return {
     nodes: [...nodeIds].map((id) => doc.modelElements[id]).filter((e): e is ModelElement => !!e),
-    rels: [...relIds].map((id) => doc.modelElements[id]).filter((e): e is Relationship => !!e && isRelationship(e)),
+    rels: [...relIds]
+      .map((id) => doc.modelElements[id])
+      .filter((e): e is Relationship => !!e && isRelationship(e)),
   };
 }
 
@@ -65,14 +77,31 @@ function classMermaid(doc: ProjectDocument, diagram: UMLDiagram): TextExportResu
     }
     const label = alias !== el.name ? `${alias}["${clean(el.name)}"]` : alias;
     lines.push(`  class ${label} {`);
-    const kw = el.kind === 'interface' ? 'interface' : el.kind === 'enumeration' ? 'enumeration' : 'isAbstract' in el && el.isAbstract ? 'abstract' : el.kind === 'dataType' ? 'dataType' : '';
+    const kw =
+      el.kind === 'interface'
+        ? 'interface'
+        : el.kind === 'enumeration'
+          ? 'enumeration'
+          : 'isAbstract' in el && el.isAbstract
+            ? 'abstract'
+            : el.kind === 'dataType'
+              ? 'dataType'
+              : '';
     if (kw) lines.push(`    <<${kw}>>`);
     if (el.kind === 'enumeration') for (const l of el.literals) lines.push(`    ${clean(l.name)}`);
     if ('attributes' in el) {
-      for (const a of el.attributes) lines.push(`    ${VISIBILITY_SYMBOL[a.visibility]}${clean(a.type ? `${a.type} ` : '')}${clean(a.name)}${a.isStatic ? '$' : ''}`);
+      for (const a of el.attributes)
+        lines.push(
+          `    ${VISIBILITY_SYMBOL[a.visibility]}${clean(a.type ? `${a.type} ` : '')}${clean(a.name)}${a.isStatic ? '$' : ''}`,
+        );
       for (const o of el.operations) {
-        const params = o.parameters.filter((p) => p.direction !== 'return').map((p) => clean(`${p.name}${p.type ? `: ${p.type}` : ''}`)).join(', ');
-        lines.push(`    ${VISIBILITY_SYMBOL[o.visibility]}${clean(o.name)}(${params})${o.isAbstract ? '*' : o.isStatic ? '$' : ''}${o.returnType ? ` ${clean(o.returnType)}` : ''}`);
+        const params = o.parameters
+          .filter((p) => p.direction !== 'return')
+          .map((p) => clean(`${p.name}${p.type ? `: ${p.type}` : ''}`))
+          .join(', ');
+        lines.push(
+          `    ${VISIBILITY_SYMBOL[o.visibility]}${clean(o.name)}(${params})${o.isAbstract ? '*' : o.isStatic ? '$' : ''}${o.returnType ? ` ${clean(o.returnType)}` : ''}`,
+        );
       }
     }
     lines.push('  }');
@@ -102,7 +131,8 @@ function classMermaid(doc: ProjectDocument, diagram: UMLDiagram): TextExportResu
         else if (rel.targetEnd.aggregation === 'shared') arrow = '--o';
         else if (rel.targetEnd.navigability === 'navigable') arrow = '-->';
         lines.push(`  ${s}${sm} ${arrow} ${tm}${t}${label}`);
-        if (rel.sourceEnd.name || rel.targetEnd.name) lost.push(`Role names of association ${rel.name || `${s}–${t}`}`);
+        if (rel.sourceEnd.name || rel.targetEnd.name)
+          lost.push(`Role names of association ${rel.name || `${s}–${t}`}`);
         break;
       }
       default:
@@ -124,13 +154,30 @@ function classPlantUml(doc: ProjectDocument, diagram: UMLDiagram): TextExportRes
       lines.push(`package ${display} as ${alias} {`, '}');
       continue;
     }
-    const keyword = el.kind === 'interface' ? 'interface' : el.kind === 'enumeration' ? 'enum' : 'isAbstract' in el && el.isAbstract ? 'abstract class' : 'class';
-    const stereo = el.stereotype ? ` <<${clean(el.stereotype)}>>` : el.kind === 'dataType' ? ' <<dataType>>' : el.kind === 'signal' ? ' <<signal>>' : '';
+    const keyword =
+      el.kind === 'interface'
+        ? 'interface'
+        : el.kind === 'enumeration'
+          ? 'enum'
+          : 'isAbstract' in el && el.isAbstract
+            ? 'abstract class'
+            : 'class';
+    const stereo = el.stereotype
+      ? ` <<${clean(el.stereotype)}>>`
+      : el.kind === 'dataType'
+        ? ' <<dataType>>'
+        : el.kind === 'signal'
+          ? ' <<signal>>'
+          : '';
     lines.push(`${keyword} ${display} as ${alias}${stereo} {`);
     if (el.kind === 'enumeration') for (const l of el.literals) lines.push(`  ${clean(l.name)}`);
     if ('attributes' in el) {
-      for (const a of el.attributes) lines.push(`  ${a.isStatic ? '{static} ' : ''}${clean(formatAttribute(a))}`);
-      for (const o of el.operations) lines.push(`  ${o.isStatic ? '{static} ' : ''}${o.isAbstract ? '{abstract} ' : ''}${clean(formatOperation(o))}`);
+      for (const a of el.attributes)
+        lines.push(`  ${a.isStatic ? '{static} ' : ''}${clean(formatAttribute(a))}`);
+      for (const o of el.operations)
+        lines.push(
+          `  ${o.isStatic ? '{static} ' : ''}${o.isAbstract ? '{abstract} ' : ''}${clean(formatOperation(o))}`,
+        );
     }
     lines.push('}');
   }
@@ -158,7 +205,9 @@ function classPlantUml(doc: ProjectDocument, diagram: UMLDiagram): TextExportRes
         else if (rel.targetEnd.aggregation === 'composite') arrow = '--*';
         else if (rel.targetEnd.aggregation === 'shared') arrow = '--o';
         else if (rel.targetEnd.navigability === 'navigable') arrow = '-->';
-        lines.push(`${s}${sEnd ? ` ${quote(sEnd)}` : ''} ${arrow}${tEnd ? ` ${quote(tEnd)}` : ''} ${t}${label}`);
+        lines.push(
+          `${s}${sEnd ? ` ${quote(sEnd)}` : ''} ${arrow}${tEnd ? ` ${quote(tEnd)}` : ''} ${t}${label}`,
+        );
         break;
       }
       default:
@@ -182,14 +231,18 @@ function plantUmlUseCase(doc: ProjectDocument, diagram: UMLDiagram): TextExportR
   for (const v of Object.values(diagram.views)) {
     if (v.kind !== 'node' || !v.containerViewId) continue;
     const container = diagram.views[v.containerViewId];
-    if (container?.kind === 'node' && doc.modelElements[container.elementId]?.kind === 'subject') insideBoundary.set(v.elementId, container.elementId);
+    if (container?.kind === 'node' && doc.modelElements[container.elementId]?.kind === 'subject')
+      insideBoundary.set(v.elementId, container.elementId);
   }
-  for (const el of nodes) if (el.kind === 'actor') lines.push(`actor ${quote(el.name)} as ${names.get(el.id)}`);
-  const emitUseCase = (el: ModelElement, indent: string) => lines.push(`${indent}usecase ${quote(el.name)} as ${names.get(el.id)}`);
+  for (const el of nodes)
+    if (el.kind === 'actor') lines.push(`actor ${quote(el.name)} as ${names.get(el.id)}`);
+  const emitUseCase = (el: ModelElement, indent: string) =>
+    lines.push(`${indent}usecase ${quote(el.name)} as ${names.get(el.id)}`);
   for (const el of nodes) {
     if (el.kind !== 'subject') continue;
     lines.push(`rectangle ${quote(el.name)} {`);
-    for (const uc of nodes) if (uc.kind === 'useCase' && insideBoundary.get(uc.id) === el.id) emitUseCase(uc, '  ');
+    for (const uc of nodes)
+      if (uc.kind === 'useCase' && insideBoundary.get(uc.id) === el.id) emitUseCase(uc, '  ');
     lines.push('}');
   }
   for (const el of nodes) if (el.kind === 'useCase' && !insideBoundary.has(el.id)) emitUseCase(el, '');
@@ -199,7 +252,8 @@ function plantUmlUseCase(doc: ProjectDocument, diagram: UMLDiagram): TextExportR
     if (!s || !t) continue;
     if (rel.kind === 'association') lines.push(`${s} -- ${t}`);
     else if (rel.kind === 'include') lines.push(`${s} ..> ${t} : <<include>>`);
-    else if (rel.kind === 'extend') lines.push(`${s} ..> ${t} : <<extend>>${rel.condition ? `\\n[${clean(rel.condition)}]` : ''}`);
+    else if (rel.kind === 'extend')
+      lines.push(`${s} ..> ${t} : <<extend>>${rel.condition ? `\\n[${clean(rel.condition)}]` : ''}`);
     else if (rel.kind === 'generalization') lines.push(`${t} <|-- ${s}`);
     else if (rel.kind === 'dependency') lines.push(`${s} ..> ${t}`);
     else lost.push(`${rel.kind} relationship`);
@@ -223,7 +277,9 @@ function sequenceText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFor
   const lifelineViews = Object.values(diagram.views)
     .filter((v) => v.kind === 'lifeline')
     .sort((a, b) => (a.kind === 'lifeline' && b.kind === 'lifeline' ? a.x - b.x : 0));
-  const lifelines = lifelineViews.map((v) => (v.kind === 'lifeline' ? doc.modelElements[v.elementId] : undefined)).filter((e): e is ElementOf<'lifeline'> => e?.kind === 'lifeline');
+  const lifelines = lifelineViews
+    .map((v) => (v.kind === 'lifeline' ? doc.modelElements[v.elementId] : undefined))
+    .filter((e): e is ElementOf<'lifeline'> => e?.kind === 'lifeline');
   const names = aliases(lifelines);
   const byView = new Map<ID, string>();
   for (const v of lifelineViews) if (v.kind === 'lifeline') byView.set(v.id, names.get(v.elementId) ?? '');
@@ -239,14 +295,22 @@ function sequenceText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFor
     if (v.kind !== 'lifeline' || created.has(v.id)) continue;
     const el = doc.modelElements[v.elementId];
     if (el?.kind !== 'lifeline') continue;
-    const typeName = el.typeElementId ? (doc.modelElements[el.typeElementId]?.name ?? el.typeName) : el.typeName;
+    const typeName = el.typeElementId
+      ? (doc.modelElements[el.typeElementId]?.name ?? el.typeName)
+      : el.typeName;
     const label = clean(typeName ? `${el.name}:${typeName}` : el.name);
     const keyword = el.headStyle === 'actor' ? 'actor' : 'participant';
-    lines.push(format === 'mermaid' ? `  ${keyword} ${names.get(el.id)} as ${label}` : `${keyword} ${quote(label)} as ${names.get(el.id)}`);
+    lines.push(
+      format === 'mermaid'
+        ? `  ${keyword} ${names.get(el.id)} as ${label}`
+        : `${keyword} ${quote(label)} as ${names.get(el.id)}`,
+    );
   }
   const events: SeqEvent[] = [];
   let order = 0;
-  const messages = orderMessages(Object.values(diagram.views).filter((v): v is MessageView => v.kind === 'message'));
+  const messages = orderMessages(
+    Object.values(diagram.views).filter((v): v is MessageView => v.kind === 'message'),
+  );
   for (const v of messages) {
     const m = doc.modelElements[v.elementId];
     if (m?.kind !== 'message') continue;
@@ -264,7 +328,14 @@ function sequenceText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFor
       order: order++,
       line: (fmt) => {
         if (fmt === 'mermaid') {
-          const arrow = m.sort === 'reply' ? '-->>' : m.sort === 'asynchronous' ? '-)' : m.sort === 'create' ? '-->>' : '->>';
+          const arrow =
+            m.sort === 'reply'
+              ? '-->>'
+              : m.sort === 'asynchronous'
+                ? '-)'
+                : m.sort === 'create'
+                  ? '-->>'
+                  : '->>';
           const prefix = isCreate ? `  create participant ${to}\n` : isDestroy ? `  destroy ${to}\n` : '';
           return `${prefix}  ${from}${arrow}${to}: ${text}`;
         }
@@ -278,8 +349,16 @@ function sequenceText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFor
     if (v.kind !== 'activation') continue;
     const who = byView.get(v.lifelineViewId);
     if (!who) continue;
-    events.push({ y: v.startY, order: order++, line: (fmt) => (fmt === 'mermaid' ? `  activate ${who}` : `activate ${who}`) });
-    events.push({ y: v.endY + 0.01, order: order++, line: (fmt) => (fmt === 'mermaid' ? `  deactivate ${who}` : `deactivate ${who}`) });
+    events.push({
+      y: v.startY,
+      order: order++,
+      line: (fmt) => (fmt === 'mermaid' ? `  activate ${who}` : `activate ${who}`),
+    });
+    events.push({
+      y: v.endY + 0.01,
+      order: order++,
+      line: (fmt) => (fmt === 'mermaid' ? `  deactivate ${who}` : `deactivate ${who}`),
+    });
   }
   for (const v of Object.values(diagram.views)) {
     if (v.kind !== 'fragment') continue;
@@ -287,18 +366,39 @@ function sequenceText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFor
     if (f?.kind !== 'combinedFragment') continue;
     const fv = v as FragmentView;
     if (f.operator === 'ref') {
-      events.push({ y: fv.y, order: order++, line: (fmt) => (fmt === 'mermaid' ? `  Note over ${[...byView.values()][0] ?? 'A'}: ref ${clean(f.operands[0]?.guard ?? '')}` : `ref over ${[...byView.values()].join(', ')} : ${clean(f.operands[0]?.guard ?? '')}`) });
+      events.push({
+        y: fv.y,
+        order: order++,
+        line: (fmt) =>
+          fmt === 'mermaid'
+            ? `  Note over ${[...byView.values()][0] ?? 'A'}: ref ${clean(f.operands[0]?.guard ?? '')}`
+            : `ref over ${[...byView.values()].join(', ')} : ${clean(f.operands[0]?.guard ?? '')}`,
+      });
       continue;
     }
-    const supported = format === 'mermaid' ? ['alt', 'opt', 'loop', 'par', 'break', 'critical'] : ['alt', 'opt', 'loop', 'par', 'break', 'critical', 'group'];
+    const supported =
+      format === 'mermaid'
+        ? ['alt', 'opt', 'loop', 'par', 'break', 'critical']
+        : ['alt', 'opt', 'loop', 'par', 'break', 'critical', 'group'];
     const op = supported.includes(f.operator) ? f.operator : 'opt';
     if (op !== f.operator) lost.push(`"${f.operator}" fragment exported as "${op}"`);
     const keywordElse = op === 'par' ? 'and' : op === 'critical' ? 'option' : 'else';
     f.operands.forEach((operand, i) => {
       const y = i === 0 ? fv.y : (fv.operandYs[operand.id] ?? fv.y);
-      events.push({ y: y - 0.005, order: order++, line: (fmt) => (i === 0 ? `${fmt === 'mermaid' ? '  ' : ''}${op} ${clean(operand.guard)}` : `${fmt === 'mermaid' ? '  ' : ''}${keywordElse} ${clean(operand.guard)}`) });
+      events.push({
+        y: y - 0.005,
+        order: order++,
+        line: (fmt) =>
+          i === 0
+            ? `${fmt === 'mermaid' ? '  ' : ''}${op} ${clean(operand.guard)}`
+            : `${fmt === 'mermaid' ? '  ' : ''}${keywordElse} ${clean(operand.guard)}`,
+      });
     });
-    events.push({ y: fv.y + fv.height - 0.005, order: order++, line: (fmt) => `${fmt === 'mermaid' ? '  ' : ''}end` });
+    events.push({
+      y: fv.y + fv.height - 0.005,
+      order: order++,
+      line: (fmt) => `${fmt === 'mermaid' ? '  ' : ''}end`,
+    });
   }
   events.sort((a, b) => a.y - b.y || a.order - b.order);
   for (const e of events) lines.push(e.line(format));
@@ -332,7 +432,13 @@ function stateText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFormat
       if (kids.length) {
         lines.push(`${indent}state ${alias} {`);
         for (const k of kids) emitState(k, `${indent}  `);
-        for (const t of rels) if (t.kind === 'transition' && kids.some((k) => k.id === t.sourceId || k.id === t.targetId) && doc.modelElements[t.sourceId]?.ownerId === el.id) lines.push(`${indent}  ${ref(t.sourceId)} --> ${ref(t.targetId)}`);
+        for (const t of rels)
+          if (
+            t.kind === 'transition' &&
+            kids.some((k) => k.id === t.sourceId || k.id === t.targetId) &&
+            doc.modelElements[t.sourceId]?.ownerId === el.id
+          )
+            lines.push(`${indent}  ${ref(t.sourceId)} --> ${ref(t.targetId)}`);
         lines.push(`${indent}}`);
       }
     } else {
@@ -349,20 +455,32 @@ function stateText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFormat
     }
   };
   for (const el of nodes) {
-    if (el.kind === 'state' && doc.modelElements[el.ownerId ?? '']?.kind !== 'state') emitState(el, format === 'mermaid' ? '  ' : '');
+    if (el.kind === 'state' && doc.modelElements[el.ownerId ?? '']?.kind !== 'state')
+      emitState(el, format === 'mermaid' ? '  ' : '');
     if (el.kind === 'pseudostate' && !['initial'].includes(el.pseudoKind)) {
-      if (format === 'mermaid' && (el.pseudoKind === 'choice' || el.pseudoKind === 'fork' || el.pseudoKind === 'join')) lines.push(`  state ${names.get(el.id)} <<${el.pseudoKind}>>`);
-      else if (format === 'plantuml' && (el.pseudoKind === 'choice' || el.pseudoKind === 'fork' || el.pseudoKind === 'join')) lines.push(`state ${names.get(el.id)} <<${el.pseudoKind}>>`);
+      if (
+        format === 'mermaid' &&
+        (el.pseudoKind === 'choice' || el.pseudoKind === 'fork' || el.pseudoKind === 'join')
+      )
+        lines.push(`  state ${names.get(el.id)} <<${el.pseudoKind}>>`);
+      else if (
+        format === 'plantuml' &&
+        (el.pseudoKind === 'choice' || el.pseudoKind === 'fork' || el.pseudoKind === 'join')
+      )
+        lines.push(`state ${names.get(el.id)} <<${el.pseudoKind}>>`);
       else lost.push(`${el.pseudoKind} pseudostate`);
     }
-    if (format === 'mermaid' && el.kind === 'state' && (el.entry || el.exit || el.doActivity)) lost.push(`Internal activities of "${el.name}"`);
+    if (format === 'mermaid' && el.kind === 'state' && (el.entry || el.exit || el.doActivity))
+      lost.push(`Internal activities of "${el.name}"`);
   }
   for (const rel of rels) {
     if (rel.kind !== 'transition') continue;
     const label = formatTransitionLabel(rel);
     const nested = doc.modelElements[doc.modelElements[rel.sourceId]?.ownerId ?? '']?.kind === 'state';
     if (format === 'mermaid' && nested) continue; // emitted inside the composite block
-    lines.push(`${format === 'mermaid' ? '  ' : ''}${ref(rel.sourceId)} --> ${ref(rel.targetId)}${label ? ` : ${clean(label)}` : ''}`);
+    lines.push(
+      `${format === 'mermaid' ? '  ' : ''}${ref(rel.sourceId)} --> ${ref(rel.targetId)}${label ? ` : ${clean(label)}` : ''}`,
+    );
   }
   if (format === 'plantuml') lines.push('@enduml');
   return { supported: true, text: `${lines.join('\n')}\n`, lost: [...new Set(lost)] };
@@ -388,7 +506,8 @@ function activityText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFor
       else if (el.kind === 'controlNode') {
         if (el.nodeKind === 'initial') lines.push(`  ${id}(( ))`);
         else if (el.nodeKind === 'activityFinal' || el.nodeKind === 'flowFinal') lines.push(`  ${id}((( )))`);
-        else if (el.nodeKind === 'decision' || el.nodeKind === 'merge') lines.push(`  ${id}{${label.trim() ? `"${label}"` : ' '}}`);
+        else if (el.nodeKind === 'decision' || el.nodeKind === 'merge')
+          lines.push(`  ${id}{${label.trim() ? `"${label}"` : ' '}}`);
         else lines.push(`  ${id}[${el.nodeKind}]`);
       }
     }
@@ -407,9 +526,12 @@ function activityText(doc: ProjectDocument, diagram: UMLDiagram, format: TextFor
   const term = (id: ID): string => {
     const el = doc.modelElements[id];
     if (el?.kind === 'controlNode' && el.nodeKind === 'initial') return '(*)';
-    if (el?.kind === 'controlNode' && (el.nodeKind === 'activityFinal' || el.nodeKind === 'flowFinal')) return '(*)';
-    if (el?.kind === 'controlNode' && (el.nodeKind === 'fork' || el.nodeKind === 'join')) return `===${names.get(id)}===`;
-    if (el?.kind === 'controlNode' && (el.nodeKind === 'decision' || el.nodeKind === 'merge')) return `<> ${names.get(id)}`;
+    if (el?.kind === 'controlNode' && (el.nodeKind === 'activityFinal' || el.nodeKind === 'flowFinal'))
+      return '(*)';
+    if (el?.kind === 'controlNode' && (el.nodeKind === 'fork' || el.nodeKind === 'join'))
+      return `===${names.get(id)}===`;
+    if (el?.kind === 'controlNode' && (el.nodeKind === 'decision' || el.nodeKind === 'merge'))
+      return `<> ${names.get(id)}`;
     return `${quote(el?.name ?? '')} as ${names.get(id)}`;
   };
   for (const rel of rels) {

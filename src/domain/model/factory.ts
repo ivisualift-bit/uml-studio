@@ -58,9 +58,12 @@ export function makeDiagram(init: {
   return DiagramSchema.parse({ ...init, views: {} });
 }
 
-export const makeAttribute = (init: z.input<typeof AttributeSchema>): Attribute => AttributeSchema.parse(init);
-export const makeOperation = (init: z.input<typeof OperationSchema>): Operation => OperationSchema.parse(init);
-export const makeParameter = (init: z.input<typeof ParameterSchema>): Parameter => ParameterSchema.parse(init);
+export const makeAttribute = (init: z.input<typeof AttributeSchema>): Attribute =>
+  AttributeSchema.parse(init);
+export const makeOperation = (init: z.input<typeof OperationSchema>): Operation =>
+  OperationSchema.parse(init);
+export const makeParameter = (init: z.input<typeof ParameterSchema>): Parameter =>
+  ParameterSchema.parse(init);
 export const makeLiteral = (init: z.input<typeof EnumerationLiteralSchema>): EnumerationLiteral =>
   EnumerationLiteralSchema.parse(init);
 export const makeExtensionPoint = (init: z.input<typeof ExtensionPointSchema>): ExtensionPoint =>
@@ -70,8 +73,9 @@ export const makeOperand = (init: z.input<typeof InteractionOperandSchema>): Int
 export const makeSlot = (init: z.input<typeof SlotSchema>): Slot => SlotSchema.parse(init);
 export const makeTagDefinition = (init: z.input<typeof TagDefinitionSchema>): TagDefinition =>
   TagDefinitionSchema.parse(init);
-export const makeCommunicationMessage = (init: z.input<typeof CommunicationMessageSchema>): CommunicationMessage =>
-  CommunicationMessageSchema.parse(init);
+export const makeCommunicationMessage = (
+  init: z.input<typeof CommunicationMessageSchema>,
+): CommunicationMessage => CommunicationMessageSchema.parse(init);
 
 export interface NewProjectOptions {
   name: string;

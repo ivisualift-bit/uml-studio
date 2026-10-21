@@ -20,7 +20,16 @@ export interface ModalProps {
 const widths = { sm: 'max-w-[420px]', md: 'max-w-[560px]', lg: 'max-w-[760px]', xl: 'max-w-[960px]' };
 
 /** Accessible modal (focus trap, Esc closes, focus restored on close) built on Radix Dialog. */
-export function Modal({ open, onClose, title, description, children, footer, width = 'md', testId }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+  footer,
+  width = 'md',
+  testId,
+}: ModalProps) {
   const t = useT();
   return (
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
@@ -40,19 +49,29 @@ export function Modal({ open, onClose, title, description, children, footer, wid
             <div className="min-w-0">
               <Dialog.Title className="text-[14px] font-semibold text-fg">{title}</Dialog.Title>
               {description ? (
-                <Dialog.Description className="mt-0.5 text-[12.5px] text-muted">{description}</Dialog.Description>
+                <Dialog.Description className="mt-0.5 text-[12.5px] text-muted">
+                  {description}
+                </Dialog.Description>
               ) : (
                 <Dialog.Description className="sr-only">{title}</Dialog.Description>
               )}
             </div>
             <Dialog.Close asChild>
-              <button type="button" aria-label={t('common.close')} className="rounded p-1 text-muted hover:bg-surface-3 hover:text-fg">
+              <button
+                type="button"
+                aria-label={t('common.close')}
+                className="rounded p-1 text-muted hover:bg-surface-3 hover:text-fg"
+              >
                 <X size={16} />
               </button>
             </Dialog.Close>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3.5">{children}</div>
-          {footer && <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-3">{footer}</div>}
+          {footer && (
+            <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-3">
+              {footer}
+            </div>
+          )}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

@@ -1,8 +1,4 @@
-import {
-  copySelection,
-  createDiagramCommands,
-  pasteCommands,
-} from '@/domain/commands/creators';
+import { copySelection, createDiagramCommands, pasteCommands } from '@/domain/commands/creators';
 import type { CommandOutcome } from '@/domain/commands/engine';
 import type { Command } from '@/domain/commands/types';
 import { uuidGenerator } from '@/domain/ids';
@@ -88,10 +84,17 @@ export function confirmDiscardIfDirty(): Promise<boolean> {
   });
 }
 
-async function replaceProject(doc: ProjectDocument, file: FileRef | null, options: { dirty?: boolean } = {}): Promise<void> {
+async function replaceProject(
+  doc: ProjectDocument,
+  file: FileRef | null,
+  options: { dirty?: boolean } = {},
+): Promise<void> {
   const previous = currentDoc();
   // The previous project's recovery snapshot is no longer needed once the user chose to replace it.
-  if (previous && previous.id !== doc.id) await recoveryRepository().deleteRecovery(previous.id).catch(() => undefined);
+  if (previous && previous.id !== doc.id)
+    await recoveryRepository()
+      .deleteRecovery(previous.id)
+      .catch(() => undefined);
   useEditorStore.getState().reset();
   useDocumentStore.getState().load(doc, file, options);
   const first = Object.values(doc.diagrams)[0];
@@ -107,7 +110,12 @@ export async function newProject(name?: string, templateId?: string): Promise<vo
   const doc =
     templateId && templateId !== 'blank'
       ? instantiateTemplate(templateId, uuidGenerator, now, name || undefined)
-      : createEmptyProject({ name: name || t('project.defaultName'), modelName: t('project.modelName'), ids: uuidGenerator, now });
+      : createEmptyProject({
+          name: name || t('project.defaultName'),
+          modelName: t('project.modelName'),
+          ids: uuidGenerator,
+          now,
+        });
   await replaceProject(doc, null, { dirty: false });
 }
 
@@ -126,10 +134,14 @@ export async function openProject(): Promise<void> {
     const doc = showLoadError(opened.file.name, opened.text);
     if (!doc) return;
     await replaceProject(doc, opened.file);
-    await projectRepository().recordRecent(opened.file, { projectId: doc.id, projectName: doc.name }, opened.text).catch(() => undefined);
+    await projectRepository()
+      .recordRecent(opened.file, { projectId: doc.id, projectName: doc.name }, opened.text)
+      .catch(() => undefined);
     toast.success(t('project.opened', { name: doc.name }));
   } catch (error) {
-    toast.error(t('project.readError'), { details: [error instanceof Error ? error.message : String(error)] });
+    toast.error(t('project.readError'), {
+      details: [error instanceof Error ? error.message : String(error)],
+    });
   }
 }
 
@@ -141,9 +153,13 @@ export async function openRecent(entry: RecentEntry): Promise<void> {
     const doc = showLoadError(opened.file.name, opened.text);
     if (!doc) return;
     await replaceProject(doc, opened.file);
-    await projectRepository().recordRecent(opened.file, { projectId: doc.id, projectName: doc.name }, opened.text).catch(() => undefined);
+    await projectRepository()
+      .recordRecent(opened.file, { projectId: doc.id, projectName: doc.name }, opened.text)
+      .catch(() => undefined);
   } catch (error) {
-    toast.error(t('project.readError'), { details: [error instanceof Error ? error.message : String(error)] });
+    toast.error(t('project.readError'), {
+      details: [error instanceof Error ? error.message : String(error)],
+    });
   }
 }
 
@@ -171,17 +187,24 @@ async function saveWith(mode: 'save' | 'saveAs'): Promise<boolean> {
   const text = serializeProject({ ...doc, updatedAt: new Date().toISOString() });
   const repo = projectRepository();
   try {
-    const file = mode === 'save' ? await repo.save(text, state.file, doc.name) : await repo.saveAs(text, state.file?.name ?? doc.name);
+    const file =
+      mode === 'save'
+        ? await repo.save(text, state.file, doc.name)
+        : await repo.saveAs(text, state.file?.name ?? doc.name);
     if (!file) return false;
     useDocumentStore.getState().markSaved(file);
     await repo.recordRecent(file, { projectId: doc.id, projectName: doc.name }, text).catch(() => undefined);
-    await recoveryRepository().deleteRecovery(doc.id).catch(() => undefined);
+    await recoveryRepository()
+      .deleteRecovery(doc.id)
+      .catch(() => undefined);
     useEditorStore.getState().setLastRecoveryAt(null);
     if (file.kind === 'download') toast.info(t('project.savedDownload', { name: file.name }));
     else toast.success(t('project.saved', { name: file.name }));
     return true;
   } catch (error) {
-    toast.error(t('project.saveError'), { details: [error instanceof Error ? error.message : String(error)] });
+    toast.error(t('project.saveError'), {
+      details: [error instanceof Error ? error.message : String(error)],
+    });
     return false;
   }
 }
@@ -192,7 +215,10 @@ export const saveProjectAs = () => saveWith('saveAs');
 export async function closeProject(): Promise<void> {
   if (!(await confirmDiscardIfDirty())) return;
   const doc = currentDoc();
-  if (doc) await recoveryRepository().deleteRecovery(doc.id).catch(() => undefined);
+  if (doc)
+    await recoveryRepository()
+      .deleteRecovery(doc.id)
+      .catch(() => undefined);
   useDocumentStore.getState().close();
   useEditorStore.getState().reset();
 }
@@ -303,7 +329,12 @@ export function pasteClipboard(): void {
   }
   pasteCount += 1;
   const offset = payload.sourceDiagramId === diagramId ? 24 * Math.min(pasteCount, 10) : 0;
-  const result = pasteCommands(doc, { diagramId, payload, offset: { x: offset, y: offset }, ids: uuidGenerator });
+  const result = pasteCommands(doc, {
+    diagramId,
+    payload,
+    offset: { x: offset, y: offset },
+    ids: uuidGenerator,
+  });
   if (!result.ok) {
     toast.warning(t('canvas.pasteSkipped', { count: payload.elements.length }));
     return;
@@ -323,7 +354,8 @@ export function duplicateSelection(): void {
   const payload = copySelection(doc, diagramId, selectedViewIds());
   if (!payload) return;
   const result = pasteCommands(doc, { diagramId, payload, offset: { x: 30, y: 30 }, ids: uuidGenerator });
-  if (result.ok && run(result.commands, { label: t('history.duplicate') })) editor.setSelection(diagramId, result.createdViewIds);
+  if (result.ok && run(result.commands, { label: t('history.duplicate') }))
+    editor.setSelection(diagramId, result.createdViewIds);
 }
 
 /** Semantic elements whose deletion would be implied by deleting the selected views. */
@@ -357,15 +389,27 @@ export function removeSelectionFromDiagram(): void {
   });
   if (lifelineIds.length) {
     const attached = Object.values(doc.modelElements).filter(
-      (e) => e.kind === 'message' && ((e.sourceLifelineId && lifelineIds.includes(e.sourceLifelineId)) || (e.targetLifelineId && lifelineIds.includes(e.targetLifelineId))),
+      (e) =>
+        e.kind === 'message' &&
+        ((e.sourceLifelineId && lifelineIds.includes(e.sourceLifelineId)) ||
+          (e.targetLifelineId && lifelineIds.includes(e.targetLifelineId))),
     );
     if (attached.length) {
-      editor.openDialog({ type: 'deleteFromModel', elementIds: selectedElementIds(), context: { diagramId, viewIds } });
+      editor.openDialog({
+        type: 'deleteFromModel',
+        elementIds: selectedElementIds(),
+        context: { diagramId, viewIds },
+      });
       return;
     }
   }
   const soleClassifier = viewIds.length === 1 ? diagram.views[viewIds[0]!] : undefined;
-  if (run({ type: 'view/remove', diagramId, viewIds, deleteScopedOrphans: true }, { label: t('history.remove') })) {
+  if (
+    run(
+      { type: 'view/remove', diagramId, viewIds, deleteScopedOrphans: true },
+      { label: t('history.remove') },
+    )
+  ) {
     editor.setSelection(diagramId, []);
     if (soleClassifier?.kind === 'node') {
       const el = useDocumentStore.getState().doc?.modelElements[soleClassifier.elementId];
@@ -417,8 +461,10 @@ export function renameSelection(): void {
   const doc = currentDoc();
   const view = doc?.diagrams[diagramId]?.views[ids[0]!];
   if (!view) return;
-  if (view.kind === 'edge') editor.setEditing({ diagramId, viewId: view.id, target: { type: 'label', key: 'name' } });
-  else if (view.kind === 'message') editor.setEditing({ diagramId, viewId: view.id, target: { type: 'label', key: 'name' } });
+  if (view.kind === 'edge')
+    editor.setEditing({ diagramId, viewId: view.id, target: { type: 'label', key: 'name' } });
+  else if (view.kind === 'message')
+    editor.setEditing({ diagramId, viewId: view.id, target: { type: 'label', key: 'name' } });
   else editor.setEditing({ diagramId, viewId: view.id, target: { type: 'name' } });
 }
 
@@ -431,21 +477,39 @@ export function selectedClassifierId(): ID | null {
   const doc = currentDoc();
   const editor = useEditorStore.getState();
   if (!doc) return null;
-  const ids = editor.inspectorSource === 'explorer' && editor.explorerSelection ? [editor.explorerSelection] : selectedElementIds();
+  const ids =
+    editor.inspectorSource === 'explorer' && editor.explorerSelection
+      ? [editor.explorerSelection]
+      : selectedElementIds();
   if (ids.length !== 1) return null;
   const el = doc.modelElements[ids[0]!];
   return el && hasFeatures(el) ? el.id : null;
 }
 
-export function addMember(collection: 'attributes' | 'operations' | 'literals', elementId = selectedClassifierId()): ID | null {
+export function addMember(
+  collection: 'attributes' | 'operations' | 'literals',
+  elementId = selectedClassifierId(),
+): ID | null {
   const doc = currentDoc();
   if (!doc || !elementId) return null;
   const el = doc.modelElements[elementId];
   if (!el || !hasFeatures(el)) return null;
   const id = uuidGenerator.next();
   const settings = doc.settings;
-  const existing = collection === 'attributes' ? el.attributes : collection === 'operations' ? el.operations : el.kind === 'enumeration' ? el.literals : [];
-  const base = collection === 'attributes' ? t('defaultName.attribute') : collection === 'operations' ? t('defaultName.operation') : t('defaultName.literal');
+  const existing =
+    collection === 'attributes'
+      ? el.attributes
+      : collection === 'operations'
+        ? el.operations
+        : el.kind === 'enumeration'
+          ? el.literals
+          : [];
+  const base =
+    collection === 'attributes'
+      ? t('defaultName.attribute')
+      : collection === 'operations'
+        ? t('defaultName.operation')
+        : t('defaultName.literal');
   const used = new Set(existing.map((m) => m.name));
   let name = base;
   for (let n = 1; used.has(name); n += 1) name = `${base}${n}`;
@@ -456,12 +520,18 @@ export function addMember(collection: 'attributes' | 'operations' | 'literals', 
         ? makeOperation({ id, name, returnType: 'void', visibility: settings.defaultOperationVisibility })
         : makeLiteral({ id, name });
   if (collection === 'literals' && el.kind !== 'enumeration') return null;
-  if (!run({ type: 'member/add', elementId, collection, member }, { label: t('history.add', { name }) })) return null;
+  if (!run({ type: 'member/add', elementId, collection, member }, { label: t('history.add', { name }) }))
+    return null;
   // Start inline editing of the new member in the active diagram, if it is shown there.
   const editor = useEditorStore.getState();
   const diagramId = editor.activeDiagramId;
-  const view = diagramId ? Object.values(currentDoc()!.diagrams[diagramId]?.views ?? {}).find((v) => v.kind === 'node' && v.elementId === elementId) : undefined;
-  if (diagramId && view) editor.setEditing({ diagramId, viewId: view.id, target: { type: 'member', collection, memberId: id } });
+  const view = diagramId
+    ? Object.values(currentDoc()!.diagrams[diagramId]?.views ?? {}).find(
+        (v) => v.kind === 'node' && v.elementId === elementId,
+      )
+    : undefined;
+  if (diagramId && view)
+    editor.setEditing({ diagramId, viewId: view.id, target: { type: 'member', collection, memberId: id } });
   return id;
 }
 
@@ -482,7 +552,9 @@ export function revealElement(elementId: ID, preferredDiagramId?: ID): boolean {
   const editor = useEditorStore.getState();
   const locations = viewsOfElement(doc, elementId);
   const location =
-    locations.find((l) => l.diagramId === preferredDiagramId) ?? locations.find((l) => l.diagramId === editor.activeDiagramId) ?? locations[0];
+    locations.find((l) => l.diagramId === preferredDiagramId) ??
+    locations.find((l) => l.diagramId === editor.activeDiagramId) ??
+    locations[0];
   editor.selectInExplorer(elementId);
   if (!location) return false;
   editor.openDiagram(location.diagramId);
@@ -495,7 +567,8 @@ export function revealElement(elementId: ID, preferredDiagramId?: ID): boolean {
 // Arrange
 // -------------------------------------------------------------------------------------------------
 
-export type AlignMode = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom' | 'distributeH' | 'distributeV';
+export type AlignMode =
+  'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom' | 'distributeH' | 'distributeV';
 
 export function alignSelection(mode: AlignMode): void {
   const doc = currentDoc();
@@ -542,7 +615,9 @@ export function alignSelection(mode: AlignMode): void {
   });
   if (mode === 'distributeH' || mode === 'distributeV') {
     const horizontal = mode === 'distributeH';
-    const sorted = boxes.map((n, i) => ({ n, r: rects[i]! })).sort((a, b) => (horizontal ? a.r.x - b.r.x : a.r.y - b.r.y));
+    const sorted = boxes
+      .map((n, i) => ({ n, r: rects[i]! }))
+      .sort((a, b) => (horizontal ? a.r.x - b.r.x : a.r.y - b.r.y));
     const total = sorted.reduce((s, e) => s + (horizontal ? e.r.w : e.r.h), 0);
     const span = horizontal ? maxX - minX : maxY - minY;
     const gap = (span - total) / (sorted.length - 1);

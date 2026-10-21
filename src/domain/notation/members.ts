@@ -17,7 +17,12 @@ export const VISIBILITY_SYMBOL: Record<Visibility, string> = {
   package: '~',
 };
 
-const SYMBOL_VISIBILITY: Record<string, Visibility> = { '+': 'public', '-': 'private', '#': 'protected', '~': 'package' };
+const SYMBOL_VISIBILITY: Record<string, Visibility> = {
+  '+': 'public',
+  '-': 'private',
+  '#': 'protected',
+  '~': 'package',
+};
 
 export interface FormatOptions {
   showVisibility: boolean;
@@ -55,7 +60,11 @@ export function formatOperation(
 ): string {
   let text = options.showVisibility ? `${VISIBILITY_SYMBOL[o.visibility]} ` : '';
   const params = o.parameters.filter((p) => p.direction !== 'return');
-  const signature = options.showSignature ? params.map((p) => formatParameter(p, options)).join(', ') : params.length ? '…' : '';
+  const signature = options.showSignature
+    ? params.map((p) => formatParameter(p, options)).join(', ')
+    : params.length
+      ? '…'
+      : '';
   text += `${o.name}(${signature})`;
   if (options.showTypes && o.returnType) text += `: ${o.returnType}`;
   if (o.isQuery) text += ' {query}';
@@ -127,7 +136,9 @@ function takeProperties(text: string): { text: string; props: string[] } {
 }
 
 /** `name: Type [mult] = default` → parts (shared by attributes and parameters). */
-function parseTypedPart(text: string): { name: string; type: string; multiplicity: string; defaultValue: string } | null {
+function parseTypedPart(
+  text: string,
+): { name: string; type: string; multiplicity: string; defaultValue: string } | null {
   let rest = text.trim();
   let defaultValue = '';
   const eq = splitTopLevel(rest, '=');
@@ -151,7 +162,15 @@ function parseTypedPart(text: string): { name: string; type: string; multiplicit
 
 export type AttributeTextPatch = Pick<
   Attribute,
-  'name' | 'type' | 'multiplicity' | 'defaultValue' | 'isDerived' | 'isReadOnly' | 'isOrdered' | 'isUnique' | 'isStatic'
+  | 'name'
+  | 'type'
+  | 'multiplicity'
+  | 'defaultValue'
+  | 'isDerived'
+  | 'isReadOnly'
+  | 'isOrdered'
+  | 'isUnique'
+  | 'isStatic'
 > & { visibility?: Visibility };
 
 export function parseAttributeText(input: string): AttributeTextPatch | null {
@@ -245,5 +264,12 @@ export function parseOperationText(input: string): OperationTextPatch | null {
       parameters.push(parsed);
     }
   }
-  return { name, visibility: head.visibility, isStatic: head.isStatic, returnType, isQuery: props.includes('query'), parameters };
+  return {
+    name,
+    visibility: head.visibility,
+    isStatic: head.isStatic,
+    returnType,
+    isQuery: props.includes('query'),
+    parameters,
+  };
 }

@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { Menubar } from 'radix-ui';
 import { command, isEnabled, primaryShortcut } from '@/app/commands';
 import { openRecent } from '@/app/actions';
-import { ItemContent, menuContentClass, menuItemClass, menuSeparatorClass, SubTriggerContent } from '@/components/ui/menu';
+import {
+  ItemContent,
+  menuContentClass,
+  menuItemClass,
+  menuSeparatorClass,
+  SubTriggerContent,
+} from '@/components/ui/menu';
 import { useT, type MessageKey } from '@/i18n';
 import { projectRepository } from '@/services/platform/platform';
 import type { RecentEntry } from '@/services/persistence/types';
@@ -13,11 +19,39 @@ type Entry = string | '-' | { submenu: MessageKey; items: Entry[] } | { recent: 
 const MENUS: Array<{ label: MessageKey; items: Entry[] }> = [
   {
     label: 'menu.file',
-    items: ['file.new', 'file.templates', 'file.open', { recent: true }, '-', 'file.save', 'file.saveAs', '-', 'file.export', 'file.exportText', 'file.codegen', '-', 'file.close'],
+    items: [
+      'file.new',
+      'file.templates',
+      'file.open',
+      { recent: true },
+      '-',
+      'file.save',
+      'file.saveAs',
+      '-',
+      'file.export',
+      'file.exportText',
+      'file.codegen',
+      '-',
+      'file.close',
+    ],
   },
   {
     label: 'menu.edit',
-    items: ['edit.undo', 'edit.redo', '-', 'edit.cut', 'edit.copy', 'edit.paste', 'edit.duplicate', '-', 'edit.rename', 'edit.delete', 'edit.deleteFromModel', '-', 'edit.selectAll'],
+    items: [
+      'edit.undo',
+      'edit.redo',
+      '-',
+      'edit.cut',
+      'edit.copy',
+      'edit.paste',
+      'edit.duplicate',
+      '-',
+      'edit.rename',
+      'edit.delete',
+      'edit.deleteFromModel',
+      '-',
+      'edit.selectAll',
+    ],
   },
   {
     label: 'menu.view',
@@ -51,15 +85,52 @@ const MENUS: Array<{ label: MessageKey; items: Entry[] }> = [
       '-',
       {
         submenu: 'menu.align',
-        items: ['arrange.alignLeft', 'arrange.alignCenter', 'arrange.alignRight', '-', 'arrange.alignTop', 'arrange.alignMiddle', 'arrange.alignBottom', '-', 'arrange.distributeH', 'arrange.distributeV'],
+        items: [
+          'arrange.alignLeft',
+          'arrange.alignCenter',
+          'arrange.alignRight',
+          '-',
+          'arrange.alignTop',
+          'arrange.alignMiddle',
+          'arrange.alignBottom',
+          '-',
+          'arrange.distributeH',
+          'arrange.distributeV',
+        ],
       },
       { submenu: 'menu.arrange', items: ['arrange.front', 'arrange.back'] },
       { submenu: 'menu.routing', items: ['arrange.straight', 'arrange.orthogonal'] },
     ],
   },
-  { label: 'menu.model', items: ['model.addAttribute', 'model.addOperation', 'model.addLiteral', '-', 'tools.validate'] },
-  { label: 'menu.tools', items: ['tool.select', 'tool.hand', '-', 'tools.validate', 'file.codegen', 'file.exportText', '-', 'tools.settings'] },
-  { label: 'menu.window', items: ['window.nextTab', 'window.previousTab', 'window.closeTab', '-', 'view.sidebar', 'view.inspector', 'view.problems'] },
+  {
+    label: 'menu.model',
+    items: ['model.addAttribute', 'model.addOperation', 'model.addLiteral', '-', 'tools.validate'],
+  },
+  {
+    label: 'menu.tools',
+    items: [
+      'tool.select',
+      'tool.hand',
+      '-',
+      'tools.validate',
+      'file.codegen',
+      'file.exportText',
+      '-',
+      'tools.settings',
+    ],
+  },
+  {
+    label: 'menu.window',
+    items: [
+      'window.nextTab',
+      'window.previousTab',
+      'window.closeTab',
+      '-',
+      'view.sidebar',
+      'view.inspector',
+      'view.problems',
+    ],
+  },
   { label: 'menu.help', items: ['help.gettingStarted', 'help.shortcuts', '-', 'help.about'] },
 ];
 
@@ -68,7 +139,12 @@ function CommandItem({ id }: { id: string }) {
   const cmd = command(id);
   const checked = cmd.checked?.();
   return (
-    <Menubar.Item className={menuItemClass} disabled={!isEnabled(cmd)} onSelect={() => void cmd.run()} data-testid={`menu-${id}`}>
+    <Menubar.Item
+      className={menuItemClass}
+      disabled={!isEnabled(cmd)}
+      onSelect={() => void cmd.run()}
+      data-testid={`menu-${id}`}
+    >
       <ItemContent label={t(cmd.labelKey)} shortcut={primaryShortcut(id)} checked={checked} />
     </Menubar.Item>
   );
@@ -80,7 +156,11 @@ function RecentSubmenu() {
   return (
     <Menubar.Sub
       onOpenChange={(open) => {
-        if (open) void projectRepository().listRecent().then(setRecents).catch(() => setRecents([]));
+        if (open)
+          void projectRepository()
+            .listRecent()
+            .then(setRecents)
+            .catch(() => setRecents([]));
       }}
     >
       <Menubar.SubTrigger className={menuItemClass}>

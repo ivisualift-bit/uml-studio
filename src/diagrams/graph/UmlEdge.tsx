@@ -27,7 +27,12 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
   const ctx = useGraphCanvas();
   const drag = useRef<DragKind | null>(null);
   const moved = useRef(false);
-  const [labelShift, setLabelShift] = useState<{ key: EdgeLabelKey; dx: number; dy: number; offset: Point } | null>(null);
+  const [labelShift, setLabelShift] = useState<{
+    key: EdgeLabelKey;
+    dx: number;
+    dy: number;
+    offset: Point;
+  } | null>(null);
   /** Latest drag handlers; window listeners call through this so re-renders never break a drag. */
   const handlers = useRef<{ move: (e: PointerLike) => void; up: (e: PointerLike) => void } | null>(null);
   const render = data?.render;
@@ -79,7 +84,12 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
     } else if (d.type === 'label') {
       const dx = p.x - d.start.x;
       const dy = p.y - d.start.y;
-      setLabelShift({ key: d.key, dx, dy, offset: { x: Math.round(d.base.x + dx), y: Math.round(d.base.y + dy) } });
+      setLabelShift({
+        key: d.key,
+        dx,
+        dy,
+        offset: { x: Math.round(d.base.x + dx), y: Math.round(d.base.y + dy) },
+      });
     } else {
       const anchor = d.end === 'source' ? points[points.length - 1]! : points[0]!;
       ctx.setReconnectPreview({ from: anchor, to: p });
@@ -131,7 +141,8 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
     ctx.commitWaypoints(id, next);
   };
 
-  const chain: Point[] = straight && points.length >= 2 ? [points[0]!, ...waypoints, points[points.length - 1]!] : [];
+  const chain: Point[] =
+    straight && points.length >= 2 ? [points[0]!, ...waypoints, points[points.length - 1]!] : [];
   // React Flow sets `pointer-events: visibleStroke` on edges; handles must opt in to fill hits.
   const handle = { className: 'nodrag nopan', pointerEvents: 'all' as const };
 
@@ -143,8 +154,24 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
       data-selected={selected ? 'true' : 'false'}
       onPointerDown={onLabelPointerDown}
     >
-      {selected && <path d={layout.path} fill="none" stroke="var(--selection)" strokeOpacity={0.28} strokeWidth={7} strokeLinejoin="round" pointerEvents="none" />}
-      <path d={layout.path} fill="none" stroke="transparent" strokeWidth={14} className="react-flow__edge-interaction" />
+      {selected && (
+        <path
+          d={layout.path}
+          fill="none"
+          stroke="var(--selection)"
+          strokeOpacity={0.28}
+          strokeWidth={7}
+          strokeLinejoin="round"
+          pointerEvents="none"
+        />
+      )}
+      <path
+        d={layout.path}
+        fill="none"
+        stroke="transparent"
+        strokeWidth={14}
+        className="react-flow__edge-interaction"
+      />
       <PrimitiveSvg primitives={split.still} />
       {labelShift && (
         <g transform={`translate(${labelShift.dx} ${labelShift.dy})`}>

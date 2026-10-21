@@ -66,7 +66,11 @@ const KINDS = new Set(['class', 'interface', 'enumeration', 'dataType', 'signal'
 
 function typeOf(doc: ProjectDocument, text: string, multiplicity: string, classifierId: ID | null): CgType {
   const ref = classifierId && doc.modelElements[classifierId] ? classifierId : null;
-  return { name: (ref ? doc.modelElements[ref]!.name : text).trim(), collection: isCollectionMultiplicity(multiplicity), classifierId: ref };
+  return {
+    name: (ref ? doc.modelElements[ref]!.name : text).trim(),
+    collection: isCollectionMultiplicity(multiplicity),
+    classifierId: ref,
+  };
 }
 
 function lowerFirst(s: string): string {
@@ -74,7 +78,9 @@ function lowerFirst(s: string): string {
 }
 
 export function extractModel(doc: ProjectDocument, scope?: ReadonlySet<ID>): CgModel {
-  const elements = Object.values(doc.modelElements).filter((e): e is Classifier => KINDS.has(e.kind) && (!scope || scope.has(e.id)));
+  const elements = Object.values(doc.modelElements).filter(
+    (e): e is Classifier => KINDS.has(e.kind) && (!scope || scope.has(e.id)),
+  );
   const classifiers: CgClassifier[] = elements.map((el) => {
     const packagePath = ancestorIds(doc, el.id)
       .reverse()
@@ -107,7 +113,14 @@ export function extractModel(doc: ProjectDocument, scope?: ReadonlySet<ID>): CgM
         isStatic: o.isStatic,
         isAbstract: o.isAbstract || el.kind === 'interface',
         returnType: o.returnType.trim() ? typeOf(doc, o.returnType, '', o.returnTypeElementId) : null,
-        params: o.parameters.filter((p) => p.direction !== 'return').map((p) => ({ name: p.name, type: typeOf(doc, p.type, p.multiplicity, p.typeElementId), direction: p.direction, defaultValue: p.defaultValue })),
+        params: o.parameters
+          .filter((p) => p.direction !== 'return')
+          .map((p) => ({
+            name: p.name,
+            type: typeOf(doc, p.type, p.multiplicity, p.typeElementId),
+            direction: p.direction,
+            defaultValue: p.defaultValue,
+          })),
         documentation: '',
       })),
       literals: el.kind === 'enumeration' ? el.literals.map((l) => l.name) : [],
@@ -134,11 +147,21 @@ export function extractModel(doc: ProjectDocument, scope?: ReadonlySet<ID>): CgM
         const collection = isCollectionMultiplicity(end.multiplicity);
         const name = end.name || lowerFirst(other.name) + (collection ? 's' : '');
         if (owner.fields.some((f) => f.name === name)) continue;
-        owner.fields.push({ name, type: { name: other.name, collection, classifierId: other.id }, visibility: end.visibility === 'public' ? 'private' : end.visibility, isStatic: false, isReadOnly: false, defaultValue: '', documentation: '' });
+        owner.fields.push({
+          name,
+          type: { name: other.name, collection, classifierId: other.id },
+          visibility: end.visibility === 'public' ? 'private' : end.visibility,
+          isStatic: false,
+          isReadOnly: false,
+          defaultValue: '',
+          documentation: '',
+        });
       }
     }
   }
-  classifiers.sort((a, b) => [...a.packagePath, a.name].join('/').localeCompare([...b.packagePath, b.name].join('/')));
+  classifiers.sort((a, b) =>
+    [...a.packagePath, a.name].join('/').localeCompare([...b.packagePath, b.name].join('/')),
+  );
   completeContracts(classifiers, byId);
   return { classifiers, byId };
 }
@@ -171,20 +194,29 @@ function completeContracts(classifiers: CgClassifier[], byId: Map<ID, CgClassifi
   for (const c of classifiers) {
     if (c.kind !== 'class') continue;
     const chain = ancestors(c);
-    const declares = (name: string) => c.methods.some((m) => m.name === name) || chain.some((a) => a.methods.some((m) => m.name === name && !m.isAbstract));
-    const hasField = (name: string) => c.fields.some((f) => f.name === name) || chain.some((a) => a.fields.some((f) => f.name === name));
+    const declares = (name: string) =>
+      c.methods.some((m) => m.name === name) ||
+      chain.some((a) => a.methods.some((m) => m.name === name && !m.isAbstract));
+    const hasField = (name: string) =>
+      c.fields.some((f) => f.name === name) || chain.some((a) => a.fields.some((f) => f.name === name));
     const interfaces = interfaceClosure([...c.implements, ...chain.flatMap((a) => a.implements)]);
     for (const itf of interfaces) {
       for (const f of itf.fields) if (!hasField(f.name)) c.fields.push({ ...f, visibility: 'public' });
       for (const m of itf.methods) {
         if (m.isStatic || declares(m.name)) continue;
-        c.methods.push({ ...m, isAbstract: c.isAbstract, visibility: 'public', documentation: `Realizes ${itf.name}.${m.name}` });
+        c.methods.push({
+          ...m,
+          isAbstract: c.isAbstract,
+          visibility: 'public',
+          documentation: `Realizes ${itf.name}.${m.name}`,
+        });
       }
     }
     if (!c.isAbstract) {
       for (const parent of chain) {
         for (const m of parent.methods) {
-          if (m.isAbstract && !m.isStatic && !declares(m.name)) c.methods.push({ ...m, isAbstract: false, documentation: `Overrides ${parent.name}.${m.name}` });
+          if (m.isAbstract && !m.isStatic && !declares(m.name))
+            c.methods.push({ ...m, isAbstract: false, documentation: `Overrides ${parent.name}.${m.name}` });
         }
       }
     }
@@ -202,7 +234,13 @@ export interface GenerationResult {
 }
 
 /** Make an identifier legal: invalid characters → "_", reserved words get a trailing "_". */
-export function sanitizeIdentifier(raw: string, reserved: ReadonlySet<string>, warnings: string[], context: string, fallback = 'unnamed'): string {
+export function sanitizeIdentifier(
+  raw: string,
+  reserved: ReadonlySet<string>,
+  warnings: string[],
+  context: string,
+  fallback = 'unnamed',
+): string {
   let name = raw.trim().replace(/[^\p{L}\p{N}_$]/gu, '_');
   if (!name) {
     warnings.push(`${context}: empty name replaced by "${fallback}"`);
@@ -225,11 +263,17 @@ const QUOTED = /^"(?:[^"\\]|\\.)*"$|^'(?:[^'\\]|\\.)*'$/;
  * Default values are free text in the model. Only literals are emitted verbatim; anything else becomes
  * a string literal (with a warning) so generated code always parses — user text is never executed.
  */
-export function safeLiteral(raw: string, language: 'ts' | 'java' | 'python', warnings: string[], context: string): string {
+export function safeLiteral(
+  raw: string,
+  language: 'ts' | 'java' | 'python',
+  warnings: string[],
+  context: string,
+): string {
   const text = raw.trim();
   if (NUMBER.test(text)) return text;
   const lower = text.toLowerCase();
-  if (lower === 'true' || lower === 'false') return language === 'python' ? (lower === 'true' ? 'True' : 'False') : lower;
+  if (lower === 'true' || lower === 'false')
+    return language === 'python' ? (lower === 'true' ? 'True' : 'False') : lower;
   if (lower === 'null' || lower === 'none') return language === 'python' ? 'None' : 'null';
   if (QUOTED.test(text)) return JSON.stringify(text.slice(1, -1));
   warnings.push(`${context}: default "${text}" is not a literal; emitted as a string`);

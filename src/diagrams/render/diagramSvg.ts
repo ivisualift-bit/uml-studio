@@ -26,7 +26,11 @@ export interface RenderedDiagram {
 }
 
 /** Vector scene for a diagram, computed by the same notation layer the canvas uses. */
-export function renderDiagram(doc: ProjectDocument, diagramId: ID, options: DiagramRenderOptions = {}): RenderedDiagram {
+export function renderDiagram(
+  doc: ProjectDocument,
+  diagramId: ID,
+  options: DiagramRenderOptions = {},
+): RenderedDiagram {
   const diagram = doc.diagrams[diagramId];
   if (!diagram) throw new Error(`Diagram ${diagramId} not found`);
   const theme = options.theme ?? PRINT_THEME;
@@ -49,7 +53,16 @@ export function renderDiagram(doc: ProjectDocument, diagramId: ID, options: Diag
     const size = 16;
     const headingY = content.y - 14;
     primitives = [
-      { type: 'text', x: content.x, y: headingY, text: options.heading, fontSize: size, bold: true, anchor: 'start', fill: theme.text },
+      {
+        type: 'text',
+        x: content.x,
+        y: headingY,
+        text: options.heading,
+        fontSize: size,
+        bold: true,
+        anchor: 'start',
+        fill: theme.text,
+      },
       ...primitives,
     ];
     const headingWidth = measureText(options.heading, size, true);
@@ -73,7 +86,11 @@ export interface SvgExportOptions extends DiagramRenderOptions {
   scale?: number;
 }
 
-export function renderDiagramSvg(doc: ProjectDocument, diagramId: ID, options: SvgExportOptions = {}): { svg: string; width: number; height: number } {
+export function renderDiagramSvg(
+  doc: ProjectDocument,
+  diagramId: ID,
+  options: SvgExportOptions = {},
+): { svg: string; width: number; height: number } {
   const theme = options.theme ?? PRINT_THEME;
   const rendered = renderDiagram(doc, diagramId, options);
   const diagram = doc.diagrams[diagramId]!;
@@ -86,5 +103,9 @@ export function renderDiagramSvg(doc: ProjectDocument, diagramId: ID, options: S
     scale: options.scale,
   });
   const scale = options.scale ?? 1;
-  return { svg, width: Math.ceil(rendered.viewBox.width * scale), height: Math.ceil(rendered.viewBox.height * scale) };
+  return {
+    svg,
+    width: Math.ceil(rendered.viewBox.width * scale),
+    height: Math.ceil(rendered.viewBox.height * scale),
+  };
 }

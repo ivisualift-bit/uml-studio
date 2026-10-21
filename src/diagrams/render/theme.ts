@@ -35,7 +35,12 @@ export const PRINT_THEME: DiagramTheme = {
   solidFill: '#1f2328',
 };
 
-export const LIGHT_THEME: DiagramTheme = { ...PRINT_THEME, name: 'light', background: '#fbfbfc', nodeFill: '#ffffff' };
+export const LIGHT_THEME: DiagramTheme = {
+  ...PRINT_THEME,
+  name: 'light',
+  background: '#fbfbfc',
+  nodeFill: '#ffffff',
+};
 
 export const DARK_THEME: DiagramTheme = {
   name: 'dark',
@@ -64,7 +69,11 @@ export interface ResolvedStyle {
 
 export const BASE_FONT_SIZE = 13;
 
-export function resolveStyle(theme: DiagramTheme, style: ViewStyle | undefined, fill = theme.nodeFill): ResolvedStyle {
+export function resolveStyle(
+  theme: DiagramTheme,
+  style: ViewStyle | undefined,
+  fill = theme.nodeFill,
+): ResolvedStyle {
   return {
     fill: style?.fill ?? fill,
     stroke: style?.stroke ?? theme.nodeStroke,

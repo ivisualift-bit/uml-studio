@@ -17,7 +17,12 @@ import {
 import type { ProjectDocument, UMLDiagram } from '../schemas/project';
 import { canOwn, checkRelationshipEndpoints, DIAGRAM_SCOPED_KINDS } from '../model/metadata';
 import { applyContainment, visualDescendants } from '../services/containment';
-import { applyDeletionPlan, collectDependentViews, planElementDeletion, removeViewsFromDiagram } from '../services/deletion';
+import {
+  applyDeletionPlan,
+  collectDependentViews,
+  planElementDeletion,
+  removeViewsFromDiagram,
+} from '../services/deletion';
 import { ancestorIds, endpointInfo } from '../services/queries';
 import { clamp } from '../util';
 import type { Transaction } from './transaction';
@@ -41,19 +46,30 @@ function requireDiagram(draft: ProjectDocument, id: ID): UMLDiagram {
 }
 
 function assertFreshId(draft: ProjectDocument, id: ID): void {
-  if (draft.modelElements[id] || draft.diagrams[id]) throw new CommandError('duplicateId', `Identifier ${id} already exists`);
+  if (draft.modelElements[id] || draft.diagrams[id])
+    throw new CommandError('duplicateId', `Identifier ${id} already exists`);
 }
 
 /** Apply a shallow patch; `undefined` deletes optional keys. Immutable keys are rejected. */
 function applyPatch(target: Record<string, unknown>, patch: FieldPatch, immutable: readonly string[]): void {
   for (const [key, value] of Object.entries(patch)) {
-    if (immutable.includes(key)) throw new CommandError('immutableField', `Field "${key}" cannot be changed with this command`);
+    if (immutable.includes(key))
+      throw new CommandError('immutableField', `Field "${key}" cannot be changed with this command`);
     if (value === undefined) delete target[key];
     else target[key] = value;
   }
 }
 
-const ELEMENT_IMMUTABLE = ['id', 'kind', 'ownerId', 'sourceId', 'targetId', 'sourceLifelineId', 'targetLifelineId', 'lifelineId'];
+const ELEMENT_IMMUTABLE = [
+  'id',
+  'kind',
+  'ownerId',
+  'sourceId',
+  'targetId',
+  'sourceLifelineId',
+  'targetLifelineId',
+  'lifelineId',
+];
 const VIEW_IMMUTABLE = ['id', 'kind', 'elementId', 'sourceViewId', 'targetViewId', 'lifelineViewId'];
 
 // -------------------------------------------------------------------------------------------------
@@ -117,12 +133,22 @@ function fragmentViewsOf(draft: ProjectDocument, fragmentId: ID) {
   return result;
 }
 
-function addMember(draft: ProjectDocument, cmd: Extract<Command, { type: 'member/add' }>, tx: Transaction): void {
+function addMember(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'member/add' }>,
+  tx: Transaction,
+): void {
   const el = requireElement(draft, cmd.elementId);
   const list = memberList(el, cmd.collection, cmd.operationId);
   const parsed = MEMBER_SCHEMAS[cmd.collection].safeParse(cmd.member);
-  if (!parsed.success) throw new CommandError('schema', 'Invalid member', parsed.error.issues.map((i) => i.message));
-  if (list.some((m) => m.id === parsed.data.id)) throw new CommandError('duplicateId', `Member ${parsed.data.id} exists`);
+  if (!parsed.success)
+    throw new CommandError(
+      'schema',
+      'Invalid member',
+      parsed.error.issues.map((i) => i.message),
+    );
+  if (list.some((m) => m.id === parsed.data.id))
+    throw new CommandError('duplicateId', `Member ${parsed.data.id} exists`);
   const index = cmd.index === undefined ? list.length : clamp(cmd.index, 0, list.length);
   list.splice(index, 0, parsed.data);
   tx.touchElement(el.id);
@@ -145,7 +171,11 @@ function addMember(draft: ProjectDocument, cmd: Extract<Command, { type: 'member
   }
 }
 
-function updateMember(draft: ProjectDocument, cmd: Extract<Command, { type: 'member/update' }>, tx: Transaction): void {
+function updateMember(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'member/update' }>,
+  tx: Transaction,
+): void {
   const el = requireElement(draft, cmd.elementId);
   const list = memberList(el, cmd.collection, cmd.operationId);
   const member = list.find((m) => m.id === cmd.memberId);
@@ -154,7 +184,11 @@ function updateMember(draft: ProjectDocument, cmd: Extract<Command, { type: 'mem
   tx.touchElement(el.id);
 }
 
-function deleteMember(draft: ProjectDocument, cmd: Extract<Command, { type: 'member/delete' }>, tx: Transaction): void {
+function deleteMember(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'member/delete' }>,
+  tx: Transaction,
+): void {
   const el = requireElement(draft, cmd.elementId);
   const list = memberList(el, cmd.collection, cmd.operationId);
   const index = list.findIndex((m) => m.id === cmd.memberId);
@@ -193,7 +227,11 @@ function deleteMember(draft: ProjectDocument, cmd: Extract<Command, { type: 'mem
   }
 }
 
-function moveMember(draft: ProjectDocument, cmd: Extract<Command, { type: 'member/move' }>, tx: Transaction): void {
+function moveMember(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'member/move' }>,
+  tx: Transaction,
+): void {
   const el = requireElement(draft, cmd.elementId);
   const list = memberList(el, cmd.collection, cmd.operationId);
   const index = list.findIndex((m) => m.id === cmd.memberId);
@@ -221,7 +259,11 @@ function moveMember(draft: ProjectDocument, cmd: Extract<Command, { type: 'membe
 // Elements
 // -------------------------------------------------------------------------------------------------
 
-function addElements(draft: ProjectDocument, cmd: Extract<Command, { type: 'element/add' }>, tx: Transaction): void {
+function addElements(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'element/add' }>,
+  tx: Transaction,
+): void {
   for (const el of cmd.elements) {
     assertFreshId(draft, el.id);
     draft.modelElements[el.id] = el;
@@ -233,11 +275,16 @@ function addElements(draft: ProjectDocument, cmd: Extract<Command, { type: 'elem
   }
 }
 
-function moveElement(draft: ProjectDocument, cmd: Extract<Command, { type: 'element/move' }>, tx: Transaction): void {
+function moveElement(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'element/move' }>,
+  tx: Transaction,
+): void {
   const el = requireElement(draft, cmd.elementId);
   if (el.id === draft.rootModelId) throw new CommandError('rootProtected', 'The root model cannot be moved');
   const owner = requireElement(draft, cmd.newOwnerId);
-  if (!canOwn(owner.kind, el.kind)) throw new CommandError('ownershipNotAllowed', `A ${owner.kind} cannot own a ${el.kind}`);
+  if (!canOwn(owner.kind, el.kind))
+    throw new CommandError('ownershipNotAllowed', `A ${owner.kind} cannot own a ${el.kind}`);
   if (owner.id === el.id || ancestorIds(snap(draft), owner.id).includes(el.id)) {
     throw new CommandError('ownershipCycle', 'An element cannot be moved into itself');
   }
@@ -246,7 +293,8 @@ function moveElement(draft: ProjectDocument, cmd: Extract<Command, { type: 'elem
 }
 
 function deleteElements(draft: ProjectDocument, ids: readonly ID[], tx: Transaction): void {
-  if (ids.includes(draft.rootModelId)) throw new CommandError('rootProtected', 'The root model cannot be deleted');
+  if (ids.includes(draft.rootModelId))
+    throw new CommandError('rootProtected', 'The root model cannot be deleted');
   for (const id of ids) requireElement(draft, id);
   const plan = planElementDeletion(snap(draft), ids);
   applyDeletionPlan(draft, plan);
@@ -255,7 +303,11 @@ function deleteElements(draft: ProjectDocument, ids: readonly ID[], tx: Transact
   for (const diagramId of plan.viewsByDiagram.keys()) tx.touchDiagram(diagramId);
 }
 
-function reconnect(draft: ProjectDocument, cmd: Extract<Command, { type: 'element/reconnect' }>, tx: Transaction): void {
+function reconnect(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'element/reconnect' }>,
+  tx: Transaction,
+): void {
   const rel = requireElement(draft, cmd.relationshipId);
   if (!isRelationship(rel)) throw new CommandError('invalidPayload', 'Only relationships can be reconnected');
   const newEnd = requireElement(draft, cmd.newElementId);
@@ -298,7 +350,11 @@ function reconnect(draft: ProjectDocument, cmd: Extract<Command, { type: 'elemen
   }
 }
 
-function swapEnds(draft: ProjectDocument, cmd: Extract<Command, { type: 'element/swapEnds' }>, tx: Transaction): void {
+function swapEnds(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'element/swapEnds' }>,
+  tx: Transaction,
+): void {
   const rel = requireElement(draft, cmd.relationshipId);
   if (!isRelationship(rel)) throw new CommandError('invalidPayload', 'Only relationships can be reversed');
   const source = requireElement(draft, rel.sourceId);
@@ -321,7 +377,9 @@ function swapEnds(draft: ProjectDocument, cmd: Extract<Command, { type: 'element
       if (view.kind !== 'edge' || view.elementId !== rel.id) continue;
       [view.sourceViewId, view.targetViewId] = [view.targetViewId, view.sourceViewId];
       view.waypoints = view.waypoints.slice().reverse();
-      view.labelOffsets = Object.fromEntries(Object.entries(view.labelOffsets).map(([k, v]) => [swapKey[k] ?? k, v]));
+      view.labelOffsets = Object.fromEntries(
+        Object.entries(view.labelOffsets).map(([k, v]) => [swapKey[k] ?? k, v]),
+      );
       tx.touchView(diagram.id, view.id);
     }
   }
@@ -331,7 +389,11 @@ function swapEnds(draft: ProjectDocument, cmd: Extract<Command, { type: 'element
 // Views
 // -------------------------------------------------------------------------------------------------
 
-function addViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/add' }>, tx: Transaction): void {
+function addViews(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'view/add' }>,
+  tx: Transaction,
+): void {
   const diagram = requireDiagram(draft, cmd.diagramId);
   for (const view of cmd.views) {
     if (diagram.views[view.id]) throw new CommandError('duplicateId', `View ${view.id} exists`);
@@ -349,7 +411,11 @@ function addViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/ad
   );
 }
 
-function removeViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/remove' }>, tx: Transaction): void {
+function removeViews(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'view/remove' }>,
+  tx: Transaction,
+): void {
   const diagram = requireDiagram(draft, cmd.diagramId);
   const explicit = cmd.viewIds.filter((id) => diagram.views[id]);
   const removed = collectDependentViews(diagram, explicit);
@@ -368,15 +434,21 @@ function removeViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view
   // Delete scoped semantics that are no longer represented anywhere.
   const stillShown = new Set<ID>();
   for (const d of Object.values(draft.diagrams)) {
-    for (const v of Object.values(d.views)) if ('elementId' in v && scopedCandidates.has(v.elementId)) stillShown.add(v.elementId);
+    for (const v of Object.values(d.views))
+      if ('elementId' in v && scopedCandidates.has(v.elementId)) stillShown.add(v.elementId);
   }
   const orphans = [...scopedCandidates].filter((id) => !stillShown.has(id));
   if (orphans.length) deleteElements(draft, orphans, tx);
 }
 
-function moveViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/move' }>, tx: Transaction): void {
+function moveViews(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'view/move' }>,
+  tx: Transaction,
+): void {
   const diagram = requireDiagram(draft, cmd.diagramId);
-  if (!Number.isFinite(cmd.dx) || !Number.isFinite(cmd.dy)) throw new CommandError('invalidPayload', 'Invalid move delta');
+  if (!Number.isFinite(cmd.dx) || !Number.isFinite(cmd.dy))
+    throw new CommandError('invalidPayload', 'Invalid move delta');
   if (cmd.dx === 0 && cmd.dy === 0) return;
   const moved = new Set<ID>();
   for (const id of cmd.viewIds) {
@@ -394,7 +466,11 @@ function moveViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/m
     }
   }
   for (const view of Object.values(diagram.views)) {
-    if ((view.kind === 'edge' || view.kind === 'noteLink') && moved.has(view.sourceViewId) && moved.has(view.targetViewId)) {
+    if (
+      (view.kind === 'edge' || view.kind === 'noteLink') &&
+      moved.has(view.sourceViewId) &&
+      moved.has(view.targetViewId)
+    ) {
       if (view.waypoints.length) {
         view.waypoints = view.waypoints.map((p) => ({ x: p.x + cmd.dx, y: p.y + cmd.dy }));
         tx.touchView(diagram.id, view.id);
@@ -403,7 +479,9 @@ function moveViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/m
   }
   const topLevel = [...moved].filter((id) => {
     const v = diagram.views[id];
-    return v && (v.kind === 'node' || v.kind === 'note') && !(v.containerViewId && moved.has(v.containerViewId));
+    return (
+      v && (v.kind === 'node' || v.kind === 'note') && !(v.containerViewId && moved.has(v.containerViewId))
+    );
   });
   applyContainment(draft, diagram.id, topLevel, tx);
 }
@@ -418,13 +496,20 @@ function containmentCandidatesAround(diagram: UMLDiagram, viewId: ID): ID[] {
     const cx = v.x + v.width / 2;
     const cy = v.y + v.height / 2;
     const inside =
-      cx >= container.x && cx <= container.x + container.width && cy >= container.y && cy <= container.y + container.height;
+      cx >= container.x &&
+      cx <= container.x + container.width &&
+      cy >= container.y &&
+      cy <= container.y + container.height;
     if (inside || v.containerViewId === viewId) ids.push(v.id);
   }
   return ids;
 }
 
-function updateView(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/update' }>, tx: Transaction): void {
+function updateView(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'view/update' }>,
+  tx: Transaction,
+): void {
   const diagram = requireDiagram(draft, cmd.diagramId);
   const view = diagram.views[cmd.viewId];
   if (!view) throw new CommandError('notFound', `View ${cmd.viewId} not found`);
@@ -435,7 +520,11 @@ function updateView(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/
   }
 }
 
-function updateManyViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/updateMany' }>, tx: Transaction): void {
+function updateManyViews(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'view/updateMany' }>,
+  tx: Transaction,
+): void {
   const diagram = requireDiagram(draft, cmd.diagramId);
   const boxes: ID[] = [];
   for (const [viewId, patch] of Object.entries(cmd.patches)) {
@@ -448,7 +537,11 @@ function updateManyViews(draft: ProjectDocument, cmd: Extract<Command, { type: '
   if (boxes.length) applyContainment(draft, diagram.id, boxes, tx);
 }
 
-function reorderViews(draft: ProjectDocument, cmd: Extract<Command, { type: 'view/reorder' }>, tx: Transaction): void {
+function reorderViews(
+  draft: ProjectDocument,
+  cmd: Extract<Command, { type: 'view/reorder' }>,
+  tx: Transaction,
+): void {
   const diagram = requireDiagram(draft, cmd.diagramId);
   const selected = new Set(cmd.viewIds.filter((id) => diagram.views[id]));
   if (!selected.size) return;

@@ -20,7 +20,9 @@ import {
   test,
 } from './helpers';
 
-test('E2E-001 full class round trip: create, edit, connect, export SVG, save, reopen, undo/redo', async ({ page }) => {
+test('E2E-001 full class round trip: create, edit, connect, export SVG, save, reopen, undo/redo', async ({
+  page,
+}) => {
   await newProject(page, 'University');
   await addDiagram(page, 'class', 'Domain');
 
@@ -44,10 +46,21 @@ test('E2E-001 full class round trip: create, edit, connect, export SVG, save, re
   await page.getByTestId('inline-editor').press('Enter');
 
   let doc = await snapshot(page);
-  const student = byName(doc, 'Student') as unknown as { attributes: Array<{ name: string; type: string }>; operations: Array<{ name: string; returnType: string; parameters: Array<{ name: string; type: string; typeElementId: string | null }> }> };
+  const student = byName(doc, 'Student') as unknown as {
+    attributes: Array<{ name: string; type: string }>;
+    operations: Array<{
+      name: string;
+      returnType: string;
+      parameters: Array<{ name: string; type: string; typeElementId: string | null }>;
+    }>;
+  };
   expect(student.attributes.map((a) => `${a.name}:${a.type}`)).toEqual(['studentId:String']);
   expect(student.operations[0]).toMatchObject({ name: 'enroll', returnType: 'void' });
-  expect(student.operations[0]!.parameters[0]).toMatchObject({ name: 'course', type: 'Course', typeElementId: byName(doc, 'Course').id });
+  expect(student.operations[0]!.parameters[0]).toMatchObject({
+    name: 'course',
+    type: 'Course',
+    typeElementId: byName(doc, 'Course').id,
+  });
 
   // Student → Person generalization, Student — Course association with end multiplicities
   await connect(page, 'class.generalization', 'Student', 'Person');
@@ -72,7 +85,16 @@ test('E2E-001 full class round trip: create, edit, connect, export SVG, save, re
   // SVG export contains classes, labels and the generalization triangle.
   const svg = await exportDiagram(page, 'svg');
   const parsed = await parseSvg(page, svg.bytes.toString('utf8'));
-  for (const text of ['Person', 'Student', 'Course', '- name: String', '+ enroll(course: Course): void', '0..*', '1..*']) expect(parsed.texts).toContain(text);
+  for (const text of [
+    'Person',
+    'Student',
+    'Course',
+    '- name: String',
+    '+ enroll(course: Course): void',
+    '0..*',
+    '1..*',
+  ])
+    expect(parsed.texts).toContain(text);
   expect(parsed.polygons).toBeGreaterThan(0);
 
   // Save → reload → reopen: identical semantics and geometry.
@@ -101,7 +123,9 @@ test('E2E-001 full class round trip: create, edit, connect, export SVG, save, re
   expect(comparable(await snapshot(page))).toEqual(comparable(edited));
 });
 
-test('E2E-002 shared semantic entity across two diagrams: rename syncs, view delete keeps model, model delete cleans up', async ({ page }) => {
+test('E2E-002 shared semantic entity across two diagrams: rename syncs, view delete keeps model, model delete cleans up', async ({
+  page,
+}) => {
   await newProject(page, 'Shop');
   await addDiagram(page, 'class', 'Diagram A');
   await place(page, 'class.class', 300, 200, 'Customer');
@@ -116,7 +140,9 @@ test('E2E-002 shared semantic entity across two diagrams: rename syncs, view del
   let doc = await snapshot(page);
   expect(elementsOfKind(doc, 'class').filter((c) => c.name === 'Customer')).toHaveLength(1);
   const customerId = byName(doc, 'Customer').id;
-  const views = Object.values(doc.diagrams).flatMap((d) => Object.values(d.views).filter((v) => v.elementId === customerId));
+  const views = Object.values(doc.diagrams).flatMap((d) =>
+    Object.values(d.views).filter((v) => v.elementId === customerId),
+  );
   expect(views).toHaveLength(2);
 
   // Rename in the inspector → both diagrams update.
@@ -146,6 +172,10 @@ test('E2E-002 shared semantic entity across two diagrams: rename syncs, view del
   doc = await snapshot(page);
   expect(doc.modelElements[customerId]).toBeUndefined();
   expect(elementsOfKind(doc, 'association')).toHaveLength(0);
-  expect(Object.values(doc.diagrams).flatMap((d) => Object.values(d.views)).some((v) => v.elementId === customerId)).toBe(false);
+  expect(
+    Object.values(doc.diagrams)
+      .flatMap((d) => Object.values(d.views))
+      .some((v) => v.elementId === customerId),
+  ).toBe(false);
   await expect(node(page, 'Client')).toHaveCount(0);
 });

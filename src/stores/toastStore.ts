@@ -38,8 +38,12 @@ export const useToastStore = create<ToastState>()((set, get) => ({
 }));
 
 export const toast = {
-  info: (message: string, extra: Partial<Omit<Toast, 'id' | 'kind' | 'message'>> = {}) => useToastStore.getState().push({ kind: 'info', message, ...extra }),
-  success: (message: string, extra: Partial<Omit<Toast, 'id' | 'kind' | 'message'>> = {}) => useToastStore.getState().push({ kind: 'success', message, ...extra }),
-  warning: (message: string, extra: Partial<Omit<Toast, 'id' | 'kind' | 'message'>> = {}) => useToastStore.getState().push({ kind: 'warning', message, ...extra }),
-  error: (message: string, extra: Partial<Omit<Toast, 'id' | 'kind' | 'message'>> = {}) => useToastStore.getState().push({ kind: 'error', message, ...extra }),
+  info: (message: string, extra: Partial<Omit<Toast, 'id' | 'kind' | 'message'>> = {}) =>
+    useToastStore.getState().push({ kind: 'info', message, ...extra }),
+  success: (message: string, extra: Partial<Omit<Toast, 'id' | 'kind' | 'message'>> = {}) =>
+    useToastStore.getState().push({ kind: 'success', message, ...extra }),
+  warning: (message: string, extra: Partial<Omit<Toast, 'id' | 'kind' | 'message'>> = {}) =>
+    useToastStore.getState().push({ kind: 'warning', message, ...extra }),
+  error: (message: string, extra: Partial<Omit<Toast, 'id' | 'kind' | 'message'>> = {}) =>
+    useToastStore.getState().push({ kind: 'error', message, ...extra }),
 };

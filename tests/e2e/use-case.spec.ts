@@ -1,6 +1,25 @@
-import { addDiagram, byName, comparable, connect, edge, elementsOfKind, expect, exportDiagram, newProject, node, openFile, place, pngSize, saveProject, snapshot, test } from './helpers';
+import {
+  addDiagram,
+  byName,
+  comparable,
+  connect,
+  edge,
+  elementsOfKind,
+  expect,
+  exportDiagram,
+  newProject,
+  node,
+  openFile,
+  place,
+  pngSize,
+  saveProject,
+  snapshot,
+  test,
+} from './helpers';
 
-test('E2E-003 use case: actor, boundary, association, include with correct direction, save/reopen, PNG', async ({ page }) => {
+test('E2E-003 use case: actor, boundary, association, include with correct direction, save/reopen, PNG', async ({
+  page,
+}) => {
   await newProject(page, 'Enrollment');
   await addDiagram(page, 'useCase', 'Registration');
   await place(page, 'uc.subject', 520, 300, 'University');
@@ -13,10 +32,17 @@ test('E2E-003 use case: actor, boundary, association, include with correct direc
 
   const doc = await snapshot(page);
   const include = elementsOfKind(doc, 'include')[0]!;
-  expect(include).toMatchObject({ sourceId: byName(doc, 'Enroll').id, targetId: byName(doc, 'Authenticate').id });
+  expect(include).toMatchObject({
+    sourceId: byName(doc, 'Enroll').id,
+    targetId: byName(doc, 'Authenticate').id,
+  });
   // The boundary is a visual container only: use cases stay owned by the model.
-  const boundaryView = Object.values(Object.values(doc.diagrams)[0]!.views).find((v) => v.elementId === byName(doc, 'University').id)!;
-  const enrollView = Object.values(Object.values(doc.diagrams)[0]!.views).find((v) => v.elementId === byName(doc, 'Enroll').id)!;
+  const boundaryView = Object.values(Object.values(doc.diagrams)[0]!.views).find(
+    (v) => v.elementId === byName(doc, 'University').id,
+  )!;
+  const enrollView = Object.values(Object.values(doc.diagrams)[0]!.views).find(
+    (v) => v.elementId === byName(doc, 'Enroll').id,
+  )!;
   expect(enrollView.containerViewId).toBe(boundaryView.id);
   expect(byName(doc, 'Enroll').ownerId).toBe(doc.rootModelId);
 

@@ -1,6 +1,12 @@
 import type { ID } from '../schemas/common';
 import type { ModelElement } from '../schemas/elements';
-import type { DiagramOptions, ProjectDocument, ProjectSettings, UMLDiagram, Viewport } from '../schemas/project';
+import type {
+  DiagramOptions,
+  ProjectDocument,
+  ProjectSettings,
+  UMLDiagram,
+  Viewport,
+} from '../schemas/project';
 import type { DiagramView } from '../schemas/views';
 
 /** Owned-member collections editable through member commands. */

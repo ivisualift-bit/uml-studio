@@ -8,7 +8,8 @@ import type { Bounds, Primitive } from './primitives';
 import { LINE_HEIGHT, measureText, wrapText } from './textMetrics';
 import { resolveStyle, type DiagramTheme, type ResolvedStyle } from './theme';
 
-export type MemberCollectionKey = 'attributes' | 'operations' | 'literals' | 'slots' | 'extensionPoints' | 'tagDefinitions';
+export type MemberCollectionKey =
+  'attributes' | 'operations' | 'literals' | 'slots' | 'extensionPoints' | 'tagDefinitions';
 
 export interface MemberRow {
   collection: MemberCollectionKey;
@@ -58,7 +59,8 @@ function text(
   return { type: 'text', x, y, text: value, fontSize: s.fontSize, anchor: 'middle', fill: s.text, ...extra };
 }
 
-const baseline = (top: number, lineHeight: number, fontSize: number) => top + (lineHeight + fontSize * 0.7) / 2;
+const baseline = (top: number, lineHeight: number, fontSize: number) =>
+  top + (lineHeight + fontSize * 0.7) / 2;
 
 // -------------------------------------------------------------------------------------------------
 // Classifier boxes (class, interface, enumeration, component, stereotype, instance…)
@@ -133,7 +135,12 @@ function classifierBox(input: ClassifierBoxInput): NodeLayout {
   }
   const nameBaseline = baseline(y, lh, fs);
   primitives.push(
-    text(width / 2, nameBaseline, input.name, s, { bold: true, italic: input.nameItalic, underline: input.nameUnderline, hit: { part: 'name' } }),
+    text(width / 2, nameBaseline, input.name, s, {
+      bold: true,
+      italic: input.nameItalic,
+      underline: input.nameUnderline,
+      hit: { part: 'name' },
+    }),
   );
   const nameBox = { x: PAD / 2, y, width: width - PAD, height: lh };
   y += lh + PAD / 2;
@@ -144,7 +151,15 @@ function classifierBox(input: ClassifierBoxInput): NodeLayout {
   input.compartments.forEach((c, index) => {
     const isLast = index === input.compartments.length - 1;
     const h = compartmentHeights[index]! + (isLast ? extra : 0);
-    primitives.push({ type: 'line', x1: 0, y1: y, x2: width, y2: y, stroke: s.stroke, strokeWidth: s.lineWidth });
+    primitives.push({
+      type: 'line',
+      x1: 0,
+      y1: y,
+      x2: width,
+      y2: y,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    });
     compartments[c.key] = { x: 0, y, width, height: h };
     let rowTop = y + PAD / 4 + 1;
     for (const r of c.rows) {
@@ -203,7 +218,16 @@ function artifactIcon(x: number, y: number, s: ResolvedStyle): Primitive[] {
       stroke: s.stroke,
       strokeWidth: 1,
     },
-    { type: 'polyline', points: [{ x: x + 9, y }, { x: x + 9, y: y + 4 }, { x: x + 13, y: y + 4 }], stroke: s.stroke, strokeWidth: 1 },
+    {
+      type: 'polyline',
+      points: [
+        { x: x + 9, y },
+        { x: x + 9, y: y + 4 },
+        { x: x + 13, y: y + 4 },
+      ],
+      stroke: s.stroke,
+      strokeWidth: 1,
+    },
   ];
 }
 
@@ -225,7 +249,9 @@ function visible(view: NodeView, key: Compartment): boolean {
 function featureCompartments(
   ctx: NodeRenderContext,
   view: NodeView,
-  el: ElementOf<'class' | 'interface' | 'enumeration' | 'dataType' | 'primitiveType' | 'signal' | 'component'>,
+  el: ElementOf<
+    'class' | 'interface' | 'enumeration' | 'dataType' | 'primitiveType' | 'signal' | 'component'
+  >,
   options: { attributes: 'always' | 'nonEmpty'; operations: 'always' | 'nonEmpty' },
 ): BoxCompartment[] {
   const o = ctx.diagram.options;
@@ -258,7 +284,12 @@ function featureCompartments(
 // Simple shapes
 // -------------------------------------------------------------------------------------------------
 
-function base(view: NodeView, minWidth: number, minHeight: number, outline: ShapeOutline): Omit<NodeLayout, 'primitives' | 'nameBox'> {
+function base(
+  view: NodeView,
+  minWidth: number,
+  minHeight: number,
+  outline: ShapeOutline,
+): Omit<NodeLayout, 'primitives' | 'nameBox'> {
   const width = Math.max(view.width, minWidth);
   const height = Math.max(view.height, minHeight);
   return {
@@ -287,13 +318,21 @@ function centeredLabel(
   const top = box.y + (box.height - total) / 2;
   return {
     primitives: lines.map((line, i) =>
-      text(box.x + box.width / 2, baseline(top + i * lh, lh, s.fontSize), line, s, { hit: { part: 'name' }, ...extra }),
+      text(box.x + box.width / 2, baseline(top + i * lh, lh, s.fontSize), line, s, {
+        hit: { part: 'name' },
+        ...extra,
+      }),
     ),
     height: total,
   };
 }
 
-function wrappedMin(label: string, s: ResolvedStyle, maxWidth: number, bold = false): { width: number; height: number } {
+function wrappedMin(
+  label: string,
+  s: ResolvedStyle,
+  maxWidth: number,
+  bold = false,
+): { width: number; height: number } {
   const lines = wrapText(label || ' ', maxWidth, s.fontSize, bold);
   const width = Math.max(...lines.map((l) => measureText(l, s.fontSize, bold)));
   return { width: Math.ceil(width), height: Math.ceil(lines.length * rowHeight(s.fontSize)) };
@@ -305,9 +344,26 @@ function stickFigure(cx: number, top: number, h: number, s: ResolvedStyle): Prim
   const hip = top + h * 0.62;
   const sw = s.lineWidth + 0.3;
   return [
-    { type: 'ellipse', cx, cy: top + head, rx: head, ry: head, fill: s.fill, stroke: s.stroke, strokeWidth: sw },
+    {
+      type: 'ellipse',
+      cx,
+      cy: top + head,
+      rx: head,
+      ry: head,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: sw,
+    },
     { type: 'line', x1: cx, y1: neck, x2: cx, y2: hip, stroke: s.stroke, strokeWidth: sw },
-    { type: 'line', x1: cx - h * 0.28, y1: neck + h * 0.12, x2: cx + h * 0.28, y2: neck + h * 0.12, stroke: s.stroke, strokeWidth: sw },
+    {
+      type: 'line',
+      x1: cx - h * 0.28,
+      y1: neck + h * 0.12,
+      x2: cx + h * 0.28,
+      y2: neck + h * 0.12,
+      stroke: s.stroke,
+      strokeWidth: sw,
+    },
     { type: 'line', x1: cx, y1: hip, x2: cx - h * 0.24, y2: top + h, stroke: s.stroke, strokeWidth: sw },
     { type: 'line', x1: cx, y1: hip, x2: cx + h * 0.24, y2: top + h, stroke: s.stroke, strokeWidth: sw },
   ];
@@ -316,7 +372,14 @@ function stickFigure(cx: number, top: number, h: number, s: ResolvedStyle): Prim
 function layoutActor(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'actor'>): NodeLayout {
   const s = resolveStyle(ctx.theme, view.style);
   if (view.variant === 'alternate') {
-    return classifierBox({ view, theme: ctx.theme, keywords: keywordsFor(ctx.doc, el, 'actor'), name: el.name, nameItalic: el.isAbstract, compartments: [] });
+    return classifierBox({
+      view,
+      theme: ctx.theme,
+      keywords: keywordsFor(ctx.doc, el, 'actor'),
+      name: el.name,
+      nameItalic: el.isAbstract,
+      compartments: [],
+    });
   }
   const label = wrappedMin(el.name, s, 160);
   const minWidth = Math.max(40, label.width + 8);
@@ -333,9 +396,23 @@ function layoutActor(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'acto
     outlineBox: { x: cx - figureWidth / 2, y: 0, width: figureWidth, height: figureHeight },
     primitives: [
       // transparent hit rect so the whole node is grabbable
-      { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, fill: 'none', stroke: 'none', strokeWidth: 0 },
+      {
+        type: 'rect',
+        x: 0,
+        y: 0,
+        width: b.width,
+        height: b.height,
+        fill: 'none',
+        stroke: 'none',
+        strokeWidth: 0,
+      },
       ...stickFigure(cx, 1, figureHeight - 2, s),
-      ...lines.map((line, i) => text(cx, baseline(labelTop + i * lh, lh, s.fontSize), line, s, { italic: el.isAbstract, hit: { part: 'name' } })),
+      ...lines.map((line, i) =>
+        text(cx, baseline(labelTop + i * lh, lh, s.fontSize), line, s, {
+          italic: el.isAbstract,
+          hit: { part: 'name' },
+        }),
+      ),
     ],
     nameBox: { x: 0, y: labelTop, width: b.width, height: Math.max(lh, label.height) },
   };
@@ -347,31 +424,80 @@ function layoutUseCase(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'us
   const label = wrappedMin(el.name, s, Math.max(100, view.width * 0.72));
   const kwSize = Math.round(s.fontSize * KEYWORD_SCALE);
   const pointsText = el.extensionPoints.map((p) => p.name);
-  const pointsWidth = showPoints ? Math.max(measureText('extension points', kwSize, true), ...pointsText.map((t) => measureText(t, kwSize))) : 0;
+  const pointsWidth = showPoints
+    ? Math.max(
+        measureText('extension points', kwSize, true),
+        ...pointsText.map((t) => measureText(t, kwSize)),
+      )
+    : 0;
   const minWidth = Math.ceil(Math.max(label.width, pointsWidth) / 0.72 + PAD);
   const pointsHeight = showPoints ? (pointsText.length + 1) * rowHeight(kwSize) + 6 : 0;
   const minHeight = Math.ceil((label.height + pointsHeight) / 0.72 + PAD);
   const b = base(view, Math.max(100, minWidth), Math.max(50, minHeight), 'ellipse');
   const primitives: Primitive[] = [
-    { type: 'ellipse', cx: b.width / 2, cy: b.height / 2, rx: b.width / 2, ry: b.height / 2, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
+    {
+      type: 'ellipse',
+      cx: b.width / 2,
+      cy: b.height / 2,
+      rx: b.width / 2,
+      ry: b.height / 2,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    },
   ];
   const keywords = keywordsFor(ctx.doc, el);
-  const nameArea = { x: b.width * 0.14, y: 0, width: b.width * 0.72, height: showPoints ? b.height * 0.5 : b.height };
+  const nameArea = {
+    x: b.width * 0.14,
+    y: 0,
+    width: b.width * 0.72,
+    height: showPoints ? b.height * 0.5 : b.height,
+  };
   if (keywords.length) {
-    primitives.push(text(b.width / 2, nameArea.y + nameArea.height / 2 - label.height / 2 - 2, `«${keywords.join(', ')}»`, s, { fontSize: kwSize }));
+    primitives.push(
+      text(
+        b.width / 2,
+        nameArea.y + nameArea.height / 2 - label.height / 2 - 2,
+        `«${keywords.join(', ')}»`,
+        s,
+        { fontSize: kwSize },
+      ),
+    );
   }
   primitives.push(...centeredLabel(el.name, nameArea, s, { italic: el.isAbstract }).primitives);
   const rows: MemberRow[] = [];
   if (showPoints) {
     const lineY = b.height * 0.5;
     const half = (b.width / 2) * Math.sqrt(1 - Math.pow((lineY - b.height / 2) / (b.height / 2), 2));
-    primitives.push({ type: 'line', x1: b.width / 2 - half, y1: lineY, x2: b.width / 2 + half, y2: lineY, stroke: s.stroke, strokeWidth: s.lineWidth });
+    primitives.push({
+      type: 'line',
+      x1: b.width / 2 - half,
+      y1: lineY,
+      x2: b.width / 2 + half,
+      y2: lineY,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    });
     const lh = rowHeight(kwSize);
-    primitives.push(text(b.width / 2, baseline(lineY + 2, lh, kwSize), 'extension points', s, { fontSize: kwSize, bold: true }));
+    primitives.push(
+      text(b.width / 2, baseline(lineY + 2, lh, kwSize), 'extension points', s, {
+        fontSize: kwSize,
+        bold: true,
+      }),
+    );
     el.extensionPoints.forEach((p, i) => {
       const top = lineY + 2 + (i + 1) * lh;
-      primitives.push(text(b.width / 2, baseline(top, lh, kwSize), p.name, s, { fontSize: kwSize, hit: { member: p.id, collection: 'extensionPoints' } }));
-      rows.push({ collection: 'extensionPoints', memberId: p.id, box: { x: b.width * 0.2, y: top, width: b.width * 0.6, height: lh } });
+      primitives.push(
+        text(b.width / 2, baseline(top, lh, kwSize), p.name, s, {
+          fontSize: kwSize,
+          hit: { member: p.id, collection: 'extensionPoints' },
+        }),
+      );
+      rows.push({
+        collection: 'extensionPoints',
+        memberId: p.id,
+        box: { x: b.width * 0.2, y: top, width: b.width * 0.6, height: lh },
+      });
     });
   }
   return { ...b, primitives, nameBox: nameArea, rows };
@@ -388,19 +514,40 @@ function layoutFrameContainer(
   const kwSize = Math.round(s.fontSize * KEYWORD_SCALE);
   const lh = rowHeight(s.fontSize);
   const kwLh = keywords.length ? rowHeight(kwSize) : 0;
-  const nameWidth = Math.max(measureText(el.name || ' ', s.fontSize, true), keywords.length ? measureText(`«${keywords.join(', ')}»`, kwSize) : 0);
-  const b = base(view, Math.max(options.minWidth, nameWidth + PAD * 4), Math.max(options.minHeight, lh + kwLh + PAD * 2), 'rect');
+  const nameWidth = Math.max(
+    measureText(el.name || ' ', s.fontSize, true),
+    keywords.length ? measureText(`«${keywords.join(', ')}»`, kwSize) : 0,
+  );
+  const b = base(
+    view,
+    Math.max(options.minWidth, nameWidth + PAD * 4),
+    Math.max(options.minHeight, lh + kwLh + PAD * 2),
+    'rect',
+  );
   const x = options.headerAlign === 'center' ? b.width / 2 : PAD;
   const anchor = options.headerAlign === 'center' ? 'middle' : 'start';
   const primitives: Primitive[] = [
-    { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
+    {
+      type: 'rect',
+      x: 0,
+      y: 0,
+      width: b.width,
+      height: b.height,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    },
   ];
   let y = PAD / 2;
   if (keywords.length) {
-    primitives.push(text(x, baseline(y, kwLh, kwSize), `«${keywords.join(', ')}»`, s, { fontSize: kwSize, anchor }));
+    primitives.push(
+      text(x, baseline(y, kwLh, kwSize), `«${keywords.join(', ')}»`, s, { fontSize: kwSize, anchor }),
+    );
     y += kwLh;
   }
-  primitives.push(text(x, baseline(y, lh, s.fontSize), el.name, s, { bold: true, anchor, hit: { part: 'name' } }));
+  primitives.push(
+    text(x, baseline(y, lh, s.fontSize), el.name, s, { bold: true, anchor, hit: { part: 'name' } }),
+  );
   return {
     ...b,
     primitives,
@@ -427,17 +574,43 @@ function layoutPackage(ctx: NodeRenderContext, view: NodeView, el: ModelElement)
   const b = base(view, minWidth, minHeight, 'rect');
   const tabHeight = inTab && kwText ? tabH + kwLh - 4 : tabH;
   const primitives: Primitive[] = [
-    { type: 'rect', x: 0, y: 0, width: tabW, height: tabHeight, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
-    { type: 'rect', x: 0, y: tabHeight, width: b.width, height: b.height - tabHeight, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
+    {
+      type: 'rect',
+      x: 0,
+      y: 0,
+      width: tabW,
+      height: tabHeight,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    },
+    {
+      type: 'rect',
+      x: 0,
+      y: tabHeight,
+      width: b.width,
+      height: b.height - tabHeight,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    },
   ];
   let nameBox: Bounds;
   if (inTab) {
     let y = 2;
     if (kwText) {
-      primitives.push(text(PAD, baseline(y, kwLh - 2, kwSize), kwText, s, { fontSize: kwSize, anchor: 'start' }));
+      primitives.push(
+        text(PAD, baseline(y, kwLh - 2, kwSize), kwText, s, { fontSize: kwSize, anchor: 'start' }),
+      );
       y += kwLh - 4;
     }
-    primitives.push(text(PAD, baseline(y, tabH - 2, s.fontSize), el.name, s, { bold: true, anchor: 'start', hit: { part: 'name' } }));
+    primitives.push(
+      text(PAD, baseline(y, tabH - 2, s.fontSize), el.name, s, {
+        bold: true,
+        anchor: 'start',
+        hit: { part: 'name' },
+      }),
+    );
     nameBox = { x: 2, y, width: tabW - 4, height: tabH - 2 };
   } else {
     const body = { x: 0, y: tabHeight, width: b.width, height: b.height - tabHeight };
@@ -447,10 +620,17 @@ function layoutPackage(ctx: NodeRenderContext, view: NodeView, el: ModelElement)
       primitives.push(text(b.width / 2, baseline(y, kwLh, kwSize), kwText, s, { fontSize: kwSize }));
       y += kwLh;
     }
-    primitives.push(text(b.width / 2, baseline(y, lh, s.fontSize), el.name, s, { bold: true, hit: { part: 'name' } }));
+    primitives.push(
+      text(b.width / 2, baseline(y, lh, s.fontSize), el.name, s, { bold: true, hit: { part: 'name' } }),
+    );
     nameBox = { x: PAD, y, width: b.width - PAD * 2, height: lh };
   }
-  return { ...b, primitives, nameBox, bodyBox: { x: 0, y: tabHeight, width: b.width, height: b.height - tabHeight } };
+  return {
+    ...b,
+    primitives,
+    nameBox,
+    bodyBox: { x: 0, y: tabHeight, width: b.width, height: b.height - tabHeight },
+  };
 }
 
 function layoutAction(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'action'>): NodeLayout {
@@ -477,14 +657,28 @@ function layoutAction(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'act
       ...b,
       outlineBox: { x: cx - 12, y: 2, width: 24, height: 30 },
       primitives: [
-        { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, fill: 'none', stroke: 'none', strokeWidth: 0 },
+        {
+          type: 'rect',
+          x: 0,
+          y: 0,
+          width: b.width,
+          height: b.height,
+          fill: 'none',
+          stroke: 'none',
+          strokeWidth: 0,
+        },
         glass,
         ...centeredLabel(el.name, { x: 0, y: 34, width: b.width, height: b.height - 34 }, s).primitives,
       ],
       nameBox: { x: 0, y: 34, width: b.width, height: b.height - 34 },
     };
   }
-  const b = base(view, Math.max(90, label.width + PAD * 3 + extraW), Math.max(40, label.height + PAD * 2), 'rect');
+  const b = base(
+    view,
+    Math.max(90, label.width + PAD * 3 + extraW),
+    Math.max(40, label.height + PAD * 2),
+    'rect',
+  );
   const { width: w, height: h } = b;
   let shape: Primitive;
   if (el.actionKind === 'sendSignal') {
@@ -516,7 +710,17 @@ function layoutAction(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'act
       strokeWidth: s.lineWidth,
     };
   } else {
-    shape = { type: 'rect', x: 0, y: 0, width: w, height: h, rx: 12, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth };
+    shape = {
+      type: 'rect',
+      x: 0,
+      y: 0,
+      width: w,
+      height: h,
+      rx: 12,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    };
   }
   const primitives: Primitive[] = [shape];
   if (el.actionKind === 'callBehavior') {
@@ -525,7 +729,17 @@ function layoutAction(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'act
     const y = h - 16;
     primitives.push(
       { type: 'line', x1: x + 5, y1: y, x2: x + 5, y2: y + 10, stroke: s.stroke, strokeWidth: 1 },
-      { type: 'polyline', points: [{ x, y: y + 10 }, { x, y: y + 5 }, { x: x + 10, y: y + 5 }, { x: x + 10, y: y + 10 }], stroke: s.stroke, strokeWidth: 1 },
+      {
+        type: 'polyline',
+        points: [
+          { x, y: y + 10 },
+          { x, y: y + 5 },
+          { x: x + 10, y: y + 5 },
+          { x: x + 10, y: y + 10 },
+        ],
+        stroke: s.stroke,
+        strokeWidth: 1,
+      },
     );
   }
   const labelBox = { x: el.actionKind === 'acceptEvent' ? 16 : 0, y: 0, width: w - extraW, height: h };
@@ -534,13 +748,31 @@ function layoutAction(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'act
 }
 
 function solidCircle(cx: number, cy: number, r: number, theme: DiagramTheme, s: ResolvedStyle): Primitive {
-  return { type: 'ellipse', cx, cy, rx: r, ry: r, fill: s.fill === theme.nodeFill ? theme.solidFill : s.fill, stroke: s.stroke, strokeWidth: s.lineWidth };
+  return {
+    type: 'ellipse',
+    cx,
+    cy,
+    rx: r,
+    ry: r,
+    fill: s.fill === theme.nodeFill ? theme.solidFill : s.fill,
+    stroke: s.stroke,
+    strokeWidth: s.lineWidth,
+  };
 }
 
 function bullseye(size: number, theme: DiagramTheme, s: ResolvedStyle): Primitive[] {
   const r = size / 2;
   return [
-    { type: 'ellipse', cx: r, cy: r, rx: r - 1, ry: r - 1, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth + 0.3 },
+    {
+      type: 'ellipse',
+      cx: r,
+      cy: r,
+      rx: r - 1,
+      ry: r - 1,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth + 0.3,
+    },
     solidCircle(r, r, r * 0.6, theme, s),
   ];
 }
@@ -551,7 +783,17 @@ function labelBelow(name: string, top: number, width: number, s: ResolvedStyle):
 }
 
 function bar(w: number, h: number, theme: DiagramTheme, s: ResolvedStyle): Primitive {
-  return { type: 'rect', x: 0, y: 0, width: w, height: h, rx: 1.5, fill: s.fill === theme.nodeFill ? theme.solidFill : s.fill, stroke: s.stroke, strokeWidth: 0.8 };
+  return {
+    type: 'rect',
+    x: 0,
+    y: 0,
+    width: w,
+    height: h,
+    rx: 1.5,
+    fill: s.fill === theme.nodeFill ? theme.solidFill : s.fill,
+    stroke: s.stroke,
+    strokeWidth: 0.8,
+  };
 }
 
 function diamond(w: number, h: number, s: ResolvedStyle): Primitive {
@@ -575,12 +817,22 @@ function layoutControlNode(ctx: NodeRenderContext, view: NodeView, el: ElementOf
     case 'initial': {
       const b = base(view, 16, 16, 'circle');
       const d = Math.min(b.width, b.height);
-      return { ...b, outlineBox: { x: 0, y: 0, width: d, height: d }, primitives: [solidCircle(d / 2, d / 2, d / 2 - 0.5, ctx.theme, s)], nameBox: null };
+      return {
+        ...b,
+        outlineBox: { x: 0, y: 0, width: d, height: d },
+        primitives: [solidCircle(d / 2, d / 2, d / 2 - 0.5, ctx.theme, s)],
+        nameBox: null,
+      };
     }
     case 'activityFinal': {
       const b = base(view, 18, 18, 'circle');
       const d = Math.min(b.width, b.height);
-      return { ...b, outlineBox: { x: 0, y: 0, width: d, height: d }, primitives: bullseye(d, ctx.theme, s), nameBox: null };
+      return {
+        ...b,
+        outlineBox: { x: 0, y: 0, width: d, height: d },
+        primitives: bullseye(d, ctx.theme, s),
+        nameBox: null,
+      };
     }
     case 'flowFinal': {
       const b = base(view, 18, 18, 'circle');
@@ -591,9 +843,34 @@ function layoutControlNode(ctx: NodeRenderContext, view: NodeView, el: ElementOf
         ...b,
         outlineBox: { x: 0, y: 0, width: d, height: d },
         primitives: [
-          { type: 'ellipse', cx: r, cy: r, rx: r - 0.5, ry: r - 0.5, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
-          { type: 'line', x1: r - k, y1: r - k, x2: r + k, y2: r + k, stroke: s.stroke, strokeWidth: s.lineWidth },
-          { type: 'line', x1: r + k, y1: r - k, x2: r - k, y2: r + k, stroke: s.stroke, strokeWidth: s.lineWidth },
+          {
+            type: 'ellipse',
+            cx: r,
+            cy: r,
+            rx: r - 0.5,
+            ry: r - 0.5,
+            fill: s.fill,
+            stroke: s.stroke,
+            strokeWidth: s.lineWidth,
+          },
+          {
+            type: 'line',
+            x1: r - k,
+            y1: r - k,
+            x2: r + k,
+            y2: r + k,
+            stroke: s.stroke,
+            strokeWidth: s.lineWidth,
+          },
+          {
+            type: 'line',
+            x1: r + k,
+            y1: r - k,
+            x2: r - k,
+            y2: r + k,
+            stroke: s.stroke,
+            strokeWidth: s.lineWidth,
+          },
         ],
         nameBox: null,
       };
@@ -628,15 +905,29 @@ function layoutPseudostate(ctx: NodeRenderContext, view: NodeView, el: ElementOf
   switch (el.pseudoKind) {
     case 'initial': {
       const { b, d, r } = circleBase(16);
-      return { ...b, outlineBox: { x: 0, y: 0, width: d, height: d }, primitives: [solidCircle(r, r, r - 0.5, ctx.theme, s)], nameBox: null };
+      return {
+        ...b,
+        outlineBox: { x: 0, y: 0, width: d, height: d },
+        primitives: [solidCircle(r, r, r - 0.5, ctx.theme, s)],
+        nameBox: null,
+      };
     }
     case 'junction': {
       const { b, d, r } = circleBase(10);
-      return { ...b, outlineBox: { x: 0, y: 0, width: d, height: d }, primitives: [solidCircle(r, r, r - 0.5, ctx.theme, s)], nameBox: null };
+      return {
+        ...b,
+        outlineBox: { x: 0, y: 0, width: d, height: d },
+        primitives: [solidCircle(r, r, r - 0.5, ctx.theme, s)],
+        nameBox: null,
+      };
     }
     case 'choice': {
       const b = base(view, 22, 22, 'diamond');
-      return { ...b, primitives: [diamond(b.width, b.height, s), ...labelBelow(el.name, b.height + 2, b.width, s)], nameBox: { x: -40, y: b.height + 2, width: b.width + 80, height: 18 } };
+      return {
+        ...b,
+        primitives: [diamond(b.width, b.height, s), ...labelBelow(el.name, b.height + 2, b.width, s)],
+        nameBox: { x: -40, y: b.height + 2, width: b.width + 80, height: 18 },
+      };
     }
     case 'fork':
     case 'join': {
@@ -650,7 +941,16 @@ function layoutPseudostate(ctx: NodeRenderContext, view: NodeView, el: ElementOf
         ...b,
         outlineBox: { x: 0, y: 0, width: d, height: d },
         primitives: [
-          { type: 'ellipse', cx: r, cy: r, rx: r - 0.5, ry: r - 0.5, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
+          {
+            type: 'ellipse',
+            cx: r,
+            cy: r,
+            rx: r - 0.5,
+            ry: r - 0.5,
+            fill: s.fill,
+            stroke: s.stroke,
+            strokeWidth: s.lineWidth,
+          },
           text(r, r + s.fontSize * 0.36, el.pseudoKind === 'deepHistory' ? 'H*' : 'H', s, { bold: true }),
         ],
         nameBox: null,
@@ -661,9 +961,34 @@ function layoutPseudostate(ctx: NodeRenderContext, view: NodeView, el: ElementOf
       return {
         ...b,
         primitives: [
-          { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, fill: 'none', stroke: 'none', strokeWidth: 0 },
-          { type: 'line', x1: 0, y1: 0, x2: b.width, y2: b.height, stroke: s.stroke, strokeWidth: s.lineWidth + 0.5 },
-          { type: 'line', x1: b.width, y1: 0, x2: 0, y2: b.height, stroke: s.stroke, strokeWidth: s.lineWidth + 0.5 },
+          {
+            type: 'rect',
+            x: 0,
+            y: 0,
+            width: b.width,
+            height: b.height,
+            fill: 'none',
+            stroke: 'none',
+            strokeWidth: 0,
+          },
+          {
+            type: 'line',
+            x1: 0,
+            y1: 0,
+            x2: b.width,
+            y2: b.height,
+            stroke: s.stroke,
+            strokeWidth: s.lineWidth + 0.5,
+          },
+          {
+            type: 'line',
+            x1: b.width,
+            y1: 0,
+            x2: 0,
+            y2: b.height,
+            stroke: s.stroke,
+            strokeWidth: s.lineWidth + 0.5,
+          },
         ],
         nameBox: null,
       };
@@ -673,14 +998,46 @@ function layoutPseudostate(ctx: NodeRenderContext, view: NodeView, el: ElementOf
     default: {
       const { b, d, r } = circleBase(16);
       const k = r * 0.7071;
-      const prims: Primitive[] = [{ type: 'ellipse', cx: r, cy: r, rx: r - 0.5, ry: r - 0.5, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth }];
+      const prims: Primitive[] = [
+        {
+          type: 'ellipse',
+          cx: r,
+          cy: r,
+          rx: r - 0.5,
+          ry: r - 0.5,
+          fill: s.fill,
+          stroke: s.stroke,
+          strokeWidth: s.lineWidth,
+        },
+      ];
       if (el.pseudoKind === 'exitPoint') {
         prims.push(
-          { type: 'line', x1: r - k, y1: r - k, x2: r + k, y2: r + k, stroke: s.stroke, strokeWidth: s.lineWidth },
-          { type: 'line', x1: r + k, y1: r - k, x2: r - k, y2: r + k, stroke: s.stroke, strokeWidth: s.lineWidth },
+          {
+            type: 'line',
+            x1: r - k,
+            y1: r - k,
+            x2: r + k,
+            y2: r + k,
+            stroke: s.stroke,
+            strokeWidth: s.lineWidth,
+          },
+          {
+            type: 'line',
+            x1: r + k,
+            y1: r - k,
+            x2: r - k,
+            y2: r + k,
+            stroke: s.stroke,
+            strokeWidth: s.lineWidth,
+          },
         );
       }
-      return { ...b, outlineBox: { x: 0, y: 0, width: d, height: d }, primitives: [...prims, ...labelBelow(el.name, d + 2, d, s)], nameBox: { x: -40, y: d + 2, width: d + 80, height: 18 } };
+      return {
+        ...b,
+        outlineBox: { x: 0, y: 0, width: d, height: d },
+        primitives: [...prims, ...labelBelow(el.name, d + 2, d, s)],
+        nameBox: { x: -40, y: d + 2, width: d + 80, height: 18 },
+      };
     }
   }
 }
@@ -697,25 +1054,50 @@ function layoutState(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'stat
   const keywords = keywordsFor(ctx.doc, el);
   const kwSize = Math.round(s.fontSize * KEYWORD_SCALE);
   const kwLh = keywords.length ? rowHeight(kwSize) : 0;
-  const widths = [measureText(el.name || ' ', s.fontSize, true), ...internal.map((i) => measureText(i.text, s.fontSize))];
+  const widths = [
+    measureText(el.name || ' ', s.fontSize, true),
+    ...internal.map((i) => measureText(i.text, s.fontSize)),
+  ];
   const headerH = PAD / 2 + kwLh + lh + PAD / 2;
   const internalH = internal.length ? internal.length * lh + PAD : 0;
   const minHeight = Math.max(40, headerH + internalH + (ctx.hasChildren ? 40 : 0));
   const b = base(view, Math.max(90, Math.ceil(Math.max(...widths) + PAD * 3)), Math.ceil(minHeight), 'rect');
   const primitives: Primitive[] = [
-    { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, rx: 10, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
+    {
+      type: 'rect',
+      x: 0,
+      y: 0,
+      width: b.width,
+      height: b.height,
+      rx: 10,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    },
   ];
   const composite = ctx.hasChildren || internal.length > 0;
   let y = composite ? PAD / 2 : (b.height - (kwLh + lh)) / 2;
   if (keywords.length) {
-    primitives.push(text(b.width / 2, baseline(y, kwLh, kwSize), `«${keywords.join(', ')}»`, s, { fontSize: kwSize }));
+    primitives.push(
+      text(b.width / 2, baseline(y, kwLh, kwSize), `«${keywords.join(', ')}»`, s, { fontSize: kwSize }),
+    );
     y += kwLh;
   }
-  primitives.push(text(b.width / 2, baseline(y, lh, s.fontSize), el.name, s, { bold: true, hit: { part: 'name' } }));
+  primitives.push(
+    text(b.width / 2, baseline(y, lh, s.fontSize), el.name, s, { bold: true, hit: { part: 'name' } }),
+  );
   const nameBox = { x: PAD, y, width: b.width - PAD * 2, height: lh };
   y += lh + PAD / 2;
   if (composite) {
-    primitives.push({ type: 'line', x1: 0, y1: y, x2: b.width, y2: y, stroke: s.stroke, strokeWidth: s.lineWidth });
+    primitives.push({
+      type: 'line',
+      x1: 0,
+      y1: y,
+      x2: b.width,
+      y2: y,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+    });
     let rowTop = y + PAD / 2;
     for (const row of internal) {
       primitives.push(text(PAD, baseline(rowTop, lh, s.fontSize), row.text, s, { anchor: 'start' }));
@@ -723,23 +1105,50 @@ function layoutState(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'stat
     }
     if (ctx.hasChildren && internal.length) {
       y = rowTop + PAD / 2;
-      primitives.push({ type: 'line', x1: 0, y1: y, x2: b.width, y2: y, stroke: s.stroke, strokeWidth: s.lineWidth, dash: '4 3' });
+      primitives.push({
+        type: 'line',
+        x1: 0,
+        y1: y,
+        x2: b.width,
+        y2: y,
+        stroke: s.stroke,
+        strokeWidth: s.lineWidth,
+        dash: '4 3',
+      });
     }
   }
-  return { ...b, primitives, nameBox, bodyBox: ctx.hasChildren ? { x: 0, y, width: b.width, height: b.height - y } : null };
+  return {
+    ...b,
+    primitives,
+    nameBox,
+    bodyBox: ctx.hasChildren ? { x: 0, y, width: b.width, height: b.height - y } : null,
+  };
 }
 
 function layoutNodeBox(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'node'>): NodeLayout {
   const s = resolveStyle(ctx.theme, view.style);
   const depth = 12;
-  const keyword = el.nodeKind === 'device' ? 'device' : el.nodeKind === 'executionEnvironment' ? 'executionEnvironment' : undefined;
+  const keyword =
+    el.nodeKind === 'device'
+      ? 'device'
+      : el.nodeKind === 'executionEnvironment'
+        ? 'executionEnvironment'
+        : undefined;
   const keywords = keywordsFor(ctx.doc, el, keyword);
   const kwSize = Math.round(s.fontSize * KEYWORD_SCALE);
   const kwText = keywords.length ? `«${keywords.join(', ')}»` : '';
   const lh = rowHeight(s.fontSize);
   const kwLh = kwText ? rowHeight(kwSize) : 0;
-  const textW = Math.max(measureText(el.name || ' ', s.fontSize, true), kwText ? measureText(kwText, kwSize) : 0);
-  const b = base(view, Math.ceil(textW + PAD * 2 + depth), Math.ceil(lh + kwLh + PAD * 2 + depth + (ctx.hasChildren ? 30 : 0)), 'rect');
+  const textW = Math.max(
+    measureText(el.name || ' ', s.fontSize, true),
+    kwText ? measureText(kwText, kwSize) : 0,
+  );
+  const b = base(
+    view,
+    Math.ceil(textW + PAD * 2 + depth),
+    Math.ceil(lh + kwLh + PAD * 2 + depth + (ctx.hasChildren ? 30 : 0)),
+    'rect',
+  );
   const { width: w, height: h } = b;
   const front = { x: 0, y: depth, width: w - depth, height: h - depth };
   const primitives: Primitive[] = [
@@ -767,8 +1176,16 @@ function layoutNodeBox(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'no
     primitives.push(text(tx, baseline(y, kwLh, kwSize), kwText, s, { fontSize: kwSize, anchor: align }));
     y += kwLh;
   }
-  primitives.push(text(tx, baseline(y, lh, s.fontSize), el.name, s, { bold: true, anchor: align, hit: { part: 'name' } }));
-  return { ...b, outlineBox: front, primitives, nameBox: { x: PAD / 2, y, width: front.width - PAD, height: lh }, bodyBox: { x: 0, y: y + lh, width: front.width, height: h - y - lh } };
+  primitives.push(
+    text(tx, baseline(y, lh, s.fontSize), el.name, s, { bold: true, anchor: align, hit: { part: 'name' } }),
+  );
+  return {
+    ...b,
+    outlineBox: front,
+    primitives,
+    nameBox: { x: PAD / 2, y, width: front.width - PAD, height: lh },
+    bodyBox: { x: 0, y: y + lh, width: front.width, height: h - y - lh },
+  };
 }
 
 function layoutPort(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'port'>): NodeLayout {
@@ -778,10 +1195,32 @@ function layoutPort(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'port'
   return {
     ...b,
     primitives: [
-      { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
-      ...(label ? [text(b.width + 3, b.height + s.fontSize * 0.9, label, s, { anchor: 'start', fontSize: Math.round(s.fontSize * 0.9), hit: { part: 'name' } })] : []),
+      {
+        type: 'rect',
+        x: 0,
+        y: 0,
+        width: b.width,
+        height: b.height,
+        fill: s.fill,
+        stroke: s.stroke,
+        strokeWidth: s.lineWidth,
+      },
+      ...(label
+        ? [
+            text(b.width + 3, b.height + s.fontSize * 0.9, label, s, {
+              anchor: 'start',
+              fontSize: Math.round(s.fontSize * 0.9),
+              hit: { part: 'name' },
+            }),
+          ]
+        : []),
     ],
-    nameBox: { x: b.width + 2, y: b.height, width: Math.max(80, measureText(label, s.fontSize) + 10), height: 18 },
+    nameBox: {
+      x: b.width + 2,
+      y: b.height,
+      width: Math.max(80, measureText(label, s.fontSize) + 10),
+      height: 18,
+    },
   };
 }
 
@@ -797,7 +1236,14 @@ function layoutSimpleBox(
   view: NodeView,
   el: ModelElement,
   label: string,
-  options: { underline?: boolean; dashed?: boolean; keyword?: string; minWidth?: number; minHeight?: number; bold?: boolean } = {},
+  options: {
+    underline?: boolean;
+    dashed?: boolean;
+    keyword?: string;
+    minWidth?: number;
+    minHeight?: number;
+    bold?: boolean;
+  } = {},
 ): NodeLayout {
   const s = resolveStyle(ctx.theme, view.style);
   const keywords = keywordsFor(ctx.doc, el, options.keyword);
@@ -807,41 +1253,101 @@ function layoutSimpleBox(
   const textMin = wrappedMin(label, s, 220, options.bold);
   const b = base(
     view,
-    Math.max(options.minWidth ?? 70, Math.ceil(Math.max(textMin.width, kwText ? measureText(kwText, kwSize) : 0) + PAD * 2)),
+    Math.max(
+      options.minWidth ?? 70,
+      Math.ceil(Math.max(textMin.width, kwText ? measureText(kwText, kwSize) : 0) + PAD * 2),
+    ),
     Math.max(options.minHeight ?? 30, Math.ceil(textMin.height + kwLh + PAD * 2)),
     'rect',
   );
   const primitives: Primitive[] = [
-    { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth, dash: options.dashed ? '6 4' : undefined },
+    {
+      type: 'rect',
+      x: 0,
+      y: 0,
+      width: b.width,
+      height: b.height,
+      fill: s.fill,
+      stroke: s.stroke,
+      strokeWidth: s.lineWidth,
+      dash: options.dashed ? '6 4' : undefined,
+    },
   ];
   const top = (b.height - textMin.height - kwLh) / 2;
-  if (kwText) primitives.push(text(b.width / 2, baseline(top, kwLh, kwSize), kwText, s, { fontSize: kwSize }));
+  if (kwText)
+    primitives.push(text(b.width / 2, baseline(top, kwLh, kwSize), kwText, s, { fontSize: kwSize }));
   primitives.push(
-    ...centeredLabel(label, { x: 0, y: top + kwLh, width: b.width, height: textMin.height }, s, { underline: options.underline, bold: options.bold }).primitives,
+    ...centeredLabel(label, { x: 0, y: top + kwLh, width: b.width, height: textMin.height }, s, {
+      underline: options.underline,
+      bold: options.bold,
+    }).primitives,
   );
-  return { ...b, primitives, nameBox: { x: PAD, y: top + kwLh, width: b.width - PAD * 2, height: Math.max(18, textMin.height) } };
+  return {
+    ...b,
+    primitives,
+    nameBox: { x: PAD, y: top + kwLh, width: b.width - PAD * 2, height: Math.max(18, textMin.height) },
+  };
 }
 
-function layoutInstance(ctx: NodeRenderContext, view: NodeView, el: ElementOf<'instanceSpecification'>): NodeLayout {
+function layoutInstance(
+  ctx: NodeRenderContext,
+  view: NodeView,
+  el: ElementOf<'instanceSpecification'>,
+): NodeLayout {
   const classifier = el.classifierId ? ctx.doc.modelElements[el.classifierId]?.name : el.classifierName;
   const title = classifier ? `${el.name} : ${classifier}` : el.name;
   const slots: BoxCompartment[] = visible(view, 'slots')
-    ? [{ key: 'slots', rows: el.slots.map((slot) => ({ id: slot.id, text: `${slot.name} = ${slot.value}` })) }]
+    ? [
+        {
+          key: 'slots',
+          rows: el.slots.map((slot) => ({ id: slot.id, text: `${slot.name} = ${slot.value}` })),
+        },
+      ]
     : [];
-  return classifierBox({ view, theme: ctx.theme, keywords: keywordsFor(ctx.doc, el), name: title, nameUnderline: true, compartments: el.slots.length ? slots : [] });
+  return classifierBox({
+    view,
+    theme: ctx.theme,
+    keywords: keywordsFor(ctx.doc, el),
+    name: title,
+    nameUnderline: true,
+    compartments: el.slots.length ? slots : [],
+  });
 }
 
 function layoutCollaboration(ctx: NodeRenderContext, view: NodeView, el: ModelElement): NodeLayout {
   const s = resolveStyle(ctx.theme, view.style, ctx.theme.containerFill);
   const lh = rowHeight(s.fontSize);
-  const b = base(view, Math.ceil(measureText(el.name || ' ', s.fontSize, true) * 1.6 + PAD * 2), 70, 'ellipse');
+  const b = base(
+    view,
+    Math.ceil(measureText(el.name || ' ', s.fontSize, true) * 1.6 + PAD * 2),
+    70,
+    'ellipse',
+  );
   return {
     ...b,
     primitives: [
-      { type: 'ellipse', cx: b.width / 2, cy: b.height / 2, rx: b.width / 2, ry: b.height / 2, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth, dash: '6 4' },
-      text(b.width / 2, ctx.hasChildren ? 22 : b.height / 2 + s.fontSize * 0.35, el.name, s, { bold: true, hit: { part: 'name' } }),
+      {
+        type: 'ellipse',
+        cx: b.width / 2,
+        cy: b.height / 2,
+        rx: b.width / 2,
+        ry: b.height / 2,
+        fill: s.fill,
+        stroke: s.stroke,
+        strokeWidth: s.lineWidth,
+        dash: '6 4',
+      },
+      text(b.width / 2, ctx.hasChildren ? 22 : b.height / 2 + s.fontSize * 0.35, el.name, s, {
+        bold: true,
+        hit: { part: 'name' },
+      }),
     ],
-    nameBox: { x: b.width * 0.2, y: ctx.hasChildren ? 8 : b.height / 2 - lh / 2, width: b.width * 0.6, height: lh },
+    nameBox: {
+      x: b.width * 0.2,
+      y: ctx.hasChildren ? 8 : b.height / 2 - lh / 2,
+      width: b.width * 0.6,
+      height: lh,
+    },
     bodyBox: { x: b.width * 0.15, y: 30, width: b.width * 0.7, height: b.height - 40 },
   };
 }
@@ -855,10 +1361,32 @@ function layoutInterfaceLollipop(ctx: NodeRenderContext, view: NodeView, el: Mod
     ...b,
     outlineBox: { x: cx - 10, y: 0, width: 20, height: 20 },
     primitives: [
-      { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, fill: 'none', stroke: 'none', strokeWidth: 0 },
-      { type: 'ellipse', cx, cy: 10, rx: 10, ry: 10, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
+      {
+        type: 'rect',
+        x: 0,
+        y: 0,
+        width: b.width,
+        height: b.height,
+        fill: 'none',
+        stroke: 'none',
+        strokeWidth: 0,
+      },
+      {
+        type: 'ellipse',
+        cx,
+        cy: 10,
+        rx: 10,
+        ry: 10,
+        fill: s.fill,
+        stroke: s.stroke,
+        strokeWidth: s.lineWidth,
+      },
       // The label may be wider than the ball: centre it without the box padding.
-      ...centeredLabel(el.name, { x: -PAD - 40, y: 22, width: b.width + 2 * PAD + 80, height: label.height }, s).primitives,
+      ...centeredLabel(
+        el.name,
+        { x: -PAD - 40, y: 22, width: b.width + 2 * PAD + 80, height: label.height },
+        s,
+      ).primitives,
     ],
     nameBox: { x: -40, y: 22, width: b.width + 80, height: Math.max(18, label.height) },
   };
@@ -868,13 +1396,39 @@ function layoutLane(ctx: NodeRenderContext, view: NodeView, el: ModelElement): N
   const s = resolveStyle(ctx.theme, view.style, ctx.theme.containerFill);
   const lh = rowHeight(s.fontSize);
   const header = Math.max(28, lh + PAD);
-  const b = base(view, Math.ceil(Math.max(100, measureText(el.name || ' ', s.fontSize, true) + PAD * 2)), 120, 'rect');
+  const b = base(
+    view,
+    Math.ceil(Math.max(100, measureText(el.name || ' ', s.fontSize, true) + PAD * 2)),
+    120,
+    'rect',
+  );
   return {
     ...b,
     primitives: [
-      { type: 'rect', x: 0, y: 0, width: b.width, height: b.height, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
-      { type: 'rect', x: 0, y: 0, width: b.width, height: header, fill: ctx.theme.laneHeaderFill, stroke: s.stroke, strokeWidth: s.lineWidth },
-      text(b.width / 2, baseline((header - lh) / 2, lh, s.fontSize), el.name, s, { bold: true, hit: { part: 'name' } }),
+      {
+        type: 'rect',
+        x: 0,
+        y: 0,
+        width: b.width,
+        height: b.height,
+        fill: s.fill,
+        stroke: s.stroke,
+        strokeWidth: s.lineWidth,
+      },
+      {
+        type: 'rect',
+        x: 0,
+        y: 0,
+        width: b.width,
+        height: header,
+        fill: ctx.theme.laneHeaderFill,
+        stroke: s.stroke,
+        strokeWidth: s.lineWidth,
+      },
+      text(b.width / 2, baseline((header - lh) / 2, lh, s.fontSize), el.name, s, {
+        bold: true,
+        hit: { part: 'name' },
+      }),
     ],
     nameBox: { x: PAD, y: (header - lh) / 2, width: b.width - PAD * 2, height: lh },
     bodyBox: { x: 0, y: header, width: b.width, height: b.height - header },
@@ -923,7 +1477,8 @@ export function layoutNode(ctx: NodeRenderContext, view: NodeView, el: ModelElem
     case 'dataType':
     case 'primitiveType':
     case 'signal': {
-      const keyword = el.kind === 'dataType' ? 'dataType' : el.kind === 'primitiveType' ? 'primitive' : 'signal';
+      const keyword =
+        el.kind === 'dataType' ? 'dataType' : el.kind === 'primitiveType' ? 'primitive' : 'signal';
       return classifierBox({
         view,
         theme: ctx.theme,
@@ -935,7 +1490,12 @@ export function layoutNode(ctx: NodeRenderContext, view: NodeView, el: ModelElem
     }
     case 'component': {
       if (ctx.hasChildren) {
-        const frame = layoutFrameContainer(ctx, view, el, { minWidth: 160, minHeight: 100, headerAlign: 'start', keyword: 'component' });
+        const frame = layoutFrameContainer(ctx, view, el, {
+          minWidth: 160,
+          minHeight: 100,
+          headerAlign: 'start',
+          keyword: 'component',
+        });
         const s = resolveStyle(ctx.theme, view.style, ctx.theme.containerFill);
         return { ...frame, primitives: [...frame.primitives, ...componentIcon(frame.width - 22, 6, s)] };
       }
@@ -944,12 +1504,21 @@ export function layoutNode(ctx: NodeRenderContext, view: NodeView, el: ModelElem
         theme: ctx.theme,
         keywords: keywordsFor(doc, el, 'component'),
         name: el.name,
-        compartments: hasFeatures(el) ? featureCompartments(ctx, view, el, { attributes: 'nonEmpty', operations: 'nonEmpty' }) : [],
+        compartments: hasFeatures(el)
+          ? featureCompartments(ctx, view, el, { attributes: 'nonEmpty', operations: 'nonEmpty' })
+          : [],
         icon: 'component',
       });
     }
     case 'artifact':
-      return classifierBox({ view, theme: ctx.theme, keywords: keywordsFor(doc, el, 'artifact'), name: el.name, compartments: [], icon: 'artifact' });
+      return classifierBox({
+        view,
+        theme: ctx.theme,
+        keywords: keywordsFor(doc, el, 'artifact'),
+        name: el.name,
+        compartments: [],
+        icon: 'artifact',
+      });
     case 'stereotype':
       return classifierBox({
         view,
@@ -960,15 +1529,30 @@ export function layoutNode(ctx: NodeRenderContext, view: NodeView, el: ModelElem
           ? [
               {
                 key: 'tagDefinitions',
-                rows: el.tagDefinitions.map((t) => ({ id: t.id, text: `${t.name}: ${t.type}${t.defaultValue ? ` = ${t.defaultValue}` : ''}` })),
+                rows: el.tagDefinitions.map((t) => ({
+                  id: t.id,
+                  text: `${t.name}: ${t.type}${t.defaultValue ? ` = ${t.defaultValue}` : ''}`,
+                })),
               },
             ]
           : [],
       });
     case 'metaclass':
-      return classifierBox({ view, theme: ctx.theme, keywords: keywordsFor(doc, el, 'metaclass'), name: el.name, compartments: [] });
+      return classifierBox({
+        view,
+        theme: ctx.theme,
+        keywords: keywordsFor(doc, el, 'metaclass'),
+        name: el.name,
+        compartments: [],
+      });
     case 'informationItem':
-      return classifierBox({ view, theme: ctx.theme, keywords: keywordsFor(doc, el, 'information'), name: el.name, compartments: [] });
+      return classifierBox({
+        view,
+        theme: ctx.theme,
+        keywords: keywordsFor(doc, el, 'information'),
+        name: el.name,
+        compartments: [],
+      });
     case 'instanceSpecification':
       return layoutInstance(ctx, view, el);
     case 'model':
@@ -997,18 +1581,28 @@ export function layoutNode(ctx: NodeRenderContext, view: NodeView, el: ModelElem
       const b = base(view, 18, 18, 'circle');
       const d = Math.min(b.width, b.height);
       const s = resolveStyle(ctx.theme, view.style);
-      return { ...b, outlineBox: { x: 0, y: 0, width: d, height: d }, primitives: bullseye(d, ctx.theme, s), nameBox: null };
+      return {
+        ...b,
+        outlineBox: { x: 0, y: 0, width: d, height: d },
+        primitives: bullseye(d, ctx.theme, s),
+        nameBox: null,
+      };
     }
     case 'node':
       return layoutNodeBox(ctx, view, el);
     case 'port':
       return layoutPort(ctx, view, el);
     case 'part':
-      return layoutSimpleBox(ctx, view, el, typedLabel(el.name, el.typeName, el.multiplicity), { dashed: el.aggregation !== 'composite', minWidth: 80 });
+      return layoutSimpleBox(ctx, view, el, typedLabel(el.name, el.typeName, el.multiplicity), {
+        dashed: el.aggregation !== 'composite',
+        minWidth: 80,
+      });
     case 'collaboration':
       return layoutCollaboration(ctx, view, el);
     case 'lifeline': {
-      const typeName = el.typeElementId ? (doc.modelElements[el.typeElementId]?.name ?? el.typeName) : el.typeName;
+      const typeName = el.typeElementId
+        ? (doc.modelElements[el.typeElementId]?.name ?? el.typeName)
+        : el.typeName;
       return layoutSimpleBox(ctx, view, el, typedLabel(el.name, typeName), { minWidth: 80 });
     }
     default:
@@ -1041,8 +1635,19 @@ export function layoutNote(theme: DiagramTheme, view: NoteView): NodeLayout {
       stroke,
       strokeWidth: 1,
     },
-    { type: 'polyline', points: [{ x: width - fold, y: 0 }, { x: width - fold, y: fold }, { x: width, y: fold }], stroke, strokeWidth: 1 },
-    ...lines.map((line, i): Primitive => text(PAD, baseline(PAD + i * lh, lh, s.fontSize), line, s, { anchor: 'start', hit: { part: 'name' } })),
+    {
+      type: 'polyline',
+      points: [
+        { x: width - fold, y: 0 },
+        { x: width - fold, y: fold },
+        { x: width, y: fold },
+      ],
+      stroke,
+      strokeWidth: 1,
+    },
+    ...lines.map((line, i): Primitive =>
+      text(PAD, baseline(PAD + i * lh, lh, s.fontSize), line, s, { anchor: 'start', hit: { part: 'name' } }),
+    ),
   ];
   return {
     width,
@@ -1061,5 +1666,10 @@ export function layoutNote(theme: DiagramTheme, view: NoteView): NodeLayout {
 
 /** Absolute docking bounds of a laid-out node. */
 export function dockingBounds(origin: Point, layout: NodeLayout): Bounds {
-  return { x: origin.x + layout.outlineBox.x, y: origin.y + layout.outlineBox.y, width: layout.outlineBox.width, height: layout.outlineBox.height };
+  return {
+    x: origin.x + layout.outlineBox.x,
+    y: origin.y + layout.outlineBox.y,
+    width: layout.outlineBox.width,
+    height: layout.outlineBox.height,
+  };
 }

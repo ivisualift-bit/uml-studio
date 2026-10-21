@@ -404,7 +404,15 @@ const G = {
 
 export type GlyphName = keyof typeof G;
 
-export function UmlGlyph({ name, size = 18, className }: { name: GlyphName | string; size?: number; className?: string }) {
+export function UmlGlyph({
+  name,
+  size = 18,
+  className,
+}: {
+  name: GlyphName | string;
+  size?: number;
+  className?: string;
+}) {
   return (
     <svg
       width={size}

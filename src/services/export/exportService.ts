@@ -44,14 +44,25 @@ export class ExportTooLargeError extends Error {
   }
 }
 
-export function exportSvg(doc: ProjectDocument, diagramId: ID, options: Pick<ImageExportOptions, 'background' | 'includeTitle'>): ExportResult {
+export function exportSvg(
+  doc: ProjectDocument,
+  diagramId: ID,
+  options: Pick<ImageExportOptions, 'background' | 'includeTitle'>,
+): ExportResult {
   const diagram = doc.diagrams[diagramId]!;
   const { svg, width, height } = renderDiagramSvg(doc, diagramId, {
     theme: PRINT_THEME,
     background: options.background === 'white' ? '#ffffff' : null,
     heading: options.includeTitle ? diagram.name : undefined,
   });
-  return { blob: new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), extension: 'svg', mime: 'image/svg+xml', width, height, notes: ['vector'] };
+  return {
+    blob: new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }),
+    extension: 'svg',
+    mime: 'image/svg+xml',
+    width,
+    height,
+    notes: ['vector'],
+  };
 }
 
 function loadImage(url: string): Promise<HTMLImageElement> {
@@ -64,7 +75,8 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 }
 
 async function rasterize(svg: string, width: number, height: number, transparent: boolean): Promise<Blob> {
-  if (width > MAX_CANVAS_SIDE || height > MAX_CANVAS_SIDE || width * height > MAX_CANVAS_PIXELS) throw new ExportTooLargeError(width, height);
+  if (width > MAX_CANVAS_SIDE || height > MAX_CANVAS_SIDE || width * height > MAX_CANVAS_PIXELS)
+    throw new ExportTooLargeError(width, height);
   const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
   try {
     const image = await loadImage(url);
@@ -78,13 +90,19 @@ async function rasterize(svg: string, width: number, height: number, transparent
       context.fillRect(0, 0, width, height);
     }
     context.drawImage(image, 0, 0, width, height);
-    return await new Promise<Blob>((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG encoding failed'))), 'image/png'));
+    return await new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG encoding failed'))), 'image/png'),
+    );
   } finally {
     URL.revokeObjectURL(url);
   }
 }
 
-export async function exportPng(doc: ProjectDocument, diagramId: ID, options: ImageExportOptions): Promise<ExportResult> {
+export async function exportPng(
+  doc: ProjectDocument,
+  diagramId: ID,
+  options: ImageExportOptions,
+): Promise<ExportResult> {
   const diagram = doc.diagrams[diagramId]!;
   const { svg, width, height } = renderDiagramSvg(doc, diagramId, {
     theme: PRINT_THEME,
@@ -118,7 +136,11 @@ const PAGE_SIZES_PT: Record<Exclude<PageSize, 'fit'>, [number, number]> = {
 /** SVG user units are CSS px: 1 px = 0.75 pt. */
 const PX_TO_PT = 0.75;
 
-export async function exportPdf(doc: ProjectDocument, diagramId: ID, options: PdfExportOptions): Promise<ExportResult> {
+export async function exportPdf(
+  doc: ProjectDocument,
+  diagramId: ID,
+  options: PdfExportOptions,
+): Promise<ExportResult> {
   const [{ jsPDF }] = await Promise.all([import('jspdf'), import('svg2pdf.js')]);
   const diagram = doc.diagrams[diagramId]!;
   const rendered = renderDiagramSvg(doc, diagramId, { theme: PRINT_THEME, background: '#ffffff' });
@@ -135,21 +157,34 @@ export async function exportPdf(doc: ProjectDocument, diagramId: ID, options: Pd
     pageH = contentH + margin * 2 + titleSpace + footerSpace;
   } else {
     const [w, h] = PAGE_SIZES_PT[options.pageSize];
-    const landscape = options.orientation === 'landscape' || (options.orientation === 'auto' && contentW > contentH);
+    const landscape =
+      options.orientation === 'landscape' || (options.orientation === 'auto' && contentW > contentH);
     [pageW, pageH] = landscape ? [h, w] : [w, h];
   }
-  const pdf = new jsPDF({ unit: 'pt', format: [pageW, pageH], orientation: pageW > pageH ? 'landscape' : 'portrait', compress: true });
+  const pdf = new jsPDF({
+    unit: 'pt',
+    format: [pageW, pageH],
+    orientation: pageW > pageH ? 'landscape' : 'portrait',
+    compress: true,
+  });
   pdf.setProperties({ title: diagram.name, subject: doc.name, creator: 'UML Studio' });
 
   const availW = pageW - margin * 2;
   const availH = pageH - margin * 2 - titleSpace - footerSpace;
-  const scale = Math.min(availW / contentW, availH / contentH, options.pageSize === 'fit' ? 1 : Number.POSITIVE_INFINITY);
+  const scale = Math.min(
+    availW / contentW,
+    availH / contentH,
+    options.pageSize === 'fit' ? 1 : Number.POSITIVE_INFINITY,
+  );
   const drawW = contentW * scale;
   const drawH = contentH * scale;
   const x = margin + (availW - drawW) / 2;
   const y = margin + titleSpace + (availH - drawH) / 2;
 
-  const allText = [diagram.name, ...[...rendered.svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => m[1] ?? '')].join('');
+  const allText = [
+    diagram.name,
+    ...[...rendered.svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => m[1] ?? ''),
+  ].join('');
   const vector = isWinAnsiEncodable(decodeEntities(allText));
   const titleText = vector ? diagram.name : asciiFallback(diagram.name);
   if (options.includeTitle) {
@@ -170,8 +205,15 @@ export async function exportPdf(doc: ProjectDocument, diagramId: ID, options: Pd
     }
   } else {
     // Raster fallback (reported to the user): standard PDF fonts cannot encode these characters.
-    const rasterScale = Math.max(1, Math.min(4, Math.floor(Math.sqrt(MAX_CANVAS_PIXELS / (rendered.width * rendered.height)))));
-    const png = renderDiagramSvg(doc, diagramId, { theme: PRINT_THEME, background: '#ffffff', scale: rasterScale });
+    const rasterScale = Math.max(
+      1,
+      Math.min(4, Math.floor(Math.sqrt(MAX_CANVAS_PIXELS / (rendered.width * rendered.height)))),
+    );
+    const png = renderDiagramSvg(doc, diagramId, {
+      theme: PRINT_THEME,
+      background: '#ffffff',
+      scale: rasterScale,
+    });
     const blob = await rasterize(png.svg, png.width, png.height, false);
     const dataUrl = await blobToDataUrl(blob);
     pdf.addImage(dataUrl, 'PNG', x, y, drawW, drawH, undefined, 'FAST');
@@ -186,7 +228,12 @@ export async function exportPdf(doc: ProjectDocument, diagramId: ID, options: Pd
 }
 
 export function exportJson(doc: ProjectDocument): ExportResult {
-  return { blob: new Blob([serializeProject(doc)], { type: 'application/json' }), extension: 'json', mime: 'application/json', notes: [] };
+  return {
+    blob: new Blob([serializeProject(doc)], { type: 'application/json' }),
+    extension: 'json',
+    mime: 'application/json',
+    notes: [],
+  };
 }
 
 function decodeEntities(text: string): string {

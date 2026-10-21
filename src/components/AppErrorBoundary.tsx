@@ -24,7 +24,10 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, State> 
     const doc = useDocumentStore.getState().doc;
     if (!doc) return;
     try {
-      downloadBlob(new Blob([serializeProject(doc)], { type: 'application/json' }), `${doc.name || 'project'}-recovered.umls`);
+      downloadBlob(
+        new Blob([serializeProject(doc)], { type: 'application/json' }),
+        `${doc.name || 'project'}-recovered.umls`,
+      );
     } catch (error) {
       console.error(error);
     }
@@ -36,20 +39,37 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, State> 
     const hasDoc = !!useDocumentStore.getState().doc;
     return (
       <div className="flex h-full items-center justify-center bg-bg p-6">
-        <div className="max-w-lg rounded-lg border border-border-strong bg-surface-1 p-5 shadow-panel" role="alert">
+        <div
+          className="max-w-lg rounded-lg border border-border-strong bg-surface-1 p-5 shadow-panel"
+          role="alert"
+        >
           <h1 className="text-[15px] font-semibold">{t('error.boundaryTitle')}</h1>
           <p className="mt-2 text-[13px] text-muted">{t('error.boundaryBody')}</p>
-          <pre className="mt-3 max-h-40 overflow-auto rounded bg-surface-2 p-2 font-mono text-[11px] text-danger">{error.message}</pre>
+          <pre className="mt-3 max-h-40 overflow-auto rounded bg-surface-2 p-2 font-mono text-[11px] text-danger">
+            {error.message}
+          </pre>
           <div className="mt-4 flex flex-wrap gap-2">
-            <button type="button" className="h-8 rounded-md bg-accent px-3 text-[13px] text-accent-text" onClick={() => this.setState({ error: null })}>
+            <button
+              type="button"
+              className="h-8 rounded-md bg-accent px-3 text-[13px] text-accent-text"
+              onClick={() => this.setState({ error: null })}
+            >
               {t('error.tryAgain')}
             </button>
             {hasDoc && (
-              <button type="button" className="h-8 rounded-md border border-border-strong px-3 text-[13px]" onClick={this.download}>
+              <button
+                type="button"
+                className="h-8 rounded-md border border-border-strong px-3 text-[13px]"
+                onClick={this.download}
+              >
                 {t('error.saveFirst')}
               </button>
             )}
-            <button type="button" className="h-8 rounded-md border border-border-strong px-3 text-[13px]" onClick={() => window.location.reload()}>
+            <button
+              type="button"
+              className="h-8 rounded-md border border-border-strong px-3 text-[13px]"
+              onClick={() => window.location.reload()}
+            >
               {t('error.reload')}
             </button>
           </div>

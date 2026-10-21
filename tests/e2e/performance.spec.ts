@@ -7,7 +7,10 @@ function largeProjectText(): string {
   const d = b.diagram('class', 'Hundred');
   const views: string[] = [];
   for (let i = 0; i < 100; i += 1) {
-    const n = b.node(d, 'class', `C${i}`, (i % 10) * 220, Math.floor(i / 10) * 170, { width: 160, height: 80 });
+    const n = b.node(d, 'class', `C${i}`, (i % 10) * 220, Math.floor(i / 10) * 170, {
+      width: 160,
+      height: 80,
+    });
     b.attribute(n.elementId, `- value${i}: Integer`);
     views.push(n.viewId);
   }
@@ -40,7 +43,9 @@ test('100 nodes / 200 edges: opens and drags responsively in the browser', async
   }
   await page.mouse.up();
   const median = frames.slice().sort((a, b) => a - b)[Math.floor(frames.length / 2)]!;
-  console.log(`[perf-e2e] open+render ${openMs} ms, median drag frame ${median} ms (max ${Math.max(...frames)} ms)`);
+  console.log(
+    `[perf-e2e] open+render ${openMs} ms, median drag frame ${median} ms (max ${Math.max(...frames)} ms)`,
+  );
   expect(openMs).toBeLessThan(10_000);
   expect(median).toBeLessThan(200);
 });

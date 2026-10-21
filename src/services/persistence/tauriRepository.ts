@@ -19,7 +19,8 @@ async function toBase64(data: Blob): Promise<string> {
   const bytes = new Uint8Array(await data.arrayBuffer());
   let binary = '';
   const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  for (let i = 0; i < bytes.length; i += chunk)
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
   return btoa(binary);
 }
 
@@ -46,7 +47,10 @@ export class TauriProjectRepository implements ProjectRepository {
   }
 
   async saveAs(text: string, suggestedName: string): Promise<FileRef | null> {
-    const path = await invoke<string | null>('pick_save_path', { suggestedName: safeFileName(suggestedName), kind: 'project' });
+    const path = await invoke<string | null>('pick_save_path', {
+      suggestedName: safeFileName(suggestedName),
+      kind: 'project',
+    });
     if (!path) return null;
     await invoke('write_text_file', { path, contents: text });
     return { kind: 'tauri', name: path.split(/[\\/]/).pop() ?? path, path };
@@ -54,7 +58,13 @@ export class TauriProjectRepository implements ProjectRepository {
 
   async listRecent(): Promise<RecentEntry[]> {
     const list = await invoke<NativeRecent[]>('list_recent');
-    return list.map((r) => ({ id: r.path, name: r.project_name, fileName: r.name, kind: 'tauri', lastOpenedAt: r.last_opened_at }));
+    return list.map((r) => ({
+      id: r.path,
+      name: r.project_name,
+      fileName: r.name,
+      kind: 'tauri',
+      lastOpenedAt: r.last_opened_at,
+    }));
   }
 
   async openRecent(entry: RecentEntry): Promise<OpenedFile | null> {
@@ -73,7 +83,10 @@ export class TauriProjectRepository implements ProjectRepository {
 
   async exportFile(data: Blob, suggestedName: string, filter: ExportFilter): Promise<string | null> {
     const ext = filter.extensions[0] ?? 'bin';
-    const path = await invoke<string | null>('pick_save_path', { suggestedName: `${safeFileName(suggestedName, 'diagram')}.${ext}`, kind: ext });
+    const path = await invoke<string | null>('pick_save_path', {
+      suggestedName: `${safeFileName(suggestedName, 'diagram')}.${ext}`,
+      kind: ext,
+    });
     if (!path) return null;
     await invoke('write_binary_file', { path, base64: await toBase64(data) });
     return path.split(/[\\/]/).pop() ?? path;

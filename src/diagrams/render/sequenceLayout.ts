@@ -1,7 +1,13 @@
 import type { ID, Point } from '@/domain/schemas/common';
 import type { ElementOf } from '@/domain/schemas/elements';
 import type { ProjectDocument, UMLDiagram } from '@/domain/schemas/project';
-import type { ActivationView, FragmentView, LifelineView, MessageView, NoteView } from '@/domain/schemas/views';
+import type {
+  ActivationView,
+  FragmentView,
+  LifelineView,
+  MessageView,
+  NoteView,
+} from '@/domain/schemas/views';
 import { formatMessageLabel } from '@/domain/notation/labels';
 import { markerPrimitives } from './edges';
 import { trimEnd } from './geometry';
@@ -77,7 +83,10 @@ export interface SequenceOverrides {
   messageY?: ReadonlyMap<ID, { sendY: number; receiveY: number }>;
   messageLabel?: ReadonlyMap<ID, Point>;
   activation?: ReadonlyMap<ID, { startY: number; endY: number }>;
-  fragment?: ReadonlyMap<ID, { x: number; y: number; width: number; height: number; operandYs?: Record<ID, number> }>;
+  fragment?: ReadonlyMap<
+    ID,
+    { x: number; y: number; width: number; height: number; operandYs?: Record<ID, number> }
+  >;
   note?: ReadonlyMap<ID, { x: number; y: number; width?: number; height?: number }>;
 }
 
@@ -87,12 +96,19 @@ export function orderMessages(views: MessageView[]): MessageView[] {
 }
 
 function lifelineLabel(doc: ProjectDocument, el: ElementOf<'lifeline'>): string {
-  const typeName = el.typeElementId ? (doc.modelElements[el.typeElementId]?.name ?? el.typeName) : el.typeName;
+  const typeName = el.typeElementId
+    ? (doc.modelElements[el.typeElementId]?.name ?? el.typeName)
+    : el.typeName;
   if (typeName) return `${el.name}${el.name ? ' ' : ''}: ${typeName}`.trim();
   return el.name || ':';
 }
 
-export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme: DiagramTheme, overrides: SequenceOverrides = {}): SequenceLayout {
+export function layoutSequence(
+  doc: ProjectDocument,
+  diagram: UMLDiagram,
+  theme: DiagramTheme,
+  overrides: SequenceOverrides = {},
+): SequenceLayout {
   const views = Object.values(diagram.views);
   const lifelineViews = views.filter((v): v is LifelineView => v.kind === 'lifeline');
   const messageViews = orderMessages(
@@ -127,7 +143,8 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
     const msg = doc.modelElements[mv.elementId];
     if (msg?.kind !== 'message' || !mv.targetViewId) continue;
     if (msg.sort === 'create' && !createdAt.has(mv.targetViewId)) createdAt.set(mv.targetViewId, mv.receiveY);
-    if (msg.sort === 'destroy' && !destroyedAt.has(mv.targetViewId)) destroyedAt.set(mv.targetViewId, mv.receiveY);
+    if (msg.sort === 'destroy' && !destroyedAt.has(mv.targetViewId))
+      destroyedAt.set(mv.targetViewId, mv.receiveY);
   }
 
   let contentBottom = 0;
@@ -151,7 +168,16 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
     const primitives: Primitive[] = [];
     const destroyed = destroyedAt.get(view.id) ?? null;
     const lineBottom = destroyed ?? contentBottom;
-    primitives.push({ type: 'line', x1: x, y1: top + view.headHeight, x2: x, y2: lineBottom, stroke: s.stroke, strokeWidth: 1, dash: '6 4' });
+    primitives.push({
+      type: 'line',
+      x1: x,
+      y1: top + view.headHeight,
+      x2: x,
+      y2: lineBottom,
+      stroke: s.stroke,
+      strokeWidth: 1,
+      dash: '6 4',
+    });
     if (element.headStyle === 'actor') {
       const figH = view.headHeight - lh - 4;
       const head = figH * 0.16;
@@ -159,42 +185,138 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
       const hip = top + figH * 0.62;
       primitives.push(
         { type: 'rect', ...headBox, fill: 'none', stroke: 'none', strokeWidth: 0 },
-        { type: 'ellipse', cx: x, cy: top + head, rx: head, ry: head, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
+        {
+          type: 'ellipse',
+          cx: x,
+          cy: top + head,
+          rx: head,
+          ry: head,
+          fill: s.fill,
+          stroke: s.stroke,
+          strokeWidth: s.lineWidth,
+        },
         { type: 'line', x1: x, y1: neck, x2: x, y2: hip, stroke: s.stroke, strokeWidth: s.lineWidth },
-        { type: 'line', x1: x - figH * 0.28, y1: neck + figH * 0.12, x2: x + figH * 0.28, y2: neck + figH * 0.12, stroke: s.stroke, strokeWidth: s.lineWidth },
-        { type: 'line', x1: x, y1: hip, x2: x - figH * 0.24, y2: top + figH, stroke: s.stroke, strokeWidth: s.lineWidth },
-        { type: 'line', x1: x, y1: hip, x2: x + figH * 0.24, y2: top + figH, stroke: s.stroke, strokeWidth: s.lineWidth },
-        { type: 'text', x, y: top + figH + lh - 2, text: label, fontSize: s.fontSize, anchor: 'middle', fill: s.text, hit: { part: 'name' } },
+        {
+          type: 'line',
+          x1: x - figH * 0.28,
+          y1: neck + figH * 0.12,
+          x2: x + figH * 0.28,
+          y2: neck + figH * 0.12,
+          stroke: s.stroke,
+          strokeWidth: s.lineWidth,
+        },
+        {
+          type: 'line',
+          x1: x,
+          y1: hip,
+          x2: x - figH * 0.24,
+          y2: top + figH,
+          stroke: s.stroke,
+          strokeWidth: s.lineWidth,
+        },
+        {
+          type: 'line',
+          x1: x,
+          y1: hip,
+          x2: x + figH * 0.24,
+          y2: top + figH,
+          stroke: s.stroke,
+          strokeWidth: s.lineWidth,
+        },
+        {
+          type: 'text',
+          x,
+          y: top + figH + lh - 2,
+          text: label,
+          fontSize: s.fontSize,
+          anchor: 'middle',
+          fill: s.text,
+          hit: { part: 'name' },
+        },
       );
     } else {
       primitives.push(
         { type: 'rect', ...headBox, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth },
-        { type: 'text', x, y: top + view.headHeight / 2 + s.fontSize * 0.35, text: label, fontSize: s.fontSize, anchor: 'middle', fill: s.text, hit: { part: 'name' } },
+        {
+          type: 'text',
+          x,
+          y: top + view.headHeight / 2 + s.fontSize * 0.35,
+          text: label,
+          fontSize: s.fontSize,
+          anchor: 'middle',
+          fill: s.text,
+          hit: { part: 'name' },
+        },
       );
     }
     if (destroyed !== null) {
       const d = 9;
       primitives.push(
-        { type: 'line', x1: x - d, y1: destroyed - d, x2: x + d, y2: destroyed + d, stroke: s.stroke, strokeWidth: 1.8 },
-        { type: 'line', x1: x + d, y1: destroyed - d, x2: x - d, y2: destroyed + d, stroke: s.stroke, strokeWidth: 1.8 },
+        {
+          type: 'line',
+          x1: x - d,
+          y1: destroyed - d,
+          x2: x + d,
+          y2: destroyed + d,
+          stroke: s.stroke,
+          strokeWidth: 1.8,
+        },
+        {
+          type: 'line',
+          x1: x + d,
+          y1: destroyed - d,
+          x2: x - d,
+          y2: destroyed + d,
+          stroke: s.stroke,
+          strokeWidth: 1.8,
+        },
       );
     }
-    lifelines.set(view.id, { view, element, x, headBox, lineTop: top + view.headHeight, lineBottom, destroyedAt: destroyed, primitives, label });
+    lifelines.set(view.id, {
+      view,
+      element,
+      x,
+      headBox,
+      lineTop: top + view.headHeight,
+      lineBottom,
+      destroyedAt: destroyed,
+      primitives,
+      label,
+    });
   }
 
   // ---- Activations (nesting depth by range containment on the same lifeline)
   const activations = new Map<ID, ActivationRender>();
   const byLifeline = new Map<ID, ActivationView[]>();
-  for (const av of activationViews) byLifeline.set(av.lifelineViewId, [...(byLifeline.get(av.lifelineViewId) ?? []), av]);
+  for (const av of activationViews)
+    byLifeline.set(av.lifelineViewId, [...(byLifeline.get(av.lifelineViewId) ?? []), av]);
   for (const [lifelineViewId, list] of byLifeline) {
     const lifeline = lifelines.get(lifelineViewId);
     if (!lifeline) continue;
-    const sorted = list.slice().sort((a, b) => a.startY - b.startY || b.endY - a.endY || a.id.localeCompare(b.id));
+    const sorted = list
+      .slice()
+      .sort((a, b) => a.startY - b.startY || b.endY - a.endY || a.id.localeCompare(b.id));
     for (const av of sorted) {
-      const depth = sorted.filter((o) => o !== av && o.startY <= av.startY && o.endY >= av.endY && (o.startY < av.startY || o.endY > av.endY || o.id < av.id)).length;
+      const depth = sorted.filter(
+        (o) =>
+          o !== av &&
+          o.startY <= av.startY &&
+          o.endY >= av.endY &&
+          (o.startY < av.startY || o.endY > av.endY || o.id < av.id),
+      ).length;
       const s = resolveStyle(theme, av.style, theme.activationFill);
-      const box = { x: lifeline.x - ACTIVATION_WIDTH / 2 + depth * (ACTIVATION_WIDTH / 2), y: av.startY, width: ACTIVATION_WIDTH, height: Math.max(4, av.endY - av.startY) };
-      activations.set(av.id, { view: av, box, depth, primitives: [{ type: 'rect', ...box, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth }] });
+      const box = {
+        x: lifeline.x - ACTIVATION_WIDTH / 2 + depth * (ACTIVATION_WIDTH / 2),
+        y: av.startY,
+        width: ACTIVATION_WIDTH,
+        height: Math.max(4, av.endY - av.startY),
+      };
+      activations.set(av.id, {
+        view: av,
+        box,
+        depth,
+        primitives: [{ type: 'rect', ...box, fill: s.fill, stroke: s.stroke, strokeWidth: s.lineWidth }],
+      });
     }
   }
 
@@ -242,26 +364,65 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
       const sourceX = source?.x ?? targetX - FOUND_LOST_LENGTH;
       const sx = source ? anchorX(source.view.id, mv.sendY, targetX) : sourceX;
       let tx = target ? anchorX(target.view.id, mv.receiveY, sourceX) : targetX;
-      if (element.sort === 'create' && target) tx = sourceX < target.x ? target.headBox.x : target.headBox.x + target.headBox.width;
+      if (element.sort === 'create' && target)
+        tx = sourceX < target.x ? target.headBox.x : target.headBox.x + target.headBox.width;
       points = [
         { x: sx, y: mv.sendY },
         { x: tx, y: mv.receiveY },
       ];
     }
     const dashed = element.sort === 'reply' || element.sort === 'create';
-    const marker = element.sort === 'asynchronous' || element.sort === 'reply' || element.sort === 'create' ? 'openArrow' : 'filledArrow';
+    const marker =
+      element.sort === 'asynchronous' || element.sort === 'reply' || element.sort === 'create'
+        ? 'openArrow'
+        : 'filledArrow';
     const tip = points[points.length - 1]!;
     const prev = points[points.length - 2]!;
     const primitives: Primitive[] = [
-      { type: 'polyline', points: marker === 'filledArrow' ? trimEnd(points, 10) : points, stroke: color, strokeWidth: s.lineWidth, dash: dashed ? '6 4' : undefined, fill: 'none' },
-      ...markerPrimitives(marker, tip, Math.atan2(tip.y - prev.y, tip.x - prev.x), color, theme.background, s.lineWidth),
+      {
+        type: 'polyline',
+        points: marker === 'filledArrow' ? trimEnd(points, 10) : points,
+        stroke: color,
+        strokeWidth: s.lineWidth,
+        dash: dashed ? '6 4' : undefined,
+        fill: 'none',
+      },
+      ...markerPrimitives(
+        marker,
+        tip,
+        Math.atan2(tip.y - prev.y, tip.x - prev.x),
+        color,
+        theme.background,
+        s.lineWidth,
+      ),
     ];
-    if (!source) primitives.push({ type: 'ellipse', cx: points[0]!.x, cy: points[0]!.y, rx: 5, ry: 5, fill: color, stroke: color, strokeWidth: 1 });
-    if (!target && !isSelf) primitives.push({ type: 'ellipse', cx: tip.x + 5, cy: tip.y, rx: 5, ry: 5, fill: color, stroke: color, strokeWidth: 1 });
+    if (!source)
+      primitives.push({
+        type: 'ellipse',
+        cx: points[0]!.x,
+        cy: points[0]!.y,
+        rx: 5,
+        ry: 5,
+        fill: color,
+        stroke: color,
+        strokeWidth: 1,
+      });
+    if (!target && !isSelf)
+      primitives.push({
+        type: 'ellipse',
+        cx: tip.x + 5,
+        cy: tip.y,
+        rx: 5,
+        ry: 5,
+        fill: color,
+        stroke: color,
+        strokeWidth: 1,
+      });
 
     let labelText = formatMessageLabel(element.name, element.arguments, element.sort);
     if (element.guard.trim()) labelText = `[${element.guard.trim()}] ${labelText}`;
-    if (diagram.options.showMessageNumbers && element.sort !== 'reply') labelText = labelText ? `${number}: ${labelText}` : `${number}`;
+    if (diagram.options.showMessageNumbers && element.sort !== 'reply')
+      labelText = labelText ? `${number}: ${labelText}` : `${number}`;
     const textW = measureText(labelText, s.fontSize);
     const off = mv.labelOffset;
     let lx: number;
@@ -277,9 +438,23 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
       anchor = 'middle';
     }
     if (labelText) {
-      primitives.push({ type: 'text', x: lx, y: ly, text: labelText, fontSize: s.fontSize, anchor, fill: s.text, hit: { label: 'name' } });
+      primitives.push({
+        type: 'text',
+        x: lx,
+        y: ly,
+        text: labelText,
+        fontSize: s.fontSize,
+        anchor,
+        fill: s.text,
+        hit: { label: 'name' },
+      });
     }
-    const labelBounds = { x: anchor === 'start' ? lx - 2 : lx - textW / 2 - 2, y: ly - s.fontSize, width: textW + 4, height: s.fontSize * 1.35 };
+    const labelBounds = {
+      x: anchor === 'start' ? lx - 2 : lx - textW / 2 - 2,
+      y: ly - s.fontSize,
+      width: textW + 4,
+      height: s.fontSize * 1.35,
+    };
     messages.set(mv.id, { view: mv, element, points, labelText, labelBounds, number, primitives });
   }
 
@@ -294,7 +469,9 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
     const tagW = measureText(tagText, s.fontSize, true) + 18;
     const tagH = 20;
     const tagBox = { x: fv.x, y: fv.y, width: tagW, height: tagH };
-    const primitives: Primitive[] = [{ type: 'rect', ...box, fill: fv.style.fill ?? 'none', stroke: s.stroke, strokeWidth: s.lineWidth }];
+    const primitives: Primitive[] = [
+      { type: 'rect', ...box, fill: fv.style.fill ?? 'none', stroke: s.stroke, strokeWidth: s.lineWidth },
+    ];
     const overlay: Primitive[] = [
       {
         type: 'polygon',
@@ -309,29 +486,82 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
         stroke: s.stroke,
         strokeWidth: s.lineWidth,
       },
-      { type: 'text', x: fv.x + 7, y: fv.y + tagH / 2 + s.fontSize * 0.35, text: tagText, fontSize: s.fontSize, bold: true, anchor: 'start', fill: s.text },
+      {
+        type: 'text',
+        x: fv.x + 7,
+        y: fv.y + tagH / 2 + s.fontSize * 0.35,
+        text: tagText,
+        fontSize: s.fontSize,
+        bold: true,
+        anchor: 'start',
+        fill: s.text,
+      },
     ];
-    const tops = element.operands.map((o, i) => (i === 0 ? fv.y : (fv.operandYs[o.id] ?? fv.y + ((i + 1) * fv.height) / (element.operands.length + 1))));
+    const tops = element.operands.map((o, i) =>
+      i === 0 ? fv.y : (fv.operandYs[o.id] ?? fv.y + ((i + 1) * fv.height) / (element.operands.length + 1)),
+    );
     const operands = element.operands.map((o, i) => {
       const top = tops[i]!;
       const bottom = tops[i + 1] ?? fv.y + fv.height;
-      if (i > 0) primitives.push({ type: 'line', x1: fv.x, y1: top, x2: fv.x + fv.width, y2: top, stroke: s.stroke, strokeWidth: s.lineWidth, dash: '6 4' });
+      if (i > 0)
+        primitives.push({
+          type: 'line',
+          x1: fv.x,
+          y1: top,
+          x2: fv.x + fv.width,
+          y2: top,
+          stroke: s.stroke,
+          strokeWidth: s.lineWidth,
+          dash: '6 4',
+        });
       const gx = i === 0 ? fv.x + tagW + 8 : fv.x + 10;
       const gy = i === 0 ? fv.y + tagH / 2 + s.fontSize * 0.35 : top + s.fontSize + 4;
       const guardText = element.operator === 'ref' ? o.guard : o.guard.trim() ? `[${o.guard.trim()}]` : '';
       if (guardText) {
         const gw0 = measureText(guardText, s.fontSize);
         if (element.operator !== 'ref') {
-          overlay.push({ type: 'rect', x: gx - 2, y: gy - s.fontSize, width: gw0 + 4, height: s.fontSize * 1.3, fill: theme.background, stroke: 'none', strokeWidth: 0 });
+          overlay.push({
+            type: 'rect',
+            x: gx - 2,
+            y: gy - s.fontSize,
+            width: gw0 + 4,
+            height: s.fontSize * 1.3,
+            fill: theme.background,
+            stroke: 'none',
+            strokeWidth: 0,
+          });
         }
         if (element.operator === 'ref') {
-          overlay.push({ type: 'text', x: fv.x + fv.width / 2, y: fv.y + fv.height / 2 + s.fontSize * 0.35, text: guardText, fontSize: s.fontSize, anchor: 'middle', fill: s.text, hit: { member: o.id, collection: 'operands' } });
+          overlay.push({
+            type: 'text',
+            x: fv.x + fv.width / 2,
+            y: fv.y + fv.height / 2 + s.fontSize * 0.35,
+            text: guardText,
+            fontSize: s.fontSize,
+            anchor: 'middle',
+            fill: s.text,
+            hit: { member: o.id, collection: 'operands' },
+          });
         } else {
-          overlay.push({ type: 'text', x: gx, y: gy, text: guardText, fontSize: s.fontSize, anchor: 'start', fill: s.text, hit: { member: o.id, collection: 'operands' } });
+          overlay.push({
+            type: 'text',
+            x: gx,
+            y: gy,
+            text: guardText,
+            fontSize: s.fontSize,
+            anchor: 'start',
+            fill: s.text,
+            hit: { member: o.id, collection: 'operands' },
+          });
         }
       }
       const gw = Math.max(60, measureText(guardText || '[ ]', s.fontSize) + 8);
-      return { id: o.id, top, bottom, guardBox: { x: gx - 2, y: gy - s.fontSize, width: gw, height: s.fontSize * 1.4 } };
+      return {
+        id: o.id,
+        top,
+        bottom,
+        guardBox: { x: gx - 2, y: gy - s.fontSize, width: gw, height: s.fontSize * 1.4 },
+      };
     });
     fragments.set(fv.id, { view: fv, element, box, tagBox, operands, primitives, overlay });
   }
@@ -341,7 +571,9 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
   for (const view of views) {
     if (view.kind !== 'note') continue;
     const o = overrides.note?.get(view.id);
-    const v = o ? { ...view, x: o.x, y: o.y, width: o.width ?? view.width, height: o.height ?? view.height } : view;
+    const v = o
+      ? { ...view, x: o.x, y: o.y, width: o.width ?? view.width, height: o.height ?? view.height }
+      : view;
     notes.set(view.id, { view: v, layout: layoutNote(theme, v) });
   }
 
@@ -351,9 +583,24 @@ export function layoutSequence(doc: ProjectDocument, diagram: UMLDiagram, theme:
     ...[...activations.values()].sort((a, b) => a.depth - b.depth).flatMap((a) => a.primitives),
     ...[...fragments.values()].flatMap((f) => f.overlay),
     ...[...messages.values()].flatMap((m) => m.primitives),
-    ...[...notes.values()].map((n): Primitive => ({ type: 'group', dx: n.view.x, dy: n.view.y, children: n.layout.primitives })),
+    ...[...notes.values()].map((n): Primitive => ({
+      type: 'group',
+      dx: n.view.x,
+      dy: n.view.y,
+      children: n.layout.primitives,
+    })),
   ];
   let bounds = primitivesBounds(primitives);
   for (const l of lifelines.values()) bounds = unionBounds(bounds, l.headBox);
-  return { lifelines, activations, messages, fragments, notes, orderedMessageIds, bottom: contentBottom, primitives, bounds };
+  return {
+    lifelines,
+    activations,
+    messages,
+    fragments,
+    notes,
+    orderedMessageIds,
+    bottom: contentBottom,
+    primitives,
+    bounds,
+  };
 }

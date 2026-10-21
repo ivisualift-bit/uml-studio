@@ -53,7 +53,10 @@ function cachedNodeLayout(
   hasChildren: boolean,
   sizeOverride: { width?: number; height?: number } | undefined,
 ): NodeLayout {
-  const effectiveView = sizeOverride?.width || sizeOverride?.height ? { ...view, width: sizeOverride.width ?? view.width, height: sizeOverride.height ?? view.height } : view;
+  const effectiveView =
+    sizeOverride?.width || sizeOverride?.height
+      ? { ...view, width: sizeOverride.width ?? view.width, height: sizeOverride.height ?? view.height }
+      : view;
   if (view.kind === 'note') return layoutNote(theme, effectiveView as NoteView);
   if (!element) throw new Error('node without element');
   // Applied stereotypes and classifier names can depend on other elements; include the diagram
@@ -81,7 +84,8 @@ function optionsKey(diagram: UMLDiagram): string {
 function dependencyKey(doc: ProjectDocument, el: ModelElement): string {
   const parts: string[] = [];
   for (const a of el.appliedStereotypes) parts.push(doc.modelElements[a.stereotypeId]?.name ?? '');
-  if (el.kind === 'instanceSpecification' && el.classifierId) parts.push(doc.modelElements[el.classifierId]?.name ?? '');
+  if (el.kind === 'instanceSpecification' && el.classifierId)
+    parts.push(doc.modelElements[el.classifierId]?.name ?? '');
   if (el.kind === 'lifeline' && el.typeElementId) parts.push(doc.modelElements[el.typeElementId]?.name ?? '');
   return parts.join('\u0001');
 }
@@ -94,7 +98,8 @@ export function layoutGraphDiagram(
 ): GraphDiagramLayout {
   const views = Object.values(diagram.views);
   const containerIds = new Set<ID>();
-  for (const v of views) if ((v.kind === 'node' || v.kind === 'note') && v.containerViewId) containerIds.add(v.containerViewId);
+  for (const v of views)
+    if ((v.kind === 'node' || v.kind === 'note') && v.containerViewId) containerIds.add(v.containerViewId);
 
   const depthOf = (view: NodeView | NoteView): number => {
     let depth = 0;
@@ -125,21 +130,38 @@ export function layoutGraphDiagram(
       x,
       y,
       depth: depthOf(view),
-      isContainer: !!element && CONTAINER_KINDS.has(element.kind) && (containerIds.has(view.id) || element.kind === 'activityPartition' || element.kind === 'subject'),
+      isContainer:
+        !!element &&
+        CONTAINER_KINDS.has(element.kind) &&
+        (containerIds.has(view.id) || element.kind === 'activityPartition' || element.kind === 'subject'),
       docking: {
-        bounds: { x: x + layout.outlineBox.x, y: y + layout.outlineBox.y, width: layout.outlineBox.width, height: layout.outlineBox.height },
+        bounds: {
+          x: x + layout.outlineBox.x,
+          y: y + layout.outlineBox.y,
+          width: layout.outlineBox.width,
+          height: layout.outlineBox.height,
+        },
         outline: layout.outline,
       },
     });
   });
   const order = new Map(views.map((v, i) => [v.id, i]));
-  nodes.sort((a, b) => a.depth - b.depth || +b.isContainer - +a.isContainer || order.get(a.view.id)! - order.get(b.view.id)!);
+  nodes.sort(
+    (a, b) =>
+      a.depth - b.depth || +b.isContainer - +a.isContainer || order.get(a.view.id)! - order.get(b.view.id)!,
+  );
   const nodeById = new Map(nodes.map((n) => [n.view.id, n]));
 
   // Parallel straight edges between the same pair are fanned out.
   const pairCount = new Map<string, ID[]>();
   for (const v of views) {
-    if (v.kind !== 'edge' || v.waypoints.length || v.routing !== 'straight' || v.sourceViewId === v.targetViewId) continue;
+    if (
+      v.kind !== 'edge' ||
+      v.waypoints.length ||
+      v.routing !== 'straight' ||
+      v.sourceViewId === v.targetViewId
+    )
+      continue;
     const key = [v.sourceViewId, v.targetViewId].sort().join('|');
     pairCount.set(key, [...(pairCount.get(key) ?? []), v.id]);
   }
@@ -160,7 +182,14 @@ export function layoutGraphDiagram(
     if (!s || !t) continue;
     const waypoints = overrides.waypoints?.get(view.id) ?? view.waypoints;
     if (view.kind === 'noteLink') {
-      const points = routeEdge({ source: s.docking, target: t.docking, waypoints, routing: 'straight', isSelf: false, parallelOffset: 0 });
+      const points = routeEdge({
+        source: s.docking,
+        target: t.docking,
+        waypoints,
+        routing: 'straight',
+        isSelf: false,
+        parallelOffset: 0,
+      });
       const color = view.style.stroke ?? theme.noteStroke;
       edges.push({
         view,
@@ -168,7 +197,9 @@ export function layoutGraphDiagram(
         targetViewId: t.view.id,
         layout: {
           points,
-          primitives: [{ type: 'polyline', points, stroke: color, strokeWidth: 1, dash: '4 3', fill: 'none' }],
+          primitives: [
+            { type: 'polyline', points, stroke: color, strokeWidth: 1, dash: '4 3', fill: 'none' },
+          ],
           labels: [],
           path: points.map((p, i) => `${i ? 'L' : 'M'}${p.x} ${p.y}`).join(' '),
         },
@@ -186,13 +217,25 @@ export function layoutGraphDiagram(
       parallelOffset: parallelOffset(view),
     });
     const extraName = conveyedLabel(doc, rel);
-    const ballTarget = rel.kind === 'realization' && t.view.kind === 'node' && t.view.variant === 'alternate' && t.element?.kind === 'interface';
+    const ballTarget =
+      rel.kind === 'realization' &&
+      t.view.kind === 'node' &&
+      t.view.variant === 'alternate' &&
+      t.element?.kind === 'interface';
     edges.push({
       view,
       relationship: rel,
       sourceViewId: s.view.id,
       targetViewId: t.view.id,
-      layout: layoutEdge({ doc, relationship: rel, view, points, theme, extraName, providedInterfaceBall: ballTarget }),
+      layout: layoutEdge({
+        doc,
+        relationship: rel,
+        view,
+        points,
+        theme,
+        extraName,
+        providedInterfaceBall: ballTarget,
+      }),
     });
   }
 
@@ -207,6 +250,11 @@ export function layoutGraphDiagram(
 
 /** Flatten a graph layout into export primitives: containers, other nodes, then edges on top (as on the canvas). */
 export function graphPrimitives(layout: GraphDiagramLayout): Primitive[] {
-  const group = (n: GraphNodeRender): Primitive => ({ type: 'group', dx: n.x, dy: n.y, children: n.layout.primitives });
+  const group = (n: GraphNodeRender): Primitive => ({
+    type: 'group',
+    dx: n.x,
+    dy: n.y,
+    children: n.layout.primitives,
+  });
   return [...layout.nodes.map(group), ...layout.edges.flatMap((e) => e.layout.primitives)];
 }

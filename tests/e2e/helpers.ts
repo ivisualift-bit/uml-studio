@@ -26,12 +26,25 @@ export const MOD = 'ControlOrMeta';
 
 export interface ProjectJson {
   rootModelId: string;
-  modelElements: Record<string, { id: string; kind: string; name: string; ownerId: string | null; [k: string]: unknown }>;
-  diagrams: Record<string, { id: string; kind: string; name: string; views: Record<string, { id: string; kind: string; elementId?: string; [k: string]: unknown }> }>;
+  modelElements: Record<
+    string,
+    { id: string; kind: string; name: string; ownerId: string | null; [k: string]: unknown }
+  >;
+  diagrams: Record<
+    string,
+    {
+      id: string;
+      kind: string;
+      name: string;
+      views: Record<string, { id: string; kind: string; elementId?: string; [k: string]: unknown }>;
+    }
+  >;
 }
 
 export async function snapshot(page: Page): Promise<ProjectJson> {
-  const text = await page.evaluate(() => (window as unknown as { umlStudio: { snapshot(): string | null } }).umlStudio.snapshot());
+  const text = await page.evaluate(() =>
+    (window as unknown as { umlStudio: { snapshot(): string | null } }).umlStudio.snapshot(),
+  );
   if (!text) throw new Error('No open project');
   return JSON.parse(text) as ProjectJson;
 }
@@ -89,7 +102,13 @@ export function edge(page: Page, kind: string): Locator {
 }
 
 /** Two-click connection. Containers whose centre is covered by children are clicked near their top. */
-export async function connect(page: Page, toolId: string, from: string, to: string, options: { fromTop?: boolean; toTop?: boolean } = {}): Promise<void> {
+export async function connect(
+  page: Page,
+  toolId: string,
+  from: string,
+  to: string,
+  options: { fromTop?: boolean; toTop?: boolean } = {},
+): Promise<void> {
   await page.getByTestId(`tool-${toolId}`).click();
   await node(page, from).click(options.fromTop ? { position: { x: 12, y: 8 } } : undefined);
   await node(page, to).click(options.toTop ? { position: { x: 12, y: 8 } } : undefined);
@@ -111,7 +130,10 @@ export async function selectEdge(page: Page, kind: string, index = 0): Promise<v
   const sy = box.height / Math.max(1, maxY - minY || 1);
   const mx = (x1 + x2) / 2;
   const my = (y1 + y2) / 2;
-  await page.mouse.click(box.x + (maxX === minX ? box.width / 2 : (mx - minX) * sx), box.y + (maxY === minY ? box.height / 2 : (my - minY) * sy));
+  await page.mouse.click(
+    box.x + (maxX === minX ? box.width / 2 : (mx - minX) * sx),
+    box.y + (maxY === minY ? box.height / 2 : (my - minY) * sy),
+  );
 }
 
 export async function setInspectorField(page: Page, testId: string, value: string): Promise<void> {
@@ -148,7 +170,10 @@ export async function openFile(page: Page, filePath: string): Promise<void> {
 export async function openFileDiscardingChanges(page: Page, filePath: string): Promise<void> {
   await page.keyboard.press(`${MOD}+o`);
   await expect(page.getByTestId('unsaved-dialog')).toBeVisible();
-  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByTestId('unsaved-discard').click()]);
+  const [chooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByTestId('unsaved-discard').click(),
+  ]);
   await chooser.setFiles(filePath);
 }
 
@@ -161,16 +186,25 @@ export async function writeTemp(name: string, text: string): Promise<string> {
 
 /** Comparable semantic + view content (timestamps and viewports excluded). */
 export function comparable(doc: ProjectJson): unknown {
-  const diagrams = Object.fromEntries(Object.entries(doc.diagrams).map(([id, d]) => [id, { ...d, viewport: undefined }]));
+  const diagrams = Object.fromEntries(
+    Object.entries(doc.diagrams).map(([id, d]) => [id, { ...d, viewport: undefined }]),
+  );
   return { modelElements: doc.modelElements, diagrams };
 }
 
-export async function exportDiagram(page: Page, format: 'svg' | 'png' | 'pdf' | 'json', options: (page: Page) => Promise<void> = async () => undefined) {
+export async function exportDiagram(
+  page: Page,
+  format: 'svg' | 'png' | 'pdf' | 'json',
+  options: (page: Page) => Promise<void> = async () => undefined,
+) {
   await page.keyboard.press(`${MOD}+Shift+e`);
   await expect(page.getByTestId('export-dialog')).toBeVisible();
   await page.getByTestId(`export-format-${format}`).click();
   await options(page);
-  const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('export-run').click()]);
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('export-run').click(),
+  ]);
   const dir = await mkdtemp(path.join(tmpdir(), 'umls-export-'));
   const file = path.join(dir, download.suggestedFilename());
   await download.saveAs(file);
@@ -178,7 +212,10 @@ export async function exportDiagram(page: Page, format: 'svg' | 'png' | 'pdf' | 
 }
 
 /** Parse SVG text in the browser; throws when not well-formed. Returns text contents. */
-export async function parseSvg(page: Page, svg: string): Promise<{ texts: string[]; polygons: number; dashed: number; viewBox: string | null }> {
+export async function parseSvg(
+  page: Page,
+  svg: string,
+): Promise<{ texts: string[]; polygons: number; dashed: number; viewBox: string | null }> {
   return page.evaluate((source) => {
     const dom = new DOMParser().parseFromString(source, 'image/svg+xml');
     const error = dom.getElementsByTagName('parsererror')[0];

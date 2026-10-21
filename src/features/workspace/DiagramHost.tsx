@@ -14,10 +14,17 @@ export function DiagramHost() {
   const kind = useDocumentStore((s) => (activeId ? s.doc?.diagrams[activeId]?.kind : undefined));
   if (!activeId || !kind) {
     return (
-      <div className="flex h-full items-center justify-center bg-canvas text-[13px] text-faint" data-testid="no-diagram">
+      <div
+        className="flex h-full items-center justify-center bg-canvas text-[13px] text-faint"
+        data-testid="no-diagram"
+      >
         <div className="max-w-sm text-center">
           <p>{t('toolbox.noDiagram')}</p>
-          <button type="button" className="mt-3 rounded-md border border-border-strong px-3 py-1.5 text-[12.5px] text-fg hover:border-accent" onClick={() => useEditorStore.getState().openDialog({ type: 'newDiagram' })}>
+          <button
+            type="button"
+            className="mt-3 rounded-md border border-border-strong px-3 py-1.5 text-[12.5px] text-fg hover:border-accent"
+            onClick={() => useEditorStore.getState().openDialog({ type: 'newDiagram' })}
+          >
             {t('cmd.newDiagram')}
           </button>
         </div>
@@ -35,5 +42,9 @@ export function DiagramHost() {
       </div>
     );
   }
-  return DIAGRAM_KIND_INFO[kind].renderMode === 'sequence' ? <SequenceCanvas key={activeId} diagramId={activeId} /> : <GraphCanvas key={activeId} diagramId={activeId} />;
+  return DIAGRAM_KIND_INFO[kind].renderMode === 'sequence' ? (
+    <SequenceCanvas key={activeId} diagramId={activeId} />
+  ) : (
+    <GraphCanvas key={activeId} diagramId={activeId} />
+  );
 }

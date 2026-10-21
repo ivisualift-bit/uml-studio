@@ -42,7 +42,8 @@ export class ProjectBuilder {
 
   private run(commands: Command[]): void {
     const outcome = executeCommands(this.doc, commands, { measure: measureView });
-    if (!outcome.ok) throw new Error(`Template step failed: ${outcome.message} ${outcome.details.join('; ')}`);
+    if (!outcome.ok)
+      throw new Error(`Template step failed: ${outcome.message} ${outcome.details.join('; ')}`);
     this.doc = outcome.doc;
   }
 
@@ -73,9 +74,11 @@ export class ProjectBuilder {
       size: { width: options.width ?? size.width, height: options.height ?? size.height },
       ids: this.ids,
     });
-    if (!created.ok || !created.elementId || !created.viewId) throw new Error(`Cannot create ${kind} ${name}`);
+    if (!created.ok || !created.elementId || !created.viewId)
+      throw new Error(`Cannot create ${kind} ${name}`);
     const commands = [...created.commands];
-    if (options.patch) commands.push({ type: 'element/update', elementId: created.elementId, patch: options.patch });
+    if (options.patch)
+      commands.push({ type: 'element/update', elementId: created.elementId, patch: options.patch });
     this.run(commands);
     return { elementId: created.elementId, viewId: created.viewId };
   }
@@ -83,7 +86,11 @@ export class ProjectBuilder {
   attribute(elementId: ID, text: string): this {
     const parsed = parseAttributeText(text);
     if (!parsed) throw new Error(`Bad attribute "${text}"`);
-    const member = makeAttribute({ id: this.ids.next(), ...parsed, visibility: parsed.visibility ?? 'private' });
+    const member = makeAttribute({
+      id: this.ids.next(),
+      ...parsed,
+      visibility: parsed.visibility ?? 'private',
+    });
     this.run([{ type: 'member/add', elementId, collection: 'attributes', member }]);
     return this;
   }
@@ -106,11 +113,17 @@ export class ProjectBuilder {
   }
 
   literal(elementId: ID, name: string): this {
-    this.run([{ type: 'member/add', elementId, collection: 'literals', member: { id: this.ids.next(), name } }]);
+    this.run([
+      { type: 'member/add', elementId, collection: 'literals', member: { id: this.ids.next(), name } },
+    ]);
     return this;
   }
 
-  member(elementId: ID, collection: 'extensionPoints' | 'slots' | 'tagDefinitions' | 'messages', member: Record<string, unknown>): ID {
+  member(
+    elementId: ID,
+    collection: 'extensionPoints' | 'slots' | 'tagDefinitions' | 'messages',
+    member: Record<string, unknown>,
+  ): ID {
     const id = this.ids.next();
     this.run([{ type: 'member/add', elementId, collection, member: { id, ...member } }]);
     return id;
@@ -121,24 +134,50 @@ export class ProjectBuilder {
     return this;
   }
 
-  connect(diagramId: ID, preset: RelationshipPreset, sourceViewId: ID, targetViewId: ID, patch?: Record<string, unknown>): { relationshipId: ID; edgeViewId: ID } {
-    const created = createRelationshipCommands(this.doc, { diagramId, preset, sourceViewId, targetViewId, ids: this.ids });
+  connect(
+    diagramId: ID,
+    preset: RelationshipPreset,
+    sourceViewId: ID,
+    targetViewId: ID,
+    patch?: Record<string, unknown>,
+  ): { relationshipId: ID; edgeViewId: ID } {
+    const created = createRelationshipCommands(this.doc, {
+      diagramId,
+      preset,
+      sourceViewId,
+      targetViewId,
+      ids: this.ids,
+    });
     if (!created.ok) throw new Error(`Cannot connect ${preset}: ${created.reason}`);
     const commands = [...created.commands];
     if (patch) {
       const current = created.commands[0];
       const rel = current?.type === 'element/add' ? current.elements[0] : undefined;
       const merged: Record<string, unknown> = { ...patch };
-      if (rel && 'sourceEnd' in rel && patch.sourceEnd) merged.sourceEnd = { ...rel.sourceEnd, ...(patch.sourceEnd as object) };
-      if (rel && 'targetEnd' in rel && patch.targetEnd) merged.targetEnd = { ...rel.targetEnd, ...(patch.targetEnd as object) };
+      if (rel && 'sourceEnd' in rel && patch.sourceEnd)
+        merged.sourceEnd = { ...rel.sourceEnd, ...(patch.sourceEnd as object) };
+      if (rel && 'targetEnd' in rel && patch.targetEnd)
+        merged.targetEnd = { ...rel.targetEnd, ...(patch.targetEnd as object) };
       commands.push({ type: 'element/update', elementId: created.relationshipId, patch: merged });
     }
     this.run(commands);
     return { relationshipId: created.relationshipId, edgeViewId: created.edgeViewId };
   }
 
-  waypoints(diagramId: ID, edgeViewId: ID, points: Array<{ x: number; y: number }>, routing?: 'straight' | 'orthogonal'): this {
-    this.run([{ type: 'view/update', diagramId, viewId: edgeViewId, patch: { waypoints: points, ...(routing ? { routing } : {}) } }]);
+  waypoints(
+    diagramId: ID,
+    edgeViewId: ID,
+    points: Array<{ x: number; y: number }>,
+    routing?: 'straight' | 'orthogonal',
+  ): this {
+    this.run([
+      {
+        type: 'view/update',
+        diagramId,
+        viewId: edgeViewId,
+        patch: { waypoints: points, ...(routing ? { routing } : {}) },
+      },
+    ]);
     return this;
   }
 
@@ -165,28 +204,63 @@ export class ProjectBuilder {
     });
     if (!created.ok || !created.viewId || !created.elementId) throw new Error('lifeline');
     const commands = [...created.commands];
-    if (options.typeName) commands.push({ type: 'element/update', elementId: created.elementId, patch: { typeName: options.typeName } });
+    if (options.typeName)
+      commands.push({
+        type: 'element/update',
+        elementId: created.elementId,
+        patch: { typeName: options.typeName },
+      });
     this.run(commands);
     return created.viewId;
   }
 
-  message(diagramId: ID, from: ID | null, to: ID | null, sort: MessageSort, y: number, name: string, args = ''): ID {
-    const created = createMessageCommands(this.doc, { diagramId, sourceViewId: from, targetViewId: to, sort, y, name, ids: this.ids });
-    if (!created.ok || !created.elementId) throw new Error(`message ${name}: ${created.ok ? '' : created.reason}`);
+  message(
+    diagramId: ID,
+    from: ID | null,
+    to: ID | null,
+    sort: MessageSort,
+    y: number,
+    name: string,
+    args = '',
+  ): ID {
+    const created = createMessageCommands(this.doc, {
+      diagramId,
+      sourceViewId: from,
+      targetViewId: to,
+      sort,
+      y,
+      name,
+      ids: this.ids,
+    });
+    if (!created.ok || !created.elementId)
+      throw new Error(`message ${name}: ${created.ok ? '' : created.reason}`);
     const commands = [...created.commands];
-    if (args) commands.push({ type: 'element/update', elementId: created.elementId, patch: { arguments: args } });
+    if (args)
+      commands.push({ type: 'element/update', elementId: created.elementId, patch: { arguments: args } });
     this.run(commands);
     return created.viewId!;
   }
 
   activation(diagramId: ID, lifelineViewId: ID, startY: number, endY: number): this {
-    const created = createActivationCommands(this.doc, { diagramId, lifelineViewId, startY, endY, ids: this.ids });
+    const created = createActivationCommands(this.doc, {
+      diagramId,
+      lifelineViewId,
+      startY,
+      endY,
+      ids: this.ids,
+    });
     if (!created.ok) throw new Error('activation');
     this.run(created.commands);
     return this;
   }
 
-  fragment(diagramId: ID, operator: FragmentOperator, bounds: { x: number; y: number; width: number; height: number }, guards: string[], dividers: number[] = []): ID {
+  fragment(
+    diagramId: ID,
+    operator: FragmentOperator,
+    bounds: { x: number; y: number; width: number; height: number },
+    guards: string[],
+    dividers: number[] = [],
+  ): ID {
     const created = createFragmentCommands(this.doc, { diagramId, operator, bounds, ids: this.ids });
     if (!created.ok) throw new Error('fragment');
     this.run(created.commands);
@@ -198,7 +272,12 @@ export class ProjectBuilder {
     const commands: Command[] = [];
     // Add operands beyond those created by default.
     for (let i = el.operands.length; i < guards.length; i += 1) {
-      commands.push({ type: 'member/add', elementId: el.id, collection: 'operands', member: { id: this.ids.next(), guard: '' } });
+      commands.push({
+        type: 'member/add',
+        elementId: el.id,
+        collection: 'operands',
+        member: { id: this.ids.next(), guard: '' },
+      });
     }
     if (commands.length) this.run(commands);
     const fresh = this.doc.modelElements[el.id];
@@ -211,7 +290,11 @@ export class ProjectBuilder {
       patch: { guard: guards[i] ?? '' },
     }));
     if (dividers.length) {
-      const operandYs = Object.fromEntries(fresh.operands.slice(1).map((o, i) => [o.id, dividers[i] ?? bounds.y + ((i + 1) * bounds.height) / fresh.operands.length]));
+      const operandYs = Object.fromEntries(
+        fresh.operands
+          .slice(1)
+          .map((o, i) => [o.id, dividers[i] ?? bounds.y + ((i + 1) * bounds.height) / fresh.operands.length]),
+      );
       updates.push({ type: 'view/update', diagramId, viewId, patch: { operandYs } });
     }
     this.run(updates);

@@ -1,4 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+  type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import {
   Background,
   BackgroundVariant,
@@ -13,7 +23,18 @@ import {
   type Viewport,
 } from '@xyflow/react';
 import { ContextMenu } from 'radix-ui';
-import { run, renameSelection, requestDeleteFromModel, removeSelectionFromDiagram, copySelectionToClipboard, pasteClipboard, duplicateSelection, reorderSelection, setRoutingForSelection, addMember } from '@/app/actions';
+import {
+  run,
+  renameSelection,
+  requestDeleteFromModel,
+  removeSelectionFromDiagram,
+  copySelectionToClipboard,
+  pasteClipboard,
+  duplicateSelection,
+  reorderSelection,
+  setRoutingForSelection,
+  addMember,
+} from '@/app/actions';
 import { canvasApi } from '@/app/canvasApi';
 import { primaryShortcut } from '@/app/commands';
 import { useDiagramTheme } from '@/app/theme';
@@ -32,7 +53,14 @@ import { useEditorStore, type EditTarget } from '@/stores/editorStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { toast } from '@/stores/toastStore';
 import { GraphCanvasContext, type Box, type GraphCanvasContextValue } from './canvasContext';
-import { completeConnection, connectionProblem, DRAG_ELEMENT_MIME, DRAG_TOOL_MIME, dropExistingElement, placeTool } from './graphActions';
+import {
+  completeConnection,
+  connectionProblem,
+  DRAG_ELEMENT_MIME,
+  DRAG_TOOL_MIME,
+  dropExistingElement,
+  placeTool,
+} from './graphActions';
 import { UmlEdge, type UmlEdgeType } from './UmlEdge';
 import { UmlNode, type UmlNodeType } from './UmlNode';
 
@@ -74,10 +102,15 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
 
   const interactive = tool.kind === 'select' && !spaceHeld;
   // Fit only when the diagram is opened without a remembered viewport (never while editing).
-  const [initialFit] = useState(() => !savedViewport && !diagram.viewport && Object.keys(diagram.views).length > 0);
+  const [initialFit] = useState(
+    () => !savedViewport && !diagram.viewport && Object.keys(diagram.views).length > 0,
+  );
   const connectTool = tool.kind === 'connect' ? findTool(tool.toolId) : undefined;
 
-  const layout = useMemo(() => layoutGraphDiagram(doc, diagram, theme, { boxes, waypoints: waypointOverrides }), [doc, diagram, theme, boxes, waypointOverrides]);
+  const layout = useMemo(
+    () => layoutGraphDiagram(doc, diagram, theme, { boxes, waypoints: waypointOverrides }),
+    [doc, diagram, theme, boxes, waypointOverrides],
+  );
   const selectedSet = useMemo(() => new Set(selection), [selection]);
 
   // Clear connector state when the tool changes.
@@ -147,8 +180,12 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
   const edges = useMemo<UmlEdgeType[]>(() => {
     const previous = edgeCache.current;
     const next = new Map<ID, UmlEdgeType>();
-    const samePoints = (a: { x: number; y: number }[], b: { x: number; y: number }[]) => a.length === b.length && a.every((p, i) => p.x === b[i]!.x && p.y === b[i]!.y);
-    const sameLabels = (a: { text: string; x: number; y: number }[], b: { text: string; x: number; y: number }[]) =>
+    const samePoints = (a: { x: number; y: number }[], b: { x: number; y: number }[]) =>
+      a.length === b.length && a.every((p, i) => p.x === b[i]!.x && p.y === b[i]!.y);
+    const sameLabels = (
+      a: { text: string; x: number; y: number }[],
+      b: { text: string; x: number; y: number }[],
+    ) =>
       a.length === b.length && a.every((l, i) => l.text === b[i]!.text && l.x === b[i]!.x && l.y === b[i]!.y);
     const list = layout.edges.map((e) => {
       const selected = selectedSet.has(e.view.id);
@@ -206,7 +243,9 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
   // ---- Focus requests (problems panel, search)
   useEffect(() => {
     if (!focusRequest || focusRequest.diagramId !== diagramId) return;
-    const targets = focusRequest.viewIds.map((id) => layout.nodeById.get(id)).filter((n): n is GraphNodeRender => !!n);
+    const targets = focusRequest.viewIds
+      .map((id) => layout.nodeById.get(id))
+      .filter((n): n is GraphNodeRender => !!n);
     const edgeTargets = layout.edges.filter((e) => focusRequest.viewIds.includes(e.view.id));
     const pts = [
       ...targets.flatMap((n) => [
@@ -224,7 +263,10 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
   }, [focusRequest?.nonce]);
 
   // ---- Selection & dragging
-  const setSelection = useCallback((ids: ID[]) => useEditorStore.getState().setSelection(diagramId, ids), [diagramId]);
+  const setSelection = useCallback(
+    (ids: ID[]) => useEditorStore.getState().setSelection(diagramId, ids),
+    [diagramId],
+  );
 
   const descendantsOf = useCallback(
     (ids: ID[]): ID[] => {
@@ -233,7 +275,12 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
       while (changed) {
         changed = false;
         for (const v of Object.values(diagram.views)) {
-          if ((v.kind === 'node' || v.kind === 'note') && v.containerViewId && result.has(v.containerViewId) && !result.has(v.id)) {
+          if (
+            (v.kind === 'node' || v.kind === 'note') &&
+            v.containerViewId &&
+            result.has(v.containerViewId) &&
+            !result.has(v.id)
+          ) {
             result.add(v.id);
             changed = true;
           }
@@ -246,7 +293,9 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
 
   const onNodesChange = useCallback(
     (changes: NodeChange<UmlNodeType>[]) => {
-      const selectChanges = changes.filter((c): c is Extract<NodeChange, { type: 'select' }> => c.type === 'select');
+      const selectChanges = changes.filter(
+        (c): c is Extract<NodeChange, { type: 'select' }> => c.type === 'select',
+      );
       if (selectChanges.length && tool.kind === 'select') {
         const set = new Set(useEditorStore.getState().selections[diagramId] ?? EMPTY);
         for (const c of selectChanges) {
@@ -255,7 +304,10 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
         }
         setSelection([...set]);
       }
-      const move = changes.find((c): c is Extract<NodeChange, { type: 'position' }> => c.type === 'position' && !!c.position && !!c.dragging);
+      const move = changes.find(
+        (c): c is Extract<NodeChange, { type: 'position' }> =>
+          c.type === 'position' && !!c.position && !!c.dragging,
+      );
       const origins = dragOrigins.current;
       if (move?.position && origins) {
         const origin = origins.get(move.id);
@@ -272,13 +324,15 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange<UmlEdgeType>[]) => {
-      const selectChanges = changes.filter((c): c is Extract<EdgeChange, { type: 'select' }> => c.type === 'select');
+      const selectChanges = changes.filter(
+        (c): c is Extract<EdgeChange, { type: 'select' }> => c.type === 'select',
+      );
       if (!selectChanges.length || tool.kind !== 'select') return;
       const set = new Set(useEditorStore.getState().selections[diagramId] ?? EMPTY);
       for (const c of selectChanges) {
-          if (c.selected) set.add(c.id);
-          else set.delete(c.id);
-        }
+        if (c.selected) set.add(c.id);
+        else set.delete(c.id);
+      }
       setSelection([...set]);
     },
     [tool.kind, diagramId, setSelection],
@@ -307,7 +361,10 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
       const dx = Math.round(node.position.x - origin.x);
       const dy = Math.round(node.position.y - origin.y);
       if (dx === 0 && dy === 0) return;
-      run({ type: 'view/move', diagramId, viewIds: dragged.map((n) => n.id), dx, dy }, { label: t('history.move') });
+      run(
+        { type: 'view/move', diagramId, viewIds: dragged.map((n) => n.id), dx, dy },
+        { label: t('history.move') },
+      );
     },
     [diagramId, t],
   );
@@ -329,7 +386,18 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
       commitBox: (viewId, box) => {
         setBoxes(new Map());
         run(
-          { type: 'view/update', diagramId, viewId, patch: { x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width), height: Math.round(box.height) }, recomputeContainment: true },
+          {
+            type: 'view/update',
+            diagramId,
+            viewId,
+            patch: {
+              x: Math.round(box.x),
+              y: Math.round(box.y),
+              width: Math.round(box.width),
+              height: Math.round(box.height),
+            },
+            recomputeContainment: true,
+          },
           { label: t('history.resize') },
         );
       },
@@ -343,12 +411,23 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
         }),
       commitWaypoints: (edgeId, points) => {
         setWaypointOverrides(new Map());
-        run({ type: 'view/update', diagramId, viewId: edgeId, patch: { waypoints: points } }, { label: t('history.route') });
+        run(
+          { type: 'view/update', diagramId, viewId: edgeId, patch: { waypoints: points } },
+          { label: t('history.route') },
+        );
       },
       commitLabelOffset: (edgeId, key: EdgeLabelKey, offset) => {
         const view = useDocumentStore.getState().doc?.diagrams[diagramId]?.views[edgeId];
         if (view?.kind !== 'edge') return;
-        run({ type: 'view/update', diagramId, viewId: edgeId, patch: { labelOffsets: { ...view.labelOffsets, [key]: offset } } }, { label: t('history.move') });
+        run(
+          {
+            type: 'view/update',
+            diagramId,
+            viewId: edgeId,
+            patch: { labelOffsets: { ...view.labelOffsets, [key]: offset } },
+          },
+          { label: t('history.move') },
+        );
       },
       reconnect: (edgeId, end, nodeViewId) => {
         const current = useDocumentStore.getState().doc;
@@ -357,7 +436,13 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
         if (view?.kind !== 'edge' || node?.kind !== 'node') return;
         if ((end === 'source' ? view.sourceViewId : view.targetViewId) === nodeViewId) return;
         run(
-          { type: 'element/reconnect', relationshipId: view.elementId, end, newElementId: node.elementId, edgeUpdates: [{ diagramId, edgeViewId: edgeId, nodeViewId }] },
+          {
+            type: 'element/reconnect',
+            relationshipId: view.elementId,
+            end,
+            newElementId: node.elementId,
+            edgeUpdates: [{ diagramId, edgeViewId: edgeId, nodeViewId }],
+          },
           { label: t('history.route') },
         );
       },
@@ -370,7 +455,8 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
   );
 
   // ---- Tools
-  const flowPoint = (e: { clientX: number; clientY: number }) => rf.screenToFlowPosition({ x: e.clientX, y: e.clientY });
+  const flowPoint = (e: { clientX: number; clientY: number }) =>
+    rf.screenToFlowPosition({ x: e.clientX, y: e.clientY });
 
   const onPaneClick = (e: ReactMouseEvent) => {
     if (tool.kind === 'place') {
@@ -424,8 +510,15 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
     const target = e.target as Element;
     const member = target.closest('[data-member]');
     if (member) {
-      const collection = member.getAttribute('data-collection') as Extract<EditTarget, { type: 'member' }>['collection'];
-      context.startEdit(node.id, { type: 'member', collection, memberId: member.getAttribute('data-member')! });
+      const collection = member.getAttribute('data-collection') as Extract<
+        EditTarget,
+        { type: 'member' }
+      >['collection'];
+      context.startEdit(node.id, {
+        type: 'member',
+        collection,
+        memberId: member.getAttribute('data-member')!,
+      });
       return;
     }
     if (node.data.render.layout.nameBox) context.startEdit(node.id, { type: 'name' });
@@ -444,7 +537,11 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
       return;
     }
     const p = flowPoint(e);
-    const chain = [render.layout.points[0]!, ...render.view.waypoints, render.layout.points[render.layout.points.length - 1]!];
+    const chain = [
+      render.layout.points[0]!,
+      ...render.view.waypoints,
+      render.layout.points[render.layout.points.length - 1]!,
+    ];
     const index = closestSegment(chain, p);
     const next = render.view.waypoints.slice();
     next.splice(index, 0, { x: Math.round(p.x), y: Math.round(p.y) });
@@ -473,7 +570,12 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
 
   // ---- Keyboard nudging
   const onKeyDown = (e: KeyboardEvent) => {
-    const arrows: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+    const arrows: Record<string, [number, number]> = {
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+    };
     const dir = arrows[e.key];
     if (!dir || editing || !selection.length) return;
     const boxIds = selection.filter((id) => {
@@ -483,17 +585,27 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
     if (!boxIds.length) return;
     e.preventDefault();
     const step = e.shiftKey ? gridSize : 1;
-    run({ type: 'view/move', diagramId, viewIds: boxIds, dx: dir[0] * step, dy: dir[1] * step }, { label: t('history.move'), mergeKey: `nudge:${diagramId}:${boxIds.join(',')}` });
+    run(
+      { type: 'view/move', diagramId, viewIds: boxIds, dx: dir[0] * step, dy: dir[1] * step },
+      { label: t('history.move'), mergeKey: `nudge:${diagramId}:${boxIds.join(',')}` },
+    );
   };
 
   const onMoveEnd = (_: unknown, viewport: Viewport) => {
-    useEditorStore.getState().setViewport(diagramId, { x: Math.round(viewport.x), y: Math.round(viewport.y), zoom: Math.round(viewport.zoom * 1000) / 1000 });
+    useEditorStore.getState().setViewport(diagramId, {
+      x: Math.round(viewport.x),
+      y: Math.round(viewport.y),
+      zoom: Math.round(viewport.zoom * 1000) / 1000,
+    });
   };
 
   // ---- Context menu
   const onContextMenuCapture = (e: ReactMouseEvent) => {
     const el = e.target as Element;
-    const id = el.closest('.react-flow__node')?.getAttribute('data-id') ?? el.closest('[data-edge-id]')?.getAttribute('data-edge-id') ?? null;
+    const id =
+      el.closest('.react-flow__node')?.getAttribute('data-id') ??
+      el.closest('[data-edge-id]')?.getAttribute('data-edge-id') ??
+      null;
     if (id && !selectedSet.has(id)) setSelection([id]);
     if (!id) setSelection([]);
   };
@@ -512,18 +624,34 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
       if (editing.target.type === 'member') {
         const memberId = editing.target.memberId;
         const row = node.layout.rows.find((r) => r.memberId === memberId);
-        if (row) box = { x: node.x + row.box.x + 2, y: node.y + row.box.y, width: Math.max(160, row.box.width - 4), height: row.box.height + 2 };
+        if (row)
+          box = {
+            x: node.x + row.box.x + 2,
+            y: node.y + row.box.y,
+            width: Math.max(160, row.box.width - 4),
+            height: row.box.height + 2,
+          };
       } else if (node.layout.nameBox) {
         const nb = node.layout.nameBox;
         multiline = view.kind === 'note';
-        box = { x: node.x + nb.x, y: node.y + nb.y - 1, width: Math.max(120, nb.width), height: multiline ? Math.max(48, nb.height) : nb.height + 4 };
+        box = {
+          x: node.x + nb.x,
+          y: node.y + nb.y - 1,
+          width: Math.max(120, nb.width),
+          height: multiline ? Math.max(48, nb.height) : nb.height + 4,
+        };
       }
     } else if (edge && editing.target.type === 'label') {
       const key = editing.target.key;
       const label = edge.layout.labels.find((l) => l.key === key);
       const mid = edge.layout.points[Math.floor(edge.layout.points.length / 2)] ?? { x: 0, y: 0 };
       const b = label?.bounds ?? { x: mid.x - 60, y: mid.y - 20, width: 120, height: 18 };
-      box = { x: b.x - 4, y: b.y - 2, width: Math.max(140, b.width + 16), height: Math.max(20, b.height + 4) };
+      box = {
+        x: b.x - 4,
+        y: b.y - 2,
+        width: Math.max(140, b.width + 16),
+        height: Math.max(20, b.height + 4),
+      };
     }
     if (!box) return null;
     return { box, multiline, initial: initialEditText(doc, diagram, editing.viewId, editing.target) };
@@ -533,9 +661,20 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
     const current = useEditorStore.getState().editing;
     const latestDoc = useDocumentStore.getState().doc;
     if (!current || !latestDoc) return true;
-    const result = commitInlineEdit(latestDoc, latestDoc.diagrams[diagramId]!, current.viewId, current.target, text, uuidGenerator);
+    const result = commitInlineEdit(
+      latestDoc,
+      latestDoc.diagrams[diagramId]!,
+      current.viewId,
+      current.target,
+      text,
+      uuidGenerator,
+    );
     if (!result.ok) {
-      toast.error(result.error === 'invalidMultiplicity' ? t('inspector.invalidMultiplicity') : t('canvas.invalidMemberText', { text }));
+      toast.error(
+        result.error === 'invalidMultiplicity'
+          ? t('inspector.invalidMultiplicity')
+          : t('canvas.invalidMemberText', { text }),
+      );
       return false;
     }
     useEditorStore.getState().setEditing(null);
@@ -604,10 +743,29 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
               disableKeyboardA11y={false}
               nodeDragThreshold={2}
             >
-              {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize * 2} size={1.4} color="var(--canvas-grid)" />}
-              {showMinimap && <MiniMap pannable zoomable ariaLabel={t('canvas.minimap')} nodeColor="var(--surface-4)" maskColor="rgb(0 0 0 / 0.25)" />}
+              {showGrid && (
+                <Background
+                  variant={BackgroundVariant.Dots}
+                  gap={gridSize * 2}
+                  size={1.4}
+                  color="var(--canvas-grid)"
+                />
+              )}
+              {showMinimap && (
+                <MiniMap
+                  pannable
+                  zoomable
+                  ariaLabel={t('canvas.minimap')}
+                  nodeColor="var(--surface-4)"
+                  maskColor="rgb(0 0 0 / 0.25)"
+                />
+              )}
               <ViewportPortal>
-                <svg className="pointer-events-none absolute top-0 left-0 overflow-visible" width={1} height={1}>
+                <svg
+                  className="pointer-events-none absolute top-0 left-0 overflow-visible"
+                  width={1}
+                  height={1}
+                >
                   {sourceNode && pointer && (
                     <line
                       x1={sourceNode.x + sourceNode.layout.width / 2}
@@ -620,13 +778,26 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
                     />
                   )}
                   {reconnectPreview && (
-                    <line x1={reconnectPreview.from.x} y1={reconnectPreview.from.y} x2={reconnectPreview.to.x} y2={reconnectPreview.to.y} stroke="var(--selection)" strokeWidth={1.5} strokeDasharray="5 4" />
+                    <line
+                      x1={reconnectPreview.from.x}
+                      y1={reconnectPreview.from.y}
+                      x2={reconnectPreview.to.x}
+                      y2={reconnectPreview.to.y}
+                      stroke="var(--selection)"
+                      strokeWidth={1.5}
+                      strokeDasharray="5 4"
+                    />
                   )}
                 </svg>
                 {editor && (
                   <InlineTextEditor
                     key={`${editing!.viewId}:${JSON.stringify(editing!.target)}`}
-                    style={{ left: editor.box.x, top: editor.box.y, width: editor.box.width, height: editor.box.height }}
+                    style={{
+                      left: editor.box.x,
+                      top: editor.box.y,
+                      width: editor.box.width,
+                      height: editor.box.height,
+                    }}
                     initial={editor.initial}
                     multiline={editor.multiline}
                     fontSize={13}
@@ -642,7 +813,9 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
             </ReactFlow>
             {isEmpty && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="max-w-sm rounded-lg border border-dashed border-border-strong bg-surface-1/70 px-5 py-4 text-center text-[12.5px] text-muted">{t('canvas.emptyHint')}</div>
+                <div className="max-w-sm rounded-lg border border-dashed border-border-strong bg-surface-1/70 px-5 py-4 text-center text-[12.5px] text-muted">
+                  {t('canvas.emptyHint')}
+                </div>
               </div>
             )}
             {tool.kind === 'connect' && connectTool && (
@@ -653,7 +826,9 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
           </div>
         </ContextMenu.Trigger>
         <ContextMenu.Portal>
-          <ContextMenu.Content className={menuContentClass}>{renderEntries(menuEntries(), 'context')}</ContextMenu.Content>
+          <ContextMenu.Content className={menuContentClass}>
+            {renderEntries(menuEntries(), 'context')}
+          </ContextMenu.Content>
         </ContextMenu.Portal>
       </ContextMenu.Root>
     </GraphCanvasContext.Provider>
@@ -673,8 +848,17 @@ function useCanvasMenuEntries(diagramId: ID): () => MenuEntry[] {
     const sc = (id: string) => primaryShortcut(id);
     if (!views.length) {
       return [
-        { label: t('cmd.paste'), shortcut: sc('edit.paste'), disabled: !editor.clipboard, onSelect: pasteClipboard },
-        { label: t('cmd.selectAll'), shortcut: sc('edit.selectAll'), onSelect: () => editor.setSelection(diagramId, Object.keys(diagram.views)) },
+        {
+          label: t('cmd.paste'),
+          shortcut: sc('edit.paste'),
+          disabled: !editor.clipboard,
+          onSelect: pasteClipboard,
+        },
+        {
+          label: t('cmd.selectAll'),
+          shortcut: sc('edit.selectAll'),
+          onSelect: () => editor.setSelection(diagramId, Object.keys(diagram.views)),
+        },
         { type: 'separator' },
         { label: t('cmd.fitDiagram'), shortcut: sc('view.fit'), onSelect: () => canvasApi.current?.fit() },
         { label: t('cmd.exportImage'), onSelect: () => editor.openDialog({ type: 'export', diagramId }) },
@@ -684,24 +868,57 @@ function useCanvasMenuEntries(diagramId: ID): () => MenuEntry[] {
     const single = views.length === 1 ? views[0]! : undefined;
     const element = single && 'elementId' in single ? doc.modelElements[single.elementId] : undefined;
     const entries: MenuEntry[] = [];
-    if (single && single.kind !== 'noteLink') entries.push({ label: t('cmd.rename'), shortcut: 'F2', onSelect: renameSelection });
-    if (element && (element.kind === 'class' || element.kind === 'interface' || element.kind === 'dataType' || element.kind === 'signal' || element.kind === 'enumeration')) {
-      if (element.kind === 'enumeration') entries.push({ label: t('cmd.addLiteral'), onSelect: () => void addMember('literals', element.id) });
-      entries.push({ label: t('cmd.addAttribute'), onSelect: () => void addMember('attributes', element.id) });
-      entries.push({ label: t('cmd.addOperation'), onSelect: () => void addMember('operations', element.id) });
+    if (single && single.kind !== 'noteLink')
+      entries.push({ label: t('cmd.rename'), shortcut: 'F2', onSelect: renameSelection });
+    if (
+      element &&
+      (element.kind === 'class' ||
+        element.kind === 'interface' ||
+        element.kind === 'dataType' ||
+        element.kind === 'signal' ||
+        element.kind === 'enumeration')
+    ) {
+      if (element.kind === 'enumeration')
+        entries.push({ label: t('cmd.addLiteral'), onSelect: () => void addMember('literals', element.id) });
+      entries.push({
+        label: t('cmd.addAttribute'),
+        onSelect: () => void addMember('attributes', element.id),
+      });
+      entries.push({
+        label: t('cmd.addOperation'),
+        onSelect: () => void addMember('operations', element.id),
+      });
     }
     if (single?.kind === 'node' && element && (element.kind === 'actor' || element.kind === 'interface')) {
       entries.push({
         label: t('inspector.alternateNotation'),
         checked: single.variant === 'alternate',
-        onSelect: () => run({ type: 'view/update', diagramId, viewId: single.id, patch: { variant: single.variant === 'alternate' ? 'default' : 'alternate' } }, { label: t('history.style') }),
+        onSelect: () =>
+          run(
+            {
+              type: 'view/update',
+              diagramId,
+              viewId: single.id,
+              patch: { variant: single.variant === 'alternate' ? 'default' : 'alternate' },
+            },
+            { label: t('history.style') },
+          ),
       });
     }
     if (entries.length) entries.push({ type: 'separator' });
     entries.push(
-      { label: t('cmd.cut'), shortcut: sc('edit.cut'), onSelect: () => copySelectionToClipboard() && requestDeleteFromModel() },
+      {
+        label: t('cmd.cut'),
+        shortcut: sc('edit.cut'),
+        onSelect: () => copySelectionToClipboard() && requestDeleteFromModel(),
+      },
       { label: t('cmd.copy'), shortcut: sc('edit.copy'), onSelect: () => void copySelectionToClipboard() },
-      { label: t('cmd.paste'), shortcut: sc('edit.paste'), disabled: !editor.clipboard, onSelect: pasteClipboard },
+      {
+        label: t('cmd.paste'),
+        shortcut: sc('edit.paste'),
+        disabled: !editor.clipboard,
+        onSelect: pasteClipboard,
+      },
       { label: t('cmd.duplicate'), shortcut: sc('edit.duplicate'), onSelect: duplicateSelection },
       { type: 'separator' },
     );
@@ -712,8 +929,24 @@ function useCanvasMenuEntries(diagramId: ID): () => MenuEntry[] {
       );
       if (single?.kind === 'edge') {
         entries.push(
-          { label: t('inspector.clearWaypoints'), disabled: !single.waypoints.length, onSelect: () => run({ type: 'view/update', diagramId, viewId: single.id, patch: { waypoints: [] } }, { label: t('history.route') }) },
-          { label: t('inspector.resetLabels'), disabled: !Object.keys(single.labelOffsets).length, onSelect: () => run({ type: 'view/update', diagramId, viewId: single.id, patch: { labelOffsets: {} } }, { label: t('history.move') }) },
+          {
+            label: t('inspector.clearWaypoints'),
+            disabled: !single.waypoints.length,
+            onSelect: () =>
+              run(
+                { type: 'view/update', diagramId, viewId: single.id, patch: { waypoints: [] } },
+                { label: t('history.route') },
+              ),
+          },
+          {
+            label: t('inspector.resetLabels'),
+            disabled: !Object.keys(single.labelOffsets).length,
+            onSelect: () =>
+              run(
+                { type: 'view/update', diagramId, viewId: single.id, patch: { labelOffsets: {} } },
+                { label: t('history.move') },
+              ),
+          },
         );
       }
       entries.push({ type: 'separator' });
@@ -723,9 +956,15 @@ function useCanvasMenuEntries(diagramId: ID): () => MenuEntry[] {
       { label: t('cmd.sendToBack'), onSelect: () => reorderSelection('back') },
       { type: 'separator' },
     );
-    if (element) entries.push({ label: t('cmd.selectInExplorer'), onSelect: () => editor.selectInExplorer(element.id) });
+    if (element)
+      entries.push({ label: t('cmd.selectInExplorer'), onSelect: () => editor.selectInExplorer(element.id) });
     entries.push(
-      { label: t('cmd.delete'), shortcut: sc('edit.delete'), onSelect: removeSelectionFromDiagram, testId: 'ctx-remove' },
+      {
+        label: t('cmd.delete'),
+        shortcut: sc('edit.delete'),
+        onSelect: removeSelectionFromDiagram,
+        testId: 'ctx-remove',
+      },
       {
         label: t('cmd.deleteFromModel'),
         shortcut: sc('edit.deleteFromModel'),
@@ -738,4 +977,3 @@ function useCanvasMenuEntries(diagramId: ID): () => MenuEntry[] {
     return entries;
   }, [diagramId, t]);
 }
-

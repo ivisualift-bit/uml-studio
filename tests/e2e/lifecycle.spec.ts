@@ -1,6 +1,20 @@
-import { addDiagram, comparable, expect, MOD, newProject, node, openFileDiscardingChanges, place, snapshot, test, writeTemp } from './helpers';
+import {
+  addDiagram,
+  comparable,
+  expect,
+  MOD,
+  newProject,
+  node,
+  openFileDiscardingChanges,
+  place,
+  snapshot,
+  test,
+  writeTemp,
+} from './helpers';
 
-test('E2E-007 recovery: unsaved work is snapshotted, offered after relaunch, restored intact and still dirty', async ({ page }) => {
+test('E2E-007 recovery: unsaved work is snapshotted, offered after relaunch, restored intact and still dirty', async ({
+  page,
+}) => {
   await newProject(page, 'Unsaved Work');
   await addDiagram(page, 'class', 'Draft');
   await place(page, 'class.class', 300, 200, 'Recovered');
@@ -17,7 +31,9 @@ test('E2E-007 recovery: unsaved work is snapshotted, offered after relaunch, res
   await expect(page.getByTestId('dirty-indicator')).toHaveAttribute('data-dirty', 'true');
 });
 
-test('E2E-008 malformed input: corrupt JSON, newer schema, duplicate IDs and dangling references are rejected; current project intact', async ({ page }) => {
+test('E2E-008 malformed input: corrupt JSON, newer schema, duplicate IDs and dangling references are rejected; current project intact', async ({
+  page,
+}) => {
   await newProject(page, 'Precious');
   await addDiagram(page, 'class', 'Keep');
   await place(page, 'class.class', 300, 200, 'KeepMe');
@@ -26,7 +42,12 @@ test('E2E-008 malformed input: corrupt JSON, newer schema, duplicate IDs and dan
 
   const newer = JSON.parse(valid);
   newer.schemaVersion = 42;
-  const dupKey = valid.replace('"modelElements": {', '"modelElements": {').replace(/"modelElements":\{"([^"]+)":/, (_m, id: string) => `"modelElements":{"${id}":{"kind":"class"},"${id}":`);
+  const dupKey = valid
+    .replace('"modelElements": {', '"modelElements": {')
+    .replace(
+      /"modelElements":\{"([^"]+)":/,
+      (_m, id: string) => `"modelElements":{"${id}":{"kind":"class"},"${id}":`,
+    );
   const dangling = JSON.parse(valid);
   const diagram = Object.values(dangling.diagrams)[0] as { views: Record<string, { elementId?: string }> };
   Object.values(diagram.views)[0]!.elementId = 'missing-element';
@@ -45,12 +66,16 @@ test('E2E-008 malformed input: corrupt JSON, newer schema, duplicate IDs and dan
     await expect(page.getByTestId('load-error-message')).toHaveAttribute('data-code', code);
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('load-error-dialog')).toBeHidden();
-    expect(comparable(await snapshot(page)), `${name} must not change the open project`).toEqual(comparable(original));
+    expect(comparable(await snapshot(page)), `${name} must not change the open project`).toEqual(
+      comparable(original),
+    );
     await expect(node(page, 'KeepMe')).toBeVisible();
   }
 });
 
-test('E2E-009 keyboard: shortcuts create/duplicate/delete/undo/redo; text fields keep their keystrokes', async ({ page }) => {
+test('E2E-009 keyboard: shortcuts create/duplicate/delete/undo/redo; text fields keep their keystrokes', async ({
+  page,
+}) => {
   await newProject(page, 'Keys');
   await addDiagram(page, 'class', 'K');
   await place(page, 'class.class', 300, 200, 'Person');

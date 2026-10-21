@@ -129,13 +129,19 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
 
   openDiagram(diagramId) {
     const { tabs } = get();
-    set({ tabs: tabs.includes(diagramId) ? tabs : [...tabs, diagramId], activeDiagramId: diagramId, tool: { kind: 'select' }, editing: null });
+    set({
+      tabs: tabs.includes(diagramId) ? tabs : [...tabs, diagramId],
+      activeDiagramId: diagramId,
+      tool: { kind: 'select' },
+      editing: null,
+    });
   },
   closeTab(diagramId) {
     const { tabs, activeDiagramId } = get();
     const index = tabs.indexOf(diagramId);
     const next = tabs.filter((id) => id !== diagramId);
-    const active = activeDiagramId === diagramId ? (next[Math.min(index, next.length - 1)] ?? null) : activeDiagramId;
+    const active =
+      activeDiagramId === diagramId ? (next[Math.min(index, next.length - 1)] ?? null) : activeDiagramId;
     set({ tabs: next, activeDiagramId: active, editing: null });
   },
   setActive(diagramId) {
@@ -145,8 +151,14 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     const { tabs, activeDiagramId, selections } = get();
     const next = tabs.filter((id) => existing.has(id));
     if (next.length === tabs.length && (!activeDiagramId || existing.has(activeDiagramId))) return;
-    const prunedSelections = Object.fromEntries(Object.entries(selections).filter(([id]) => existing.has(id)));
-    set({ tabs: next, activeDiagramId: activeDiagramId && existing.has(activeDiagramId) ? activeDiagramId : (next[0] ?? null), selections: prunedSelections });
+    const prunedSelections = Object.fromEntries(
+      Object.entries(selections).filter(([id]) => existing.has(id)),
+    );
+    set({
+      tabs: next,
+      activeDiagramId: activeDiagramId && existing.has(activeDiagramId) ? activeDiagramId : (next[0] ?? null),
+      selections: prunedSelections,
+    });
   },
   setViewport(diagramId, viewport) {
     set({ viewports: { ...get().viewports, [diagramId]: viewport } });
@@ -157,7 +169,10 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
       if (get().inspectorSource !== 'canvas' && viewIds.length) set({ inspectorSource: 'canvas' });
       return;
     }
-    set({ selections: { ...get().selections, [diagramId]: viewIds }, inspectorSource: viewIds.length ? 'canvas' : get().inspectorSource });
+    set({
+      selections: { ...get().selections, [diagramId]: viewIds },
+      inspectorSource: viewIds.length ? 'canvas' : get().inspectorSource,
+    });
   },
   selectInExplorer(id) {
     set({ explorerSelection: id, inspectorSource: 'explorer' });

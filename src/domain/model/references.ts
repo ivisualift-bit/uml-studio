@@ -1,5 +1,11 @@
 import type { ID } from '../schemas/common';
-import { hasFeatures, hasPartition, isRelationship, type ElementKind, type ModelElement } from '../schemas/elements';
+import {
+  hasFeatures,
+  hasPartition,
+  isRelationship,
+  type ElementKind,
+  type ModelElement,
+} from '../schemas/elements';
 
 /**
  * Element → element references (besides ownership).
@@ -40,44 +46,105 @@ export function collectReferences(el: ModelElement): ElementReference[] {
   }
   if (hasFeatures(el)) {
     for (const a of el.attributes) {
-      if (a.typeElementId) refs.push({ field: `attributes.${a.id}.typeElementId`, targetId: a.typeElementId, policy: 'clear', targetKinds: TYPE_KINDS });
+      if (a.typeElementId)
+        refs.push({
+          field: `attributes.${a.id}.typeElementId`,
+          targetId: a.typeElementId,
+          policy: 'clear',
+          targetKinds: TYPE_KINDS,
+        });
     }
     for (const o of el.operations) {
       if (o.returnTypeElementId) {
-        refs.push({ field: `operations.${o.id}.returnTypeElementId`, targetId: o.returnTypeElementId, policy: 'clear', targetKinds: TYPE_KINDS });
+        refs.push({
+          field: `operations.${o.id}.returnTypeElementId`,
+          targetId: o.returnTypeElementId,
+          policy: 'clear',
+          targetKinds: TYPE_KINDS,
+        });
       }
       for (const p of o.parameters) {
         if (p.typeElementId) {
-          refs.push({ field: `operations.${o.id}.parameters.${p.id}.typeElementId`, targetId: p.typeElementId, policy: 'clear', targetKinds: TYPE_KINDS });
+          refs.push({
+            field: `operations.${o.id}.parameters.${p.id}.typeElementId`,
+            targetId: p.typeElementId,
+            policy: 'clear',
+            targetKinds: TYPE_KINDS,
+          });
         }
       }
     }
   }
   if (hasPartition(el) && el.partitionId) {
-    refs.push({ field: 'partitionId', targetId: el.partitionId, policy: 'clear', targetKinds: ['activityPartition'] });
+    refs.push({
+      field: 'partitionId',
+      targetId: el.partitionId,
+      policy: 'clear',
+      targetKinds: ['activityPartition'],
+    });
   }
   for (const applied of el.appliedStereotypes) {
-    refs.push({ field: `appliedStereotypes.${applied.id}`, targetId: applied.stereotypeId, policy: 'clear', targetKinds: ['stereotype'] });
+    refs.push({
+      field: `appliedStereotypes.${applied.id}`,
+      targetId: applied.stereotypeId,
+      policy: 'clear',
+      targetKinds: ['stereotype'],
+    });
   }
   switch (el.kind) {
     case 'instanceSpecification':
-      if (el.classifierId) refs.push({ field: 'classifierId', targetId: el.classifierId, policy: 'clear', targetKinds: TYPE_KINDS });
+      if (el.classifierId)
+        refs.push({
+          field: 'classifierId',
+          targetId: el.classifierId,
+          policy: 'clear',
+          targetKinds: TYPE_KINDS,
+        });
       break;
     case 'port':
     case 'part':
     case 'objectNode':
     case 'lifeline':
-      if (el.typeElementId) refs.push({ field: 'typeElementId', targetId: el.typeElementId, policy: 'clear', targetKinds: TYPE_KINDS });
+      if (el.typeElementId)
+        refs.push({
+          field: 'typeElementId',
+          targetId: el.typeElementId,
+          policy: 'clear',
+          targetKinds: TYPE_KINDS,
+        });
       break;
     case 'message':
-      if (el.sourceLifelineId) refs.push({ field: 'sourceLifelineId', targetId: el.sourceLifelineId, policy: 'cascade', targetKinds: ['lifeline'] });
-      if (el.targetLifelineId) refs.push({ field: 'targetLifelineId', targetId: el.targetLifelineId, policy: 'cascade', targetKinds: ['lifeline'] });
+      if (el.sourceLifelineId)
+        refs.push({
+          field: 'sourceLifelineId',
+          targetId: el.sourceLifelineId,
+          policy: 'cascade',
+          targetKinds: ['lifeline'],
+        });
+      if (el.targetLifelineId)
+        refs.push({
+          field: 'targetLifelineId',
+          targetId: el.targetLifelineId,
+          policy: 'cascade',
+          targetKinds: ['lifeline'],
+        });
       break;
     case 'activation':
-      refs.push({ field: 'lifelineId', targetId: el.lifelineId, policy: 'cascade', targetKinds: ['lifeline'] });
+      refs.push({
+        field: 'lifelineId',
+        targetId: el.lifelineId,
+        policy: 'cascade',
+        targetKinds: ['lifeline'],
+      });
       break;
     case 'link':
-      if (el.associationId) refs.push({ field: 'associationId', targetId: el.associationId, policy: 'clear', targetKinds: ['association'] });
+      if (el.associationId)
+        refs.push({
+          field: 'associationId',
+          targetId: el.associationId,
+          policy: 'clear',
+          targetKinds: ['association'],
+        });
       break;
     case 'informationFlow':
       for (const id of el.conveyedIds) refs.push({ field: 'conveyedIds', targetId: id, policy: 'clear' });
@@ -94,10 +161,12 @@ export function collectReferences(el: ModelElement): ElementReference[] {
  */
 export function clearReferencesTo(el: ModelElement, removed: ReadonlySet<ID>): void {
   if (hasFeatures(el)) {
-    for (const a of el.attributes) if (a.typeElementId && removed.has(a.typeElementId)) a.typeElementId = null;
+    for (const a of el.attributes)
+      if (a.typeElementId && removed.has(a.typeElementId)) a.typeElementId = null;
     for (const o of el.operations) {
       if (o.returnTypeElementId && removed.has(o.returnTypeElementId)) o.returnTypeElementId = null;
-      for (const p of o.parameters) if (p.typeElementId && removed.has(p.typeElementId)) p.typeElementId = null;
+      for (const p of o.parameters)
+        if (p.typeElementId && removed.has(p.typeElementId)) p.typeElementId = null;
     }
   }
   if (hasPartition(el) && el.partitionId && removed.has(el.partitionId)) el.partitionId = null;
@@ -118,7 +187,8 @@ export function clearReferencesTo(el: ModelElement, removed: ReadonlySet<ID>): v
       if (el.associationId && removed.has(el.associationId)) el.associationId = null;
       break;
     case 'informationFlow':
-      if (el.conveyedIds.some((id) => removed.has(id))) el.conveyedIds = el.conveyedIds.filter((id) => !removed.has(id));
+      if (el.conveyedIds.some((id) => removed.has(id)))
+        el.conveyedIds = el.conveyedIds.filter((id) => !removed.has(id));
       break;
     default:
       break;

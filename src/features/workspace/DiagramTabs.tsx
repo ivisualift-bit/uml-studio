@@ -14,7 +14,11 @@ export function DiagramTabs() {
   const diagrams = useDocumentStore((s) => s.doc?.diagrams);
   if (!tabs.length) return null;
   return (
-    <div className="flex h-8 shrink-0 items-end gap-px overflow-x-auto border-b border-border bg-surface-2 px-1" role="tablist" aria-label={t('explorer.diagrams')}>
+    <div
+      className="flex h-8 shrink-0 items-end gap-px overflow-x-auto border-b border-border bg-surface-2 px-1"
+      role="tablist"
+      aria-label={t('explorer.diagrams')}
+    >
       {tabs.map((id) => {
         const diagram = diagrams?.[id];
         if (!diagram) return null;
@@ -29,7 +33,9 @@ export function DiagramTabs() {
             data-diagram-id={id}
             className={cn(
               'group flex h-7 max-w-[220px] min-w-0 cursor-default items-center gap-1.5 rounded-t-md border border-b-0 px-2.5 text-[12.5px]',
-              selected ? 'border-border bg-surface-1 text-fg' : 'border-transparent text-muted hover:bg-surface-3 hover:text-fg',
+              selected
+                ? 'border-border bg-surface-1 text-fg'
+                : 'border-transparent text-muted hover:bg-surface-3 hover:text-fg',
             )}
             onClick={() => setActive(id)}
             onAuxClick={(e) => e.button === 1 && closeTab(id)}

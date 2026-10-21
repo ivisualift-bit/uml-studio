@@ -13,7 +13,16 @@ export type UmlNodeData = {
 
 export type UmlNodeType = Node<UmlNodeData, 'uml'>;
 
-const FIXED_ASPECT = new Set(['initial', 'activityFinal', 'flowFinal', 'junction', 'shallowHistory', 'deepHistory', 'entryPoint', 'exitPoint']);
+const FIXED_ASPECT = new Set([
+  'initial',
+  'activityFinal',
+  'flowFinal',
+  'junction',
+  'shallowHistory',
+  'deepHistory',
+  'entryPoint',
+  'exitPoint',
+]);
 
 function UmlNodeImpl({ id, data, selected }: NodeProps<UmlNodeType>) {
   const ctx = useGraphCanvas();
@@ -21,10 +30,27 @@ function UmlNodeImpl({ id, data, selected }: NodeProps<UmlNodeType>) {
   const { render, connectState } = data;
   const { layout } = render;
   const el = render.element;
-  const subKind = el?.kind === 'controlNode' ? el.nodeKind : el?.kind === 'pseudostate' ? el.pseudoKind : undefined;
+  const subKind =
+    el?.kind === 'controlNode' ? el.nodeKind : el?.kind === 'pseudostate' ? el.pseudoKind : undefined;
   const outline = layout.outlineBox;
-  const showAdd = selected && ctx.singleSelection && ctx.interactive && el && (el.kind === 'class' || el.kind === 'interface' || el.kind === 'enumeration' || el.kind === 'dataType' || el.kind === 'signal');
-  const ring = connectState === 'valid' ? 'var(--success)' : connectState === 'invalid' ? 'var(--danger)' : connectState === 'source' ? 'var(--accent)' : null;
+  const showAdd =
+    selected &&
+    ctx.singleSelection &&
+    ctx.interactive &&
+    el &&
+    (el.kind === 'class' ||
+      el.kind === 'interface' ||
+      el.kind === 'enumeration' ||
+      el.kind === 'dataType' ||
+      el.kind === 'signal');
+  const ring =
+    connectState === 'valid'
+      ? 'var(--success)'
+      : connectState === 'invalid'
+        ? 'var(--danger)'
+        : connectState === 'source'
+          ? 'var(--accent)'
+          : null;
 
   return (
     <div
@@ -39,7 +65,13 @@ function UmlNodeImpl({ id, data, selected }: NodeProps<UmlNodeType>) {
     >
       <Handle type="target" position={Position.Top} isConnectable={false} />
       <Handle type="source" position={Position.Bottom} isConnectable={false} />
-      <svg width={layout.width} height={layout.height} className="absolute top-0 left-0 overflow-visible" role="img" aria-label={el ? `${t(`elementKind.${el.kind}`)} ${el.name}` : t('elementKind.note')}>
+      <svg
+        width={layout.width}
+        height={layout.height}
+        className="absolute top-0 left-0 overflow-visible"
+        role="img"
+        aria-label={el ? `${t(`elementKind.${el.kind}`)} ${el.name}` : t('elementKind.note')}
+      >
         <PrimitiveSvg primitives={layout.primitives} />
         {selected && (
           <rect
@@ -56,7 +88,17 @@ function UmlNodeImpl({ id, data, selected }: NodeProps<UmlNodeType>) {
           />
         )}
         {ring && (
-          <rect x={outline.x - 4} y={outline.y - 4} width={outline.width + 8} height={outline.height + 8} rx={5} fill="none" stroke={ring} strokeWidth={2.5} pointerEvents="none" />
+          <rect
+            x={outline.x - 4}
+            y={outline.y - 4}
+            width={outline.width + 8}
+            height={outline.height + 8}
+            rx={5}
+            fill="none"
+            stroke={ring}
+            strokeWidth={2.5}
+            pointerEvents="none"
+          />
         )}
       </svg>
       {ctx.interactive && (
@@ -72,17 +114,41 @@ function UmlNodeImpl({ id, data, selected }: NodeProps<UmlNodeType>) {
       {showAdd && el && (
         <div className="nodrag nopan absolute -bottom-7 left-1/2 flex -translate-x-1/2 gap-1">
           {el.kind === 'enumeration' && (
-            <AddButton label={t('canvas.addLiteral')} onClick={() => ctx.addMember(el.id, 'literals')} testId="add-literal" />
+            <AddButton
+              label={t('canvas.addLiteral')}
+              onClick={() => ctx.addMember(el.id, 'literals')}
+              testId="add-literal"
+            />
           )}
-          <AddButton label={t('canvas.addAttribute')} onClick={() => ctx.addMember(el.id, 'attributes')} testId="add-attribute" text="attr" />
-          <AddButton label={t('canvas.addOperation')} onClick={() => ctx.addMember(el.id, 'operations')} testId="add-operation" text="op()" />
+          <AddButton
+            label={t('canvas.addAttribute')}
+            onClick={() => ctx.addMember(el.id, 'attributes')}
+            testId="add-attribute"
+            text="attr"
+          />
+          <AddButton
+            label={t('canvas.addOperation')}
+            onClick={() => ctx.addMember(el.id, 'operations')}
+            testId="add-operation"
+            text="op()"
+          />
         </div>
       )}
     </div>
   );
 }
 
-function AddButton({ label, onClick, testId, text }: { label: string; onClick: () => void; testId: string; text?: string }) {
+function AddButton({
+  label,
+  onClick,
+  testId,
+  text,
+}: {
+  label: string;
+  onClick: () => void;
+  testId: string;
+  text?: string;
+}) {
   return (
     <button
       type="button"

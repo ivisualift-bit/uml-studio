@@ -32,7 +32,8 @@ export function withDiagram(kind: DiagramKind, name = 'D', fixture?: Fixture): F
   const ids = fixture?.ids ?? sequentialIds('t');
   const doc = fixture?.doc ?? newProject(ids);
   const created = createDiagramCommands(doc, { kind, name, ownerId: doc.rootModelId, ids });
-  if (!created.ok || !created.diagramId) throw new Error(`cannot create diagram: ${created.ok ? '' : created.reason}`);
+  if (!created.ok || !created.diagramId)
+    throw new Error(`cannot create diagram: ${created.ok ? '' : created.reason}`);
   return { doc: apply(doc, created.commands), ids, diagramId: created.diagramId };
 }
 
@@ -51,7 +52,8 @@ export function addNode(
     size,
     ids: f.ids,
   });
-  if (!created.ok || !created.elementId || !created.viewId) throw new Error(`cannot create node: ${created.ok ? '' : created.reason}`);
+  if (!created.ok || !created.elementId || !created.viewId)
+    throw new Error(`cannot create node: ${created.ok ? '' : created.reason}`);
   f.doc = apply(f.doc, created.commands);
   return { doc: f.doc, elementId: created.elementId, viewId: created.viewId };
 }
@@ -63,7 +65,13 @@ export function connect(
   sourceViewId: ID,
   targetViewId: ID,
 ): { relationshipId: ID; edgeViewId: ID } {
-  const created = createRelationshipCommands(f.doc, { diagramId, preset, sourceViewId, targetViewId, ids: f.ids });
+  const created = createRelationshipCommands(f.doc, {
+    diagramId,
+    preset,
+    sourceViewId,
+    targetViewId,
+    ids: f.ids,
+  });
   if (!created.ok) throw new Error(`cannot connect: ${created.reason}`);
   f.doc = apply(f.doc, created.commands);
   return { relationshipId: created.relationshipId, edgeViewId: created.edgeViewId };

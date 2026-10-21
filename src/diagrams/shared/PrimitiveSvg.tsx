@@ -14,20 +14,85 @@ function renderPrimitive(p: Primitive, key: number): ReactNode {
   switch (p.type) {
     case 'rect':
       return (
-        <rect key={key} x={p.x} y={p.y} width={Math.max(0, p.width)} height={Math.max(0, p.height)} rx={p.rx} fill={p.fill} stroke={p.stroke} strokeWidth={p.strokeWidth} strokeDasharray={p.dash} {...dataAttrs(p.hit)} />
+        <rect
+          key={key}
+          x={p.x}
+          y={p.y}
+          width={Math.max(0, p.width)}
+          height={Math.max(0, p.height)}
+          rx={p.rx}
+          fill={p.fill}
+          stroke={p.stroke}
+          strokeWidth={p.strokeWidth}
+          strokeDasharray={p.dash}
+          {...dataAttrs(p.hit)}
+        />
       );
     case 'ellipse':
-      return <ellipse key={key} cx={p.cx} cy={p.cy} rx={Math.max(0, p.rx)} ry={Math.max(0, p.ry)} fill={p.fill} stroke={p.stroke} strokeWidth={p.strokeWidth} strokeDasharray={p.dash} {...dataAttrs(p.hit)} />;
+      return (
+        <ellipse
+          key={key}
+          cx={p.cx}
+          cy={p.cy}
+          rx={Math.max(0, p.rx)}
+          ry={Math.max(0, p.ry)}
+          fill={p.fill}
+          stroke={p.stroke}
+          strokeWidth={p.strokeWidth}
+          strokeDasharray={p.dash}
+          {...dataAttrs(p.hit)}
+        />
+      );
     case 'line':
-      return <line key={key} x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2} stroke={p.stroke} strokeWidth={p.strokeWidth} strokeDasharray={p.dash} {...dataAttrs(p.hit)} />;
+      return (
+        <line
+          key={key}
+          x1={p.x1}
+          y1={p.y1}
+          x2={p.x2}
+          y2={p.y2}
+          stroke={p.stroke}
+          strokeWidth={p.strokeWidth}
+          strokeDasharray={p.dash}
+          {...dataAttrs(p.hit)}
+        />
+      );
     case 'polyline':
       return (
-        <polyline key={key} points={p.points.map((q) => `${q.x},${q.y}`).join(' ')} fill={p.fill ?? 'none'} stroke={p.stroke} strokeWidth={p.strokeWidth} strokeDasharray={p.dash} strokeLinejoin="round" {...dataAttrs(p.hit)} />
+        <polyline
+          key={key}
+          points={p.points.map((q) => `${q.x},${q.y}`).join(' ')}
+          fill={p.fill ?? 'none'}
+          stroke={p.stroke}
+          strokeWidth={p.strokeWidth}
+          strokeDasharray={p.dash}
+          strokeLinejoin="round"
+          {...dataAttrs(p.hit)}
+        />
       );
     case 'polygon':
-      return <polygon key={key} points={p.points.map((q) => `${q.x},${q.y}`).join(' ')} fill={p.fill} stroke={p.stroke} strokeWidth={p.strokeWidth} {...dataAttrs(p.hit)} />;
+      return (
+        <polygon
+          key={key}
+          points={p.points.map((q) => `${q.x},${q.y}`).join(' ')}
+          fill={p.fill}
+          stroke={p.stroke}
+          strokeWidth={p.strokeWidth}
+          {...dataAttrs(p.hit)}
+        />
+      );
     case 'path':
-      return <path key={key} d={p.d} fill={p.fill} stroke={p.stroke} strokeWidth={p.strokeWidth} strokeDasharray={p.dash} {...dataAttrs(p.hit)} />;
+      return (
+        <path
+          key={key}
+          d={p.d}
+          fill={p.fill}
+          stroke={p.stroke}
+          strokeWidth={p.strokeWidth}
+          strokeDasharray={p.dash}
+          {...dataAttrs(p.hit)}
+        />
+      );
     case 'text': {
       if (!p.text) return null;
       const underline = underlineFor(p);
@@ -46,7 +111,16 @@ function renderPrimitive(p: Primitive, key: number): ReactNode {
           >
             {p.text}
           </text>
-          {underline && <line x1={underline.x1} y1={underline.y1} x2={underline.x2} y2={underline.y2} stroke={underline.stroke} strokeWidth={underline.strokeWidth} />}
+          {underline && (
+            <line
+              x1={underline.x1}
+              y1={underline.y1}
+              x2={underline.x2}
+              y2={underline.y2}
+              stroke={underline.stroke}
+              strokeWidth={underline.strokeWidth}
+            />
+          )}
         </g>
       );
     }

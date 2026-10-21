@@ -31,14 +31,29 @@ export function StatusBar({ problemCount }: { problemCount: number }) {
   }, []);
   const diagram = activeId ? doc?.diagrams[activeId] : undefined;
   return (
-    <footer className="flex h-6 shrink-0 items-center gap-4 border-t border-border bg-surface-2 px-3 text-[11.5px] text-muted" data-testid="status-bar">
+    <footer
+      className="flex h-6 shrink-0 items-center gap-4 border-t border-border bg-surface-2 px-3 text-[11.5px] text-muted"
+      data-testid="status-bar"
+    >
       <span className="truncate font-medium text-fg">{doc?.name}</span>
-      <span className="flex items-center gap-1" data-testid="dirty-indicator" data-dirty={dirty ? 'true' : 'false'}>
-        {dirty ? <Circle size={9} className="fill-warning text-warning" /> : <CircleCheck size={11} className="text-success" />}
+      <span
+        className="flex items-center gap-1"
+        data-testid="dirty-indicator"
+        data-dirty={dirty ? 'true' : 'false'}
+      >
+        {dirty ? (
+          <Circle size={9} className="fill-warning text-warning" />
+        ) : (
+          <CircleCheck size={11} className="text-success" />
+        )}
         {dirty ? t('status.unsaved') : file ? t('status.saved') : t('project.neverSaved')}
       </span>
       {file && <span className="truncate text-faint">{file.name}</span>}
-      {lastRecovery && dirty && <span className="text-faint">{t('status.recoverySaved', { time: new Date(lastRecovery).toLocaleTimeString() })}</span>}
+      {lastRecovery && dirty && (
+        <span className="text-faint">
+          {t('status.recoverySaved', { time: new Date(lastRecovery).toLocaleTimeString() })}
+        </span>
+      )}
       <span className="flex-1" />
       <span>{t('status.problems', { count: problemCount })}</span>
       <span>{selection ? t('status.selection', { count: selection }) : ''}</span>

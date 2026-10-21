@@ -7,7 +7,11 @@ import { layoutSequence } from '@/diagrams/render/sequenceLayout';
 import { escapeXml } from '@/diagrams/render/svgSerializer';
 import { measureText, wrapText } from '@/diagrams/render/textMetrics';
 import { PRINT_THEME } from '@/diagrams/render/theme';
-import { createLifelineCommands, createMessageCommands, createActivationCommands } from '@/domain/commands/creators';
+import {
+  createLifelineCommands,
+  createMessageCommands,
+  createActivationCommands,
+} from '@/domain/commands/creators';
 import type { Relationship } from '@/domain/schemas/elements';
 import { addNode, apply, connect, withDiagram } from '../helpers';
 
@@ -21,10 +25,23 @@ function parseSvg(svg: string): Document {
 function classDiagram() {
   const f = withDiagram('class', 'Domain «model» & <test>');
   const person = addNode(f, f.diagramId, { kind: 'class', name: 'Person' }, 0, 0, { width: 100, height: 40 });
-  const student = addNode(f, f.diagramId, { kind: 'class', name: 'Étudiant' }, 0, 300, { width: 100, height: 40 });
+  const student = addNode(f, f.diagramId, { kind: 'class', name: 'Étudiant' }, 0, 300, {
+    width: 100,
+    height: 40,
+  });
   f.doc = apply(f.doc, [
-    { type: 'member/add', elementId: person.elementId, collection: 'attributes', member: { id: 'a-name', name: 'name', type: 'String', visibility: 'private' } },
-    { type: 'member/add', elementId: person.elementId, collection: 'operations', member: { id: 'o-greet', name: 'greet', returnType: 'void', isStatic: true } },
+    {
+      type: 'member/add',
+      elementId: person.elementId,
+      collection: 'attributes',
+      member: { id: 'a-name', name: 'name', type: 'String', visibility: 'private' },
+    },
+    {
+      type: 'member/add',
+      elementId: person.elementId,
+      collection: 'operations',
+      member: { id: 'o-greet', name: 'greet', returnType: 'void', isStatic: true },
+    },
   ]);
   const gen = connect(f, f.diagramId, 'generalization', student.viewId, person.viewId);
   return { f, person, student, gen };
@@ -47,7 +64,9 @@ describe('class node notation', () => {
     const node = layout.nodeById.get(person.viewId)!;
     expect(node.layout.height).toBeGreaterThan(40); // stored 40 < intrinsic
     expect(node.layout.rows.map((r) => r.collection)).toEqual(['attributes', 'operations']);
-    const texts = node.layout.primitives.filter((p) => p.type === 'text').map((p) => (p.type === 'text' ? p : null));
+    const texts = node.layout.primitives
+      .filter((p) => p.type === 'text')
+      .map((p) => (p.type === 'text' ? p : null));
     expect(texts.map((t) => t?.text)).toContain('- name: String');
     const op = texts.find((t) => t?.text === '+ greet(): void');
     expect(op?.underline).toBe(true); // static → underlined
@@ -59,9 +78,14 @@ describe('class node notation', () => {
     f.doc = apply(f.doc, { type: 'element/update', elementId: abs.elementId, patch: { isAbstract: true } });
     const itf = addNode(f, f.diagramId, { kind: 'interface', name: 'Drawable' }, 300);
     const layout = layoutGraphDiagram(f.doc, f.doc.diagrams[f.diagramId]!, PRINT_THEME);
-    const shapeName = layout.nodeById.get(abs.viewId)!.layout.primitives.find((p) => p.type === 'text' && p.text === 'Shape');
+    const shapeName = layout.nodeById
+      .get(abs.viewId)!
+      .layout.primitives.find((p) => p.type === 'text' && p.text === 'Shape');
     expect(shapeName?.type === 'text' && shapeName.italic).toBe(true);
-    const itfTexts = layout.nodeById.get(itf.viewId)!.layout.primitives.filter((p) => p.type === 'text').map((p) => (p.type === 'text' ? p.text : ''));
+    const itfTexts = layout.nodeById
+      .get(itf.viewId)!
+      .layout.primitives.filter((p) => p.type === 'text')
+      .map((p) => (p.type === 'text' ? p.text : ''));
     expect(itfTexts).toContain('«interface»');
   });
 });
@@ -70,16 +94,30 @@ describe('edge notation', () => {
   it('maps relationship kinds to UML markers and line styles', () => {
     const { f, gen } = classDiagram();
     const rel = f.doc.modelElements[gen.relationshipId] as Relationship;
-    expect(edgeNotation(f.doc, rel)).toMatchObject({ dashed: false, targetMarker: 'hollowTriangle', sourceMarker: 'none' });
+    expect(edgeNotation(f.doc, rel)).toMatchObject({
+      dashed: false,
+      targetMarker: 'hollowTriangle',
+      sourceMarker: 'none',
+    });
     const a = addNode(f, f.diagramId, { kind: 'class', name: 'Order' }, 400, 0);
     const b = addNode(f, f.diagramId, { kind: 'class', name: 'Line' }, 400, 300);
     const comp = connect(f, f.diagramId, 'composition', a.viewId, b.viewId);
-    expect(edgeNotation(f.doc, f.doc.modelElements[comp.relationshipId] as Relationship)).toMatchObject({ sourceMarker: 'filledDiamond', targetMarker: 'none' });
+    expect(edgeNotation(f.doc, f.doc.modelElements[comp.relationshipId] as Relationship)).toMatchObject({
+      sourceMarker: 'filledDiamond',
+      targetMarker: 'none',
+    });
     const i = addNode(f, f.diagramId, { kind: 'interface', name: 'I' }, 700, 0);
     const real = connect(f, f.diagramId, 'realization', a.viewId, i.viewId);
-    expect(edgeNotation(f.doc, f.doc.modelElements[real.relationshipId] as Relationship)).toMatchObject({ dashed: true, targetMarker: 'hollowTriangle' });
+    expect(edgeNotation(f.doc, f.doc.modelElements[real.relationshipId] as Relationship)).toMatchObject({
+      dashed: true,
+      targetMarker: 'hollowTriangle',
+    });
     const dep = connect(f, f.diagramId, 'usage', b.viewId, i.viewId);
-    expect(edgeNotation(f.doc, f.doc.modelElements[dep.relationshipId] as Relationship)).toMatchObject({ dashed: true, targetMarker: 'openArrow', labels: { stereotype: '«use»' } });
+    expect(edgeNotation(f.doc, f.doc.modelElements[dep.relationshipId] as Relationship)).toMatchObject({
+      dashed: true,
+      targetMarker: 'openArrow',
+      labels: { stereotype: '«use»' },
+    });
   });
 
   it('labels include/extend with keywords and points the arrow at the right use case', () => {
@@ -106,7 +144,10 @@ describe('edge notation', () => {
     f.doc = apply(f.doc, {
       type: 'element/update',
       elementId: rel.id,
-      patch: { sourceEnd: { ...rel.sourceEnd, multiplicity: '0..*' }, targetEnd: { ...rel.targetEnd, multiplicity: '1..*', name: 'courses' } },
+      patch: {
+        sourceEnd: { ...rel.sourceEnd, multiplicity: '0..*' },
+        targetEnd: { ...rel.targetEnd, multiplicity: '1..*', name: 'courses' },
+      },
     });
     const layout = layoutGraphDiagram(f.doc, f.doc.diagrams[f.diagramId]!, PRINT_THEME);
     const edge = layout.edges[0]!;
@@ -120,9 +161,17 @@ describe('edge notation', () => {
   });
 
   it('docks rays on ellipse and diamond outlines', () => {
-    const p = rayExit({ bounds: { x: 0, y: 0, width: 100, height: 50 }, outline: 'ellipse' }, { x: 50, y: 25 }, { x: 500, y: 25 });
+    const p = rayExit(
+      { bounds: { x: 0, y: 0, width: 100, height: 50 }, outline: 'ellipse' },
+      { x: 50, y: 25 },
+      { x: 500, y: 25 },
+    );
     expect(p.x).toBeCloseTo(100, 0);
-    const d = rayExit({ bounds: { x: 0, y: 0, width: 40, height: 40 }, outline: 'diamond' }, { x: 20, y: 20 }, { x: 20, y: -100 });
+    const d = rayExit(
+      { bounds: { x: 0, y: 0, width: 40, height: 40 }, outline: 'diamond' },
+      { x: 20, y: 20 },
+      { x: 20, y: -100 },
+    );
     expect(d.y).toBeCloseTo(0, 0);
   });
 });
@@ -130,7 +179,11 @@ describe('edge notation', () => {
 describe('SVG export', () => {
   it('produces well-formed SVG with escaped text, a viewBox covering all content and no markers', () => {
     const { f } = classDiagram();
-    f.doc = apply(f.doc, { type: 'element/update', elementId: Object.values(f.doc.modelElements).find((e) => e.name === 'Person')!.id, patch: { name: 'Person <&> "quoted"' } });
+    f.doc = apply(f.doc, {
+      type: 'element/update',
+      elementId: Object.values(f.doc.modelElements).find((e) => e.name === 'Person')!.id,
+      patch: { name: 'Person <&> "quoted"' },
+    });
     const { svg, width, height } = renderDiagramSvg(f.doc, f.diagramId, { background: '#ffffff' });
     const dom = parseSvg(svg);
     const root = dom.documentElement;
@@ -144,7 +197,12 @@ describe('SVG export', () => {
     expect(dom.getElementsByTagName('title')[0]?.textContent).toBe('Domain «model» & <test>');
     // The hollow generalization triangle is an explicit polygon.
     expect(dom.getElementsByTagName('polygon').length).toBeGreaterThan(0);
-    const [vx, vy, vw, vh] = root.getAttribute('viewBox')!.split(' ').map(Number) as [number, number, number, number];
+    const [vx, vy, vw, vh] = root.getAttribute('viewBox')!.split(' ').map(Number) as [
+      number,
+      number,
+      number,
+      number,
+    ];
     for (const r of [...dom.getElementsByTagName('rect')]) {
       if (r.id.endsWith('-background')) continue;
       const x = Number(r.getAttribute('x'));
@@ -156,7 +214,7 @@ describe('SVG export', () => {
   });
 
   it('strips characters that are invalid in XML', () => {
-    expect(escapeXml('a\u0001b￾c')).toBe('abc');
+    expect(escapeXml('a\u0001b\uFFFEc')).toBe('abc');
     expect(escapeXml('مرحبا')).toBe('مرحبا');
   });
 
@@ -172,20 +230,49 @@ describe('sequence layout', () => {
   it('anchors messages on activation edges and orders them by Y', () => {
     const f = withDiagram('sequence');
     const ll = (name: string, x: number) => {
-      const c = createLifelineCommands(f.doc, { diagramId: f.diagramId, x, baseName: 'L', headStyle: 'object', name, ids: f.ids });
+      const c = createLifelineCommands(f.doc, {
+        diagramId: f.diagramId,
+        x,
+        baseName: 'L',
+        headStyle: 'object',
+        name,
+        ids: f.ids,
+      });
       if (!c.ok) throw new Error(c.reason);
       f.doc = apply(f.doc, c.commands);
       return c.viewId!;
     };
     const a = ll('Frontend', 100);
     const b = ll('API', 400);
-    const act = createActivationCommands(f.doc, { diagramId: f.diagramId, lifelineViewId: b, startY: 120, endY: 220, ids: f.ids });
+    const act = createActivationCommands(f.doc, {
+      diagramId: f.diagramId,
+      lifelineViewId: b,
+      startY: 120,
+      endY: 220,
+      ids: f.ids,
+    });
     if (!act.ok) throw new Error(act.reason);
     f.doc = apply(f.doc, act.commands);
-    const m1 = createMessageCommands(f.doc, { diagramId: f.diagramId, sourceViewId: a, targetViewId: b, sort: 'synchronous', y: 120, name: 'login', ids: f.ids });
+    const m1 = createMessageCommands(f.doc, {
+      diagramId: f.diagramId,
+      sourceViewId: a,
+      targetViewId: b,
+      sort: 'synchronous',
+      y: 120,
+      name: 'login',
+      ids: f.ids,
+    });
     if (!m1.ok) throw new Error(m1.reason);
     f.doc = apply(f.doc, m1.commands);
-    const m2 = createMessageCommands(f.doc, { diagramId: f.diagramId, sourceViewId: b, targetViewId: a, sort: 'reply', y: 210, name: 'token', ids: f.ids });
+    const m2 = createMessageCommands(f.doc, {
+      diagramId: f.diagramId,
+      sourceViewId: b,
+      targetViewId: a,
+      sort: 'reply',
+      y: 210,
+      name: 'token',
+      ids: f.ids,
+    });
     if (!m2.ok) throw new Error(m2.reason);
     f.doc = apply(f.doc, m2.commands);
     const layout = layoutSequence(f.doc, f.doc.diagrams[f.diagramId]!, PRINT_THEME);

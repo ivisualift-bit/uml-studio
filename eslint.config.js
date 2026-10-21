@@ -48,11 +48,26 @@ export default tseslint.config(
         'error',
         {
           patterns: [
-            { group: ['react', 'react-dom', 'react/*', 'react-dom/*'], message: 'Pure modules must not depend on React.' },
+            {
+              group: ['react', 'react-dom', 'react/*', 'react-dom/*'],
+              message: 'Pure modules must not depend on React.',
+            },
             { group: ['@xyflow/*'], message: 'Pure modules must not depend on React Flow.' },
             { group: ['@tauri-apps/*'], message: 'Pure modules must not depend on Tauri.' },
-            { group: ['dexie', 'zustand', 'zustand/*'], message: 'Pure modules must not depend on storage/state bindings.' },
-            { group: ['@/features/*', '@/stores/*', '@/components/*', '@/services/persistence/*', '@/services/platform/*'], message: 'Pure modules must not import UI or platform layers.' },
+            {
+              group: ['dexie', 'zustand', 'zustand/*'],
+              message: 'Pure modules must not depend on storage/state bindings.',
+            },
+            {
+              group: [
+                '@/features/*',
+                '@/stores/*',
+                '@/components/*',
+                '@/services/persistence/*',
+                '@/services/platform/*',
+              ],
+              message: 'Pure modules must not import UI or platform layers.',
+            },
           ],
         },
       ],

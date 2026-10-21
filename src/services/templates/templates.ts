@@ -24,19 +24,37 @@ function library(): ProjectDocument {
   b.attribute(librarian.elementId, '- employeeId: String');
   b.operation(librarian.elementId, '+ registerMember(member: Member): void');
   const loan = b.node(d, 'class', 'Loan', 130, 480, { width: 220 });
-  b.attribute(loan.elementId, '- loanDate: Date').attribute(loan.elementId, '- dueDate: Date').attribute(loan.elementId, '- returned: Boolean = false');
+  b.attribute(loan.elementId, '- loanDate: Date')
+    .attribute(loan.elementId, '- dueDate: Date')
+    .attribute(loan.elementId, '- returned: Boolean = false');
   b.operation(loan.elementId, '+ isOverdue(): Boolean').operation(loan.elementId, '+ close(): void');
   const book = b.node(d, 'class', 'Book', 520, 480, { width: 220 });
-  b.attribute(book.elementId, '- isbn: String').attribute(book.elementId, '- title: String').attribute(book.elementId, '- year: Integer');
+  b.attribute(book.elementId, '- isbn: String')
+    .attribute(book.elementId, '- title: String')
+    .attribute(book.elementId, '- year: Integer');
   b.operation(book.elementId, '+ isAvailable(): Boolean');
   const author = b.node(d, 'class', 'Author', 880, 480, { width: 190 });
   b.attribute(author.elementId, '- name: String').attribute(author.elementId, '- nationality: String');
   b.connect(d, 'generalization', member.viewId, person.viewId);
   b.connect(d, 'generalization', librarian.viewId, person.viewId);
-  b.connect(d, 'association', member.viewId, loan.viewId, { sourceEnd: { multiplicity: '1' }, targetEnd: { multiplicity: '0..*', name: 'loans' } });
-  b.connect(d, 'directedAssociation', loan.viewId, book.viewId, { sourceEnd: { multiplicity: '0..*' }, targetEnd: { multiplicity: '1', name: 'book' } });
-  b.connect(d, 'association', author.viewId, book.viewId, { name: 'writes', sourceEnd: { multiplicity: '1..*', name: 'authors' }, targetEnd: { multiplicity: '*', name: 'books' } });
-  b.connect(d, 'association', librarian.viewId, loan.viewId, { name: 'processes', sourceEnd: { multiplicity: '1' }, targetEnd: { multiplicity: '*' } });
+  b.connect(d, 'association', member.viewId, loan.viewId, {
+    sourceEnd: { multiplicity: '1' },
+    targetEnd: { multiplicity: '0..*', name: 'loans' },
+  });
+  b.connect(d, 'directedAssociation', loan.viewId, book.viewId, {
+    sourceEnd: { multiplicity: '0..*' },
+    targetEnd: { multiplicity: '1', name: 'book' },
+  });
+  b.connect(d, 'association', author.viewId, book.viewId, {
+    name: 'writes',
+    sourceEnd: { multiplicity: '1..*', name: 'authors' },
+    targetEnd: { multiplicity: '*', name: 'books' },
+  });
+  b.connect(d, 'association', librarian.viewId, loan.viewId, {
+    name: 'processes',
+    sourceEnd: { multiplicity: '1' },
+    targetEnd: { multiplicity: '*' },
+  });
   return b.build();
 }
 
@@ -44,16 +62,22 @@ function ecommerce(): ProjectDocument {
   const b = new ProjectBuilder('E-Commerce Domain', { modelName: 'Shop', idPrefix: 'shop' });
   const d = b.diagram('class', 'Ordering');
   const customer = b.node(d, 'class', 'Customer', 40, 40, { width: 210 });
-  b.attribute(customer.elementId, '- customerId: String').attribute(customer.elementId, '- name: String').attribute(customer.elementId, '- email: String');
+  b.attribute(customer.elementId, '- customerId: String')
+    .attribute(customer.elementId, '- name: String')
+    .attribute(customer.elementId, '- email: String');
   b.operation(customer.elementId, '+ placeOrder(): Order');
   const order = b.node(d, 'class', 'Order', 380, 40, { width: 220 });
-  b.attribute(order.elementId, '- orderNumber: String').attribute(order.elementId, '- placedAt: Date').attribute(order.elementId, '- status: OrderStatus');
+  b.attribute(order.elementId, '- orderNumber: String')
+    .attribute(order.elementId, '- placedAt: Date')
+    .attribute(order.elementId, '- status: OrderStatus');
   b.operation(order.elementId, '+ total(): Money').operation(order.elementId, '+ cancel(): void');
   const item = b.node(d, 'class', 'OrderItem', 380, 320, { width: 220 });
   b.attribute(item.elementId, '- quantity: Integer').attribute(item.elementId, '- unitPrice: Money');
   b.operation(item.elementId, '+ subtotal(): Money');
   const product = b.node(d, 'class', 'Product', 740, 320, { width: 200 });
-  b.attribute(product.elementId, '- sku: String').attribute(product.elementId, '- name: String').attribute(product.elementId, '- price: Money');
+  b.attribute(product.elementId, '- sku: String')
+    .attribute(product.elementId, '- name: String')
+    .attribute(product.elementId, '- price: Money');
   const status = b.node(d, 'enumeration', 'OrderStatus', 740, 40, { width: 170 });
   for (const l of ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED']) b.literal(status.elementId, l);
   const payment = b.node(d, 'class', 'Payment', 40, 320, { width: 220, patch: { isAbstract: true } });
@@ -65,10 +89,23 @@ function ecommerce(): ProjectDocument {
   const wallet = b.node(d, 'class', 'WalletPayment', 230, 560, { width: 190 });
   b.attribute(wallet.elementId, '- walletId: String');
   b.operation(wallet.elementId, '+ authorize(): Boolean');
-  b.connect(d, 'association', customer.viewId, order.viewId, { name: 'places', sourceEnd: { multiplicity: '1' }, targetEnd: { multiplicity: '0..*', name: 'orders' } });
-  b.connect(d, 'composition', order.viewId, item.viewId, { sourceEnd: { multiplicity: '1' }, targetEnd: { multiplicity: '1..*', name: 'items' } });
-  b.connect(d, 'directedAssociation', item.viewId, product.viewId, { sourceEnd: { multiplicity: '*' }, targetEnd: { multiplicity: '1' } });
-  b.connect(d, 'association', order.viewId, payment.viewId, { sourceEnd: { multiplicity: '1' }, targetEnd: { multiplicity: '0..1', name: 'payment' } });
+  b.connect(d, 'association', customer.viewId, order.viewId, {
+    name: 'places',
+    sourceEnd: { multiplicity: '1' },
+    targetEnd: { multiplicity: '0..*', name: 'orders' },
+  });
+  b.connect(d, 'composition', order.viewId, item.viewId, {
+    sourceEnd: { multiplicity: '1' },
+    targetEnd: { multiplicity: '1..*', name: 'items' },
+  });
+  b.connect(d, 'directedAssociation', item.viewId, product.viewId, {
+    sourceEnd: { multiplicity: '*' },
+    targetEnd: { multiplicity: '1' },
+  });
+  b.connect(d, 'association', order.viewId, payment.viewId, {
+    sourceEnd: { multiplicity: '1' },
+    targetEnd: { multiplicity: '0..1', name: 'payment' },
+  });
   b.connect(d, 'dependency', order.viewId, status.viewId);
   b.connect(d, 'generalization', card.viewId, payment.viewId);
   b.connect(d, 'generalization', wallet.viewId, payment.viewId);
@@ -100,7 +137,10 @@ function university(): ProjectDocument {
   b.connect(d, 'include', submit.viewId, auth.viewId);
   const reg = b.doc.modelElements[register.elementId];
   const point = reg?.kind === 'useCase' ? reg.extensionPoints[0]?.id : undefined;
-  b.connect(d, 'extend', waitlist.viewId, register.viewId, { condition: 'course is full', extensionPointIds: point ? [point] : [] });
+  b.connect(d, 'extend', waitlist.viewId, register.viewId, {
+    condition: 'course is full',
+    extensionPointIds: point ? [point] : [],
+  });
   return b.build();
 }
 
@@ -142,7 +182,13 @@ function checkout(): ProjectDocument {
   b.message(d, orders, orders, 'synchronous', 205, 'reserveStock', 'items');
   b.message(d, orders, gateway, 'synchronous', 245, 'charge', 'amount, card');
   b.message(d, gateway, orders, 'reply', 285, 'paymentResult');
-  b.fragment(d, 'alt', { x: 200, y: 320, width: 560, height: 200 }, ['payment approved', 'payment declined'], [420]);
+  b.fragment(
+    d,
+    'alt',
+    { x: 200, y: 320, width: 560, height: 200 },
+    ['payment approved', 'payment declined'],
+    [420],
+  );
   b.message(d, orders, cart, 'reply', 360, 'confirmation');
   b.message(d, cart, user, 'asynchronous', 390, 'showReceipt', 'orderNumber');
   b.message(d, orders, cart, 'reply', 460, 'declined');
@@ -189,17 +235,31 @@ function ticket(): ProjectDocument {
   const init = b.node(d, 'pseudostate', '', 40, 80, { subKind: 'initial' });
   const fresh = b.node(d, 'state', 'New', 120, 60, { width: 120, height: 60 });
   const assigned = b.node(d, 'state', 'Assigned', 360, 60, { width: 130, height: 60 });
-  const progress = b.node(d, 'state', 'In Progress', 620, 50, { width: 170, height: 90, patch: { entry: 'startTimer', exit: 'stopTimer' } });
+  const progress = b.node(d, 'state', 'In Progress', 620, 50, {
+    width: 170,
+    height: 90,
+    patch: { entry: 'startTimer', exit: 'stopTimer' },
+  });
   const resolved = b.node(d, 'state', 'Resolved', 620, 270, { width: 150, height: 60 });
   const closed = b.node(d, 'state', 'Closed', 360, 270, { width: 130, height: 60 });
   const fin = b.node(d, 'finalState', '', 180, 287);
   b.connect(d, 'transition', init.viewId, fresh.viewId);
-  b.connect(d, 'transition', fresh.viewId, assigned.viewId, { trigger: 'assign', guard: 'agentAvailable', effect: 'notifyAgent' });
+  b.connect(d, 'transition', fresh.viewId, assigned.viewId, {
+    trigger: 'assign',
+    guard: 'agentAvailable',
+    effect: 'notifyAgent',
+  });
   b.connect(d, 'transition', assigned.viewId, progress.viewId, { trigger: 'start' });
   b.connect(d, 'transition', progress.viewId, resolved.viewId, { trigger: 'resolve', effect: 'sendSurvey' });
   const reopen = b.connect(d, 'transition', resolved.viewId, progress.viewId, { trigger: 'reopen' });
-  b.waypoints(d, reopen.edgeViewId, [{ x: 800, y: 300 }, { x: 800, y: 110 }]);
-  b.connect(d, 'transition', resolved.viewId, closed.viewId, { trigger: 'close', guard: 'customerConfirmed' });
+  b.waypoints(d, reopen.edgeViewId, [
+    { x: 800, y: 300 },
+    { x: 800, y: 110 },
+  ]);
+  b.connect(d, 'transition', resolved.viewId, closed.viewId, {
+    trigger: 'close',
+    guard: 'customerConfirmed',
+  });
   b.connect(d, 'transition', fresh.viewId, closed.viewId, { trigger: 'reject', effect: 'notifyCustomer' });
   b.connect(d, 'transition', closed.viewId, fin.viewId);
   return b.build();
@@ -217,7 +277,8 @@ function microservices(): ProjectDocument {
   const iInventory = b.node(d, 'interface', 'IInventory', 405, 190, { width: 70, height: 44 });
   const iPayments = b.node(d, 'interface', 'IPayments', 710, 190, { width: 70, height: 44 });
   // Provided interfaces in lollipop (ball) notation.
-  for (const id of [iOrders.viewId, iInventory.viewId, iPayments.viewId]) b.viewPatch(d, id, { variant: 'alternate' });
+  for (const id of [iOrders.viewId, iInventory.viewId, iPayments.viewId])
+    b.viewPatch(d, id, { variant: 'alternate' });
   b.connect(d, 'usage', web.viewId, gateway.viewId);
   b.connect(d, 'realization', orders.viewId, iOrders.viewId);
   b.connect(d, 'realization', inventory.viewId, iInventory.viewId);
@@ -245,15 +306,69 @@ function cloud(): ProjectDocument {
 }
 
 export const TEMPLATES: TemplateDef[] = [
-  { id: 'library', nameKey: 'templates.library.name', descriptionKey: 'templates.library.description', kind: 'class', build: library },
-  { id: 'ecommerce', nameKey: 'templates.ecommerce.name', descriptionKey: 'templates.ecommerce.description', kind: 'class', build: ecommerce },
-  { id: 'university', nameKey: 'templates.university.name', descriptionKey: 'templates.university.description', kind: 'useCase', build: university },
-  { id: 'login', nameKey: 'templates.login.name', descriptionKey: 'templates.login.description', kind: 'sequence', build: login },
-  { id: 'checkout', nameKey: 'templates.checkout.name', descriptionKey: 'templates.checkout.description', kind: 'sequence', build: checkout },
-  { id: 'loan', nameKey: 'templates.loan.name', descriptionKey: 'templates.loan.description', kind: 'activity', build: loanRequest },
-  { id: 'ticket', nameKey: 'templates.ticket.name', descriptionKey: 'templates.ticket.description', kind: 'stateMachine', build: ticket },
-  { id: 'microservices', nameKey: 'templates.microservices.name', descriptionKey: 'templates.microservices.description', kind: 'component', build: microservices },
-  { id: 'cloud', nameKey: 'templates.cloud.name', descriptionKey: 'templates.cloud.description', kind: 'deployment', build: cloud },
+  {
+    id: 'library',
+    nameKey: 'templates.library.name',
+    descriptionKey: 'templates.library.description',
+    kind: 'class',
+    build: library,
+  },
+  {
+    id: 'ecommerce',
+    nameKey: 'templates.ecommerce.name',
+    descriptionKey: 'templates.ecommerce.description',
+    kind: 'class',
+    build: ecommerce,
+  },
+  {
+    id: 'university',
+    nameKey: 'templates.university.name',
+    descriptionKey: 'templates.university.description',
+    kind: 'useCase',
+    build: university,
+  },
+  {
+    id: 'login',
+    nameKey: 'templates.login.name',
+    descriptionKey: 'templates.login.description',
+    kind: 'sequence',
+    build: login,
+  },
+  {
+    id: 'checkout',
+    nameKey: 'templates.checkout.name',
+    descriptionKey: 'templates.checkout.description',
+    kind: 'sequence',
+    build: checkout,
+  },
+  {
+    id: 'loan',
+    nameKey: 'templates.loan.name',
+    descriptionKey: 'templates.loan.description',
+    kind: 'activity',
+    build: loanRequest,
+  },
+  {
+    id: 'ticket',
+    nameKey: 'templates.ticket.name',
+    descriptionKey: 'templates.ticket.description',
+    kind: 'stateMachine',
+    build: ticket,
+  },
+  {
+    id: 'microservices',
+    nameKey: 'templates.microservices.name',
+    descriptionKey: 'templates.microservices.description',
+    kind: 'component',
+    build: microservices,
+  },
+  {
+    id: 'cloud',
+    nameKey: 'templates.cloud.name',
+    descriptionKey: 'templates.cloud.description',
+    kind: 'deployment',
+    build: cloud,
+  },
 ];
 
 const cache = new Map<string, ProjectDocument>();

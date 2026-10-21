@@ -26,7 +26,9 @@ const KIND_ORDER: Record<string, number> = {
 function sortChildren(a: ModelElement, b: ModelElement): number {
   const ra = isRelationship(a) ? 9 : (KIND_ORDER[a.kind] ?? 5);
   const rb = isRelationship(b) ? 9 : (KIND_ORDER[b.kind] ?? 5);
-  return ra - rb || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.id.localeCompare(b.id);
+  return (
+    ra - rb || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.id.localeCompare(b.id)
+  );
 }
 
 export interface TreeOptions {
@@ -76,7 +78,8 @@ export function buildTreeRows(doc: ProjectDocument, options: TreeOptions): TreeR
         current = doc.modelElements[current]?.ownerId ?? null;
       }
     };
-    for (const el of Object.values(doc.modelElements)) if (matchesElement(el) && (options.showRelationships || !isRelationship(el))) markAncestors(el.id);
+    for (const el of Object.values(doc.modelElements))
+      if (matchesElement(el) && (options.showRelationships || !isRelationship(el))) markAncestors(el.id);
     for (const d of Object.values(doc.diagrams)) {
       if (matchesDiagram(d)) {
         visible.add(d.id);
@@ -94,11 +97,27 @@ export function buildTreeRows(doc: ProjectDocument, options: TreeOptions): TreeR
     const diagrams = diagramsByOwner.get(el.id) ?? [];
     const hasChildren = kids.length + diagrams.length > 0;
     const expanded = query ? true : options.expanded.has(el.id);
-    rows.push({ id: el.id, depth, kind: 'element', element: el, hasChildren, expanded, match: !query || matchesElement(el) });
+    rows.push({
+      id: el.id,
+      depth,
+      kind: 'element',
+      element: el,
+      hasChildren,
+      expanded,
+      match: !query || matchesElement(el),
+    });
     if (!expanded) return;
     for (const d of diagrams) {
       if (query && !visible.has(d.id)) continue;
-      rows.push({ id: d.id, depth: depth + 1, kind: 'diagram', diagram: d, hasChildren: false, expanded: false, match: !query || matchesDiagram(d) });
+      rows.push({
+        id: d.id,
+        depth: depth + 1,
+        kind: 'diagram',
+        diagram: d,
+        hasChildren: false,
+        expanded: false,
+        match: !query || matchesDiagram(d),
+      });
     }
     for (const child of kids) visit(child, depth + 1, seen);
   };

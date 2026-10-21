@@ -46,7 +46,13 @@ export function NewProjectDialog() {
         }}
       >
         <Field label={t('project.nameLabel')} htmlFor="project-name">
-          <Input id="project-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} data-testid="project-name-input" />
+          <Input
+            id="project-name"
+            autoFocus
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            data-testid="project-name-input"
+          />
         </Field>
         <Field label={t('project.templateLabel')} htmlFor="project-template">
           <Select id="project-template" value={template} onChange={(e) => setTemplate(e.target.value)}>
@@ -74,7 +80,14 @@ function TemplatePreview({ id }: { id: string }) {
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   }, [id]);
   if (!url) return <div className="h-28 rounded bg-white" />;
-  return <img src={url} alt="" className="h-28 w-full rounded border border-border bg-white object-contain p-1" draggable={false} />;
+  return (
+    <img
+      src={url}
+      alt=""
+      className="h-28 w-full rounded border border-border bg-white object-contain p-1"
+      draggable={false}
+    />
+  );
 }
 
 export function TemplatesDialog() {
@@ -111,7 +124,10 @@ export function TemplatesDialog() {
             data-testid={`template-${tpl.id}`}
             onClick={() => setSelected(tpl.id)}
             onDoubleClick={() => use(tpl.id)}
-            className={cn('flex flex-col gap-2 rounded-lg border p-2 text-left hover:border-accent', selected === tpl.id ? 'border-accent bg-accent-muted' : 'border-border bg-surface-2')}
+            className={cn(
+              'flex flex-col gap-2 rounded-lg border p-2 text-left hover:border-accent',
+              selected === tpl.id ? 'border-accent bg-accent-muted' : 'border-border bg-surface-2',
+            )}
           >
             <TemplatePreview id={tpl.id} />
             <div>
@@ -125,7 +141,13 @@ export function TemplatesDialog() {
   );
 }
 
-export function UnsavedDialog({ projectName, onDecision }: { projectName: string; onDecision: (d: 'save' | 'discard' | 'cancel') => void }) {
+export function UnsavedDialog({
+  projectName,
+  onDecision,
+}: {
+  projectName: string;
+  onDecision: (d: 'save' | 'discard' | 'cancel') => void;
+}) {
   const t = useT();
   return (
     <Modal
@@ -181,11 +203,18 @@ export function RecoveryDialog({ snapshots }: { snapshots: RecoverySnapshotInfo[
     >
       <ul className="flex flex-col gap-2">
         {list.map((s) => (
-          <li key={s.projectId} className="flex items-center gap-3 rounded-md border border-border bg-surface-2 p-2.5" data-testid="recovery-item">
+          <li
+            key={s.projectId}
+            className="flex items-center gap-3 rounded-md border border-border bg-surface-2 p-2.5"
+            data-testid="recovery-item"
+          >
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[13px] font-medium">{t('recovery.project', { name: s.projectName })}</div>
+              <div className="truncate text-[13px] font-medium">
+                {t('recovery.project', { name: s.projectName })}
+              </div>
               <div className="text-[11.5px] text-muted">
-                {t('recovery.savedAt', { date: new Date(s.savedAt).toLocaleString() })} · {t('recovery.details', { elements: s.elementCount, diagrams: s.diagramCount })}
+                {t('recovery.savedAt', { date: new Date(s.savedAt).toLocaleString() })} ·{' '}
+                {t('recovery.details', { elements: s.elementCount, diagrams: s.diagramCount })}
               </div>
             </div>
             <Button
@@ -220,14 +249,23 @@ export function RecoveryDialog({ snapshots }: { snapshots: RecoverySnapshotInfo[
 export function LoadErrorDialog({ fileName, error }: { fileName: string; error: LoadError }) {
   const t = useT();
   return (
-    <Modal open onClose={close} title={t('loadError.title', { name: fileName })} description={t('loadError.intro')} testId="load-error-dialog" footer={<Button onClick={close}>{t('common.close')}</Button>}>
+    <Modal
+      open
+      onClose={close}
+      title={t('loadError.title', { name: fileName })}
+      description={t('loadError.intro')}
+      testId="load-error-dialog"
+      footer={<Button onClick={close}>{t('common.close')}</Button>}
+    >
       <p className="mb-3 text-[13px] text-danger" data-testid="load-error-message" data-code={error.code}>
         {t(`loadError.${error.code}`, { version: error.version ?? '?' })}
       </p>
       {error.details.length > 0 && (
         <details open={error.details.length < 4}>
           <summary className="cursor-pointer text-[12px] text-muted">{t('loadError.technical')}</summary>
-          <pre className="mt-2 max-h-56 overflow-auto rounded bg-surface-2 p-2 font-mono text-[11px] whitespace-pre-wrap text-muted">{error.details.join('\n')}</pre>
+          <pre className="mt-2 max-h-56 overflow-auto rounded bg-surface-2 p-2 font-mono text-[11px] whitespace-pre-wrap text-muted">
+            {error.details.join('\n')}
+          </pre>
         </details>
       )}
     </Modal>

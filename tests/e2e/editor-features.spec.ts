@@ -1,7 +1,21 @@
 import type { Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { unzipSync, strFromU8 } from 'fflate';
-import { addDiagram, byName, canvas, connect, elementsOfKind, expect, MOD, newProject, node, place, selectEdge, snapshot, test } from './helpers';
+import {
+  addDiagram,
+  byName,
+  canvas,
+  connect,
+  elementsOfKind,
+  expect,
+  MOD,
+  newProject,
+  node,
+  place,
+  selectEdge,
+  snapshot,
+  test,
+} from './helpers';
 
 async function dragBy(page: Page, x: number, y: number, dx: number, dy: number) {
   await page.mouse.move(x, y);
@@ -11,7 +25,9 @@ async function dragBy(page: Page, x: number, y: number, dx: number, dy: number) 
   await page.mouse.up();
 }
 
-test('composite states own their substates; packages own dropped classes (explicit move)', async ({ page }) => {
+test('composite states own their substates; packages own dropped classes (explicit move)', async ({
+  page,
+}) => {
   await newProject(page, 'Nesting');
   await addDiagram(page, 'stateMachine', 'Machine');
   await place(page, 'sm.composite', 400, 300, 'Active');
@@ -29,14 +45,22 @@ test('composite states own their substates; packages own dropped classes (explic
   await place(page, 'class.class', 650, 250, 'Invoice');
   const invoice = (await node(page, 'Invoice').boundingBox())!;
   const pkg = (await node(page, 'billing').boundingBox())!;
-  await dragBy(page, invoice.x + invoice.width / 2, invoice.y + invoice.height / 2, pkg.x + pkg.width / 2 - (invoice.x + invoice.width / 2), pkg.y + pkg.height / 2 + 10 - (invoice.y + invoice.height / 2));
+  await dragBy(
+    page,
+    invoice.x + invoice.width / 2,
+    invoice.y + invoice.height / 2,
+    pkg.x + pkg.width / 2 - (invoice.x + invoice.width / 2),
+    pkg.y + pkg.height / 2 + 10 - (invoice.y + invoice.height / 2),
+  );
   doc = await snapshot(page);
   expect(byName(doc, 'Invoice').ownerId).toBe(byName(doc, 'billing').id);
   // The explorer reflects the new ownership (Invoice nested under billing once expanded).
   await page.locator('[data-testid="explorer-item"][data-name="billing"]').click();
   await page.keyboard.press('ArrowRight');
   const items = page.getByTestId('explorer-item');
-  const names = await items.evaluateAll((els) => els.map((e) => `${e.getAttribute('aria-level')}:${e.getAttribute('data-name')}`));
+  const names = await items.evaluateAll((els) =>
+    els.map((e) => `${e.getAttribute('aria-level')}:${e.getAttribute('data-name')}`),
+  );
   expect(names.indexOf('3:Invoice')).toBe(names.indexOf('2:billing') + 1);
   // Undo restores the previous owner in one step.
   await canvas(page).focus();
@@ -78,13 +102,22 @@ test('notes, note links, bend points, label dragging and endpoint reconnection',
   const label = (await page.getByTestId('edge-label-targetRole').boundingBox())!;
   await dragBy(page, label.x + label.width / 2, label.y + label.height / 2, 25, -15);
   doc = await snapshot(page);
-  expect((views().find((v) => v.kind === 'edge')!.labelOffsets as Record<string, { x: number; y: number }>).targetRole).toBeTruthy();
+  expect(
+    (views().find((v) => v.kind === 'edge')!.labelOffsets as Record<string, { x: number; y: number }>)
+      .targetRole,
+  ).toBeTruthy();
 
   // Reconnect the target end from B to C by dragging the endpoint handle.
   await selectEdge(page, 'association');
   const handle = (await page.getByTestId('edge-target-handle').boundingBox())!;
   const c = (await node(page, 'C').boundingBox())!;
-  await dragBy(page, handle.x + handle.width / 2, handle.y + handle.height / 2, c.x + c.width / 2 - (handle.x + handle.width / 2), c.y + c.height / 2 - (handle.y + handle.height / 2));
+  await dragBy(
+    page,
+    handle.x + handle.width / 2,
+    handle.y + handle.height / 2,
+    c.x + c.width / 2 - (handle.x + handle.width / 2),
+    c.y + c.height / 2 - (handle.y + handle.height / 2),
+  );
   doc = await snapshot(page);
   const assoc = elementsOfKind(doc, 'association')[0]!;
   expect(assoc.targetId).toBe(byName(doc, 'C').id);
@@ -100,7 +133,9 @@ test('notes, note links, bend points, label dragging and endpoint reconnection',
   expect(views().find((v) => v.kind === 'edge')!.waypoints as unknown[]).toHaveLength(0);
 });
 
-test('sequence: activation, create and destroy messages, found message, operand divider', async ({ page }) => {
+test('sequence: activation, create and destroy messages, found message, operand divider', async ({
+  page,
+}) => {
   await newProject(page, 'Lifecycle');
   await addDiagram(page, 'sequence', 'Objects');
   const box = (await page.getByTestId('sequence-canvas').boundingBox())!;
@@ -134,10 +169,17 @@ test('sequence: activation, create and destroy messages, found message, operand 
   await page.getByTestId('inline-editor').press('Enter');
 
   const doc = await snapshot(page);
-  const sorts = elementsOfKind(doc, 'message').map((m) => m.sort).sort();
+  const sorts = elementsOfKind(doc, 'message')
+    .map((m) => m.sort)
+    .sort();
   expect(sorts).toEqual(['asynchronous', 'create', 'destroy']);
-  expect(elementsOfKind(doc, 'message').find((m) => m.sort === 'asynchronous')).toMatchObject({ sourceLifelineId: null, targetLifelineId: byName(doc, 'Factory').id });
-  const activation = Object.values(Object.values(doc.diagrams)[0]!.views).find((v) => v.kind === 'activation')!;
+  expect(elementsOfKind(doc, 'message').find((m) => m.sort === 'asynchronous')).toMatchObject({
+    sourceLifelineId: null,
+    targetLifelineId: byName(doc, 'Factory').id,
+  });
+  const activation = Object.values(Object.values(doc.diagrams)[0]!.views).find(
+    (v) => v.kind === 'activation',
+  )!;
   expect((activation.endY as number) - (activation.startY as number)).toBeGreaterThan(100);
   // No validation errors (destroy is the last message on Product).
   await expect(page.locator('[data-testid="problem-item"][data-severity="error"]')).toHaveCount(0);
@@ -153,11 +195,17 @@ test('sequence: activation, create and destroy messages, found message, operand 
   const fragBefore = (await snapshot(page)).diagrams;
   await dragBy(page, d.x + d.width / 2, d.y + d.height / 2, 0, 30);
   const after = await snapshot(page);
-  const fv = (x: typeof fragBefore) => Object.values(Object.values(x)[0]!.views).find((v) => v.kind === 'fragment')!.operandYs as Record<string, number>;
+  const fv = (x: typeof fragBefore) =>
+    Object.values(Object.values(x)[0]!.views).find((v) => v.kind === 'fragment')!.operandYs as Record<
+      string,
+      number
+    >;
   expect(Object.values(fv(after.diagrams))[0]).toBeGreaterThan(Object.values(fv(fragBefore))[0]!);
 });
 
-test('copy/paste across diagrams clones semantics; problems panel navigates to the element', async ({ page }) => {
+test('copy/paste across diagrams clones semantics; problems panel navigates to the element', async ({
+  page,
+}) => {
   await newProject(page, 'Clipboard');
   await addDiagram(page, 'class', 'First');
   await place(page, 'class.class', 250, 200, 'Account');
@@ -171,7 +219,11 @@ test('copy/paste across diagrams clones semantics; problems panel navigates to t
   await page.keyboard.press(`${MOD}+v`);
   await expect(page.locator('[data-testid="uml-node"][data-kind="class"]')).toHaveCount(2);
   const doc = await snapshot(page);
-  expect(elementsOfKind(doc, 'class').map((c) => c.name).sort()).toEqual(['Account', 'Account2', 'Owner', 'Owner2']);
+  expect(
+    elementsOfKind(doc, 'class')
+      .map((c) => c.name)
+      .sort(),
+  ).toEqual(['Account', 'Account2', 'Owner', 'Owner2']);
   expect(elementsOfKind(doc, 'association')).toHaveLength(2);
 
   // Create an error (self-inheritance is impossible from the UI; use an inheritance cycle).
@@ -194,7 +246,10 @@ test('code generation produces a zip of skeletons; text export offers PlantUML',
   await expect(page.getByTestId('codegen-dialog')).toBeVisible();
   await page.getByTestId('codegen-language').selectOption('java');
   await expect(page.getByTestId('codegen-preview')).toContainText('public');
-  const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('codegen-download').click()]);
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('codegen-download').click(),
+  ]);
   const zipPath = await download.path();
   const files = unzipSync(new Uint8Array(await readFile(zipPath!)));
   expect(Object.keys(files)).toContain('Book.java');
@@ -203,7 +258,9 @@ test('code generation produces a zip of skeletons; text export offers PlantUML',
 
   await page.getByTestId('menubar-file').click();
   await page.getByTestId('menu-file.exportText').click();
-  await expect(page.getByTestId('text-export-output')).toHaveValue(/@startuml[\s\S]*class "Book"[\s\S]*@enduml/);
+  await expect(page.getByTestId('text-export-output')).toHaveValue(
+    /@startuml[\s\S]*class "Book"[\s\S]*@enduml/,
+  );
   await page.getByTestId('text-export-format').selectOption('mermaid');
   await expect(page.getByTestId('text-export-output')).toHaveValue(/^classDiagram/);
 });

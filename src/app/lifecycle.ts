@@ -64,7 +64,13 @@ export function useStartupRecovery(): void {
         if (cancelled || snapshots.length === 0 || useDocumentStore.getState().doc) return;
         useEditorStore.getState().openDialog({
           type: 'recovery',
-          snapshots: snapshots.map((s) => ({ projectId: s.projectId, projectName: s.projectName, savedAt: s.savedAt, elementCount: s.elementCount, diagramCount: s.diagramCount })),
+          snapshots: snapshots.map((s) => ({
+            projectId: s.projectId,
+            projectName: s.projectName,
+            savedAt: s.savedAt,
+            elementCount: s.elementCount,
+            diagramCount: s.diagramCount,
+          })),
         });
       })
       .catch((error) => console.error('Recovery listing failed', error));
@@ -79,7 +85,9 @@ export function useGlobalInput(): void {
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !isTypingTarget(e.target) && !useEditorStore.getState().dialog && !e.repeat) {
-        const inCanvas = e.target instanceof HTMLElement && (e.target.closest('[data-canvas]') || e.target === document.body);
+        const inCanvas =
+          e.target instanceof HTMLElement &&
+          (e.target.closest('[data-canvas]') || e.target === document.body);
         if (inCanvas) {
           e.preventDefault();
           useEditorStore.getState().setSpaceHeld(true);

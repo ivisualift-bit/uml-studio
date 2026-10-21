@@ -19,7 +19,10 @@ export function isDesktop(): boolean {
  */
 export function isMac(): boolean {
   try {
-    const platform = navigator.platform || (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || '';
+    const platform =
+      navigator.platform ||
+      (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ||
+      '';
     return /mac|iphone|ipad/i.test(platform);
   } catch {
     return false;

@@ -114,7 +114,11 @@ export function removeViewsFromDiagram(diagram: UMLDiagram, removed: ReadonlySet
   };
   for (const view of Object.values(diagram.views)) {
     if (removed.has(view.id)) continue;
-    if ((view.kind === 'node' || view.kind === 'note') && view.containerViewId && removed.has(view.containerViewId)) {
+    if (
+      (view.kind === 'node' || view.kind === 'note') &&
+      view.containerViewId &&
+      removed.has(view.containerViewId)
+    ) {
       view.containerViewId = survivingContainer(view.containerViewId);
     }
   }
@@ -138,7 +142,8 @@ export function applyDeletionPlan(draft: ProjectDocument, plan: DeletionPlan): v
     clearReferencesTo(el, plan.elementIds);
     if (el.kind === 'instanceSpecification') {
       for (const slot of el.slots) {
-        if (slot.definingFeatureId && removedMemberIds.has(slot.definingFeatureId)) slot.definingFeatureId = null;
+        if (slot.definingFeatureId && removedMemberIds.has(slot.definingFeatureId))
+          slot.definingFeatureId = null;
       }
     }
   }

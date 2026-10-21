@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { executeCommands, type CommandOutcome } from '@/domain/commands/engine';
-import { createHistory, recordEntry, redo as redoStep, undo as undoStep, type HistoryEntry, type HistoryState } from '@/domain/commands/history';
+import {
+  createHistory,
+  recordEntry,
+  redo as redoStep,
+  undo as undoStep,
+  type HistoryEntry,
+  type HistoryState,
+} from '@/domain/commands/history';
 import type { Command } from '@/domain/commands/types';
 import type { ProjectDocument } from '@/domain/schemas/project';
 import { measureView } from '@/diagrams/render/measure';
@@ -104,7 +111,14 @@ export const useDocumentStore = create<DocumentState>()((set, get) => ({
   },
 
   close() {
-    set({ doc: null, file: null, history: createHistory(), revision: get().revision + 1, savedEntryId: 0, lastSavedAt: null });
+    set({
+      doc: null,
+      file: null,
+      history: createHistory(),
+      revision: get().revision + 1,
+      savedEntryId: 0,
+      lastSavedAt: null,
+    });
   },
 
   markSaved(file) {

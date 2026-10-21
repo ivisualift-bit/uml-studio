@@ -157,7 +157,8 @@ export const fr: Dictionary = {
     recovery: 'Travail non enregistré trouvé',
     browserNoticeTitle: 'Mode navigateur',
     browserNoticeFsAccess: 'Enregistrer écrit directement dans le fichier ouvert (API File System Access).',
-    browserNoticeFallback: 'Ce navigateur ne peut pas écraser de fichiers sur le disque : Enregistrer télécharge une nouvelle copie du fichier .umls. Les instantanés de récupération sont conservés dans ce navigateur.',
+    browserNoticeFallback:
+      'Ce navigateur ne peut pas écraser de fichiers sur le disque : Enregistrer télécharge une nouvelle copie du fichier .umls. Les instantanés de récupération sont conservés dans ce navigateur.',
   },
   project: {
     newTitle: 'Nouveau projet',
@@ -191,7 +192,8 @@ export const fr: Dictionary = {
     duplicateKeys: 'Le fichier contient des clés en double (identifiants dupliqués possibles).',
     invalidJson: 'Le fichier n’est pas un JSON valide.',
     notAProject: 'Ce n’est pas un projet UML Studio (.umls).',
-    newerVersion: 'Ce projet a été enregistré par une version plus récente d’UML Studio (schéma {version}). Mettez l’application à jour pour l’ouvrir.',
+    newerVersion:
+      'Ce projet a été enregistré par une version plus récente d’UML Studio (schéma {version}). Mettez l’application à jour pour l’ouvrir.',
     unsupportedVersion: 'La version du schéma du projet est inconnue ou non prise en charge.',
     schema: 'Les données du projet ne correspondent pas à la structure attendue.',
     integrity: 'Le projet contient des références cassées ou des identifiants en double.',
@@ -291,8 +293,10 @@ export const fr: Dictionary = {
     compositeState: 'État composite',
   },
   canvas: {
-    emptyHint: 'Choisissez un outil dans la boîte à outils puis cliquez ici — ou faites glisser des éléments depuis l’explorateur.',
-    sequenceEmptyHint: 'Ajoutez des lignes de vie depuis la boîte à outils, puis tracez des messages entre elles.',
+    emptyHint:
+      'Choisissez un outil dans la boîte à outils puis cliquez ici — ou faites glisser des éléments depuis l’explorateur.',
+    sequenceEmptyHint:
+      'Ajoutez des lignes de vie depuis la boîte à outils, puis tracez des messages entre elles.',
     invalidTarget: 'Interdit : {reason}',
     connectFrom: 'Sélectionnez l’élément cible',
     noteLinkFrom: 'Sélectionnez l’élément auquel rattacher la note',
@@ -308,7 +312,8 @@ export const fr: Dictionary = {
     addAttribute: 'Ajouter un attribut',
     addOperation: 'Ajouter une opération',
     addLiteral: 'Ajouter un littéral',
-    invalidMemberText: 'Impossible d’analyser « {text} ». Notation UML attendue, par ex. « - nom: String [0..1] ».',
+    invalidMemberText:
+      'Impossible d’analyser « {text} ». Notation UML attendue, par ex. « - nom: String [0..1] ».',
     minimap: 'Mini-carte',
     planned: 'Ce type de diagramme est prévu et ne peut pas encore être édité.',
     needsContainer: '{kind} doit être placé(e) dans un(e) {container}.',
@@ -329,7 +334,8 @@ export const fr: Dictionary = {
     properties: 'Propriétés',
     style: 'Style',
     documentation: 'Documentation',
-    nothingSelected: 'Sélectionnez un élément sur le canevas ou dans l’explorateur pour modifier ses propriétés.',
+    nothingSelected:
+      'Sélectionnez un élément sur le canevas ou dans l’explorateur pour modifier ses propriétés.',
     multipleSelected: '{count} éléments sélectionnés — propriétés de style communes uniquement.',
     noteSelected: 'Note (présentation uniquement)',
     noteText: 'Texte',
@@ -488,16 +494,20 @@ export const fr: Dictionary = {
     selfGeneralization: 'Un élément ne peut pas se généraliser lui-même.',
     inheritanceCycle: 'Cycle d’héritage impliquant « {name} ».',
     duplicateGeneralization: 'Généralisation en double entre les mêmes éléments.',
-    compositionCycle: 'Cycle de composition impliquant « {name} » : un objet ne peut pas se contenir (indirectement).',
-    abstractOperationInConcreteClass: 'Opération abstraite « {operation} » dans une classe concrète — rendez la classe abstraite.',
+    compositionCycle:
+      'Cycle de composition impliquant « {name} » : un objet ne peut pas se contenir (indirectement).',
+    abstractOperationInConcreteClass:
+      'Opération abstraite « {operation} » dans une classe concrète — rendez la classe abstraite.',
     duplicateAttributeName: 'Plusieurs attributs s’appellent « {name} ».',
     unnamedParameter: 'Un paramètre de « {operation} » n’a pas de nom.',
-    actorAssociation: 'Les acteurs ne devraient pas être associés entre eux ; utilisez une généralisation ou un cas d’utilisation.',
+    actorAssociation:
+      'Les acteurs ne devraient pas être associés entre eux ; utilisez une généralisation ou un cas d’utilisation.',
     useCaseWithoutActor: 'Le cas d’utilisation « {name} » n’est relié à aucun acteur.',
     includeCycle: 'Cycle d’inclusion impliquant « {name} ».',
     messageNegativeY: 'Le message « {name} » est placé au-dessus de l’origine du diagramme.',
     messageAfterDestroy: 'Le message « {name} » implique une ligne de vie après sa destruction.',
-    createAfterMessages: 'Le message de création « {name} » cible une ligne de vie qui a déjà reçu des messages.',
+    createAfterMessages:
+      'Le message de création « {name} » cible une ligne de vie qui a déjà reçu des messages.',
     selfCreateOrDestroy: 'Une ligne de vie ne peut pas se créer ou se détruire elle-même.',
     fragmentOperandOrder: 'Les opérandes de ce fragment {operator} se chevauchent ou sortent du fragment.',
     activationRange: 'Cette activation se termine avant de commencer.',
@@ -512,8 +522,10 @@ export const fr: Dictionary = {
     joinIncoming: 'Une jonction devrait avoir au moins deux flots entrants ({count} trouvé(s)).',
     unconnectedActivityNode: '« {name} » n’est relié à aucun flot.',
     missingInitialState: 'La machine à états « {name} » n’a pas de pseudo-état initial.',
-    initialStateOutgoing: 'Un pseudo-état initial doit avoir exactement une transition sortante ({count} trouvée(s)).',
-    initialTransitionTrigger: 'Une transition sortant d’un pseudo-état initial ne devrait pas avoir de déclencheur.',
+    initialStateOutgoing:
+      'Un pseudo-état initial doit avoir exactement une transition sortante ({count} trouvée(s)).',
+    initialTransitionTrigger:
+      'Une transition sortant d’un pseudo-état initial ne devrait pas avoir de déclencheur.',
     multipleInitialStates: 'Plusieurs pseudo-états initiaux dans « {name} ».',
     unreachableState: 'L’état « {name} » est inaccessible depuis l’état initial.',
     objectFlowWithoutObject: 'Un flot d’objets devrait partir ou arriver à un nœud objet.',
@@ -531,7 +543,8 @@ export const fr: Dictionary = {
       planned: 'Pas encore disponible — nécessite un éditeur dédié',
     },
     deleteTitle: 'Supprimer le diagramme « {name} » ?',
-    deleteBody: 'Le diagramme et ses {count} vues sont supprimés. Les éléments restent dans l’explorateur de modèle.',
+    deleteBody:
+      'Le diagramme et ses {count} vues sont supprimés. Les éléments restent dans l’explorateur de modèle.',
     renamePrompt: 'Nom du diagramme',
     defaultName: '{kind}',
     renamed: 'Diagramme renommé',
@@ -565,8 +578,10 @@ export const fr: Dictionary = {
     deployment: 'Nœuds, équipements, environnements d’exécution et artefacts déployés.',
     compositeStructure: 'Structure interne d’un classificateur : parties, ports et connecteurs.',
     communication: 'Lignes de vie reliées par des liens portant des messages numérotés.',
-    timing: 'Chronogrammes d’états/valeurs avec contraintes de temps (nécessite un éditeur de chronologie dédié).',
-    interactionOverview: 'Flot de contrôle de type activité entre utilisations d’interactions (nécessite des références d’interaction).',
+    timing:
+      'Chronogrammes d’états/valeurs avec contraintes de temps (nécessite un éditeur de chronologie dédié).',
+    interactionOverview:
+      'Flot de contrôle de type activité entre utilisations d’interactions (nécessite des références d’interaction).',
     profile: 'Profils, stéréotypes avec définitions d’étiquettes et extensions de métaclasses.',
     informationFlow: 'Éléments d’information circulant entre classificateurs.',
   },
@@ -728,18 +743,21 @@ export const fr: Dictionary = {
     done: '{file} exporté',
     failed: 'Échec de l’exportation : {reason}',
     tooLarge: 'L’image serait trop grande ({width} × {height} px). Choisissez une échelle plus petite.',
-    rasterFallback: 'Le diagramme contient des caractères que la police PDF intégrée ne peut pas encoder ; le PDF contient une image haute résolution au lieu de texte vectoriel.',
+    rasterFallback:
+      'Le diagramme contient des caractères que la police PDF intégrée ne peut pas encoder ; le PDF contient une image haute résolution au lieu de texte vectoriel.',
     vectorNote: 'PDF vectoriel (texte sélectionnable, Helvetica).',
     empty: 'Ce diagramme est vide.',
     json: 'Instantané JSON de tout le projet',
     pixels: '{width} × {height} px',
-    validationWarnings: 'Le modèle contient {count} erreur(s) de validation. L’export sera tout de même produit.',
+    validationWarnings:
+      'Le modèle contient {count} erreur(s) de validation. L’export sera tout de même produit.',
     allDiagrams: 'Tous les diagrammes (un fichier chacun)',
   },
   codegen: {
     title: 'Générer du code',
     language: 'Langage',
-    intro: 'Génère des squelettes (ébauches) de classes/interfaces/énumérations à partir du modèle de classes. Le corps des méthodes est un simple emplacement — ce n’est pas de la logique métier exécutable.',
+    intro:
+      'Génère des squelettes (ébauches) de classes/interfaces/énumérations à partir du modèle de classes. Le corps des méthodes est un simple emplacement — ce n’est pas de la logique métier exécutable.',
     files: '{count} fichier(s)',
     noClassifiers: 'Le modèle ne contient ni classe, ni interface, ni énumération.',
     warnings: 'Avertissements',
@@ -771,7 +789,8 @@ export const fr: Dictionary = {
     defaultAttributeVisibility: 'Visibilité par défaut des attributs',
     defaultOperationVisibility: 'Visibilité par défaut des opérations',
     data: 'Données',
-    recoveryInfo: 'Les instantanés de récupération sont écrits sur cet appareil environ 1,5 s après chaque modification.',
+    recoveryInfo:
+      'Les instantanés de récupération sont écrits sur cet appareil environ 1,5 s après chaque modification.',
     clearRecovery: 'Effacer les instantanés de récupération',
     cleared: 'Instantanés de récupération effacés',
   },
@@ -784,7 +803,8 @@ export const fr: Dictionary = {
   },
   help: {
     aboutTitle: 'À propos d’UML Studio',
-    aboutBody: 'UML Studio est un modeleur UML sémantique original qui fonctionne hors ligne. Il n’est pas affilié à StarUML. Les projets sont enregistrés dans des fichiers JSON .umls versionnés.',
+    aboutBody:
+      'UML Studio est un modeleur UML sémantique original qui fonctionne hors ligne. Il n’est pas affilié à StarUML. Les projets sont enregistrés dans des fichiers JSON .umls versionnés.',
     version: 'Version {version}',
     gettingStartedTitle: 'Prise en main',
     gs1: 'Créez un projet, puis ajoutez un diagramme avec Diagramme → Nouveau diagramme (ou le + de l’explorateur).',
@@ -803,18 +823,51 @@ export const fr: Dictionary = {
   },
   templates: {
     title: 'Modèles',
-    intro: 'Projets d’exemple réels et modifiables. Les identifiants sont régénérés pour chaque nouveau projet.',
+    intro:
+      'Projets d’exemple réels et modifiables. Les identifiants sont régénérés pour chaque nouveau projet.',
     use: 'Utiliser ce modèle',
     blank: { name: 'Projet UML vide', description: 'Un modèle vide.' },
-    library: { name: 'Gestion de bibliothèque', description: 'Diagramme de classes : Livre, Auteur, Membre, Emprunt, Bibliothécaire avec multiplicités.' },
-    ecommerce: { name: 'Domaine e-commerce', description: 'Diagramme de classes : Client, Commande, LigneCommande, Produit, Paiement avec composition et généralisation.' },
-    university: { name: 'Inscription universitaire', description: 'Diagramme de cas d’utilisation : Étudiant, Enseignant, Administrateur avec include/extend.' },
-    login: { name: 'Authentification', description: 'Diagramme de séquence : Utilisateur, IHM, ServiceAuth, BaseDeDonnées avec un fragment alt.' },
-    checkout: { name: 'Validation de commande', description: 'Diagramme de séquence : Panier, PasserellePaiement, ServiceCommande avec activations et alt.' },
-    loan: { name: 'Demande de prêt', description: 'Diagramme d’activité : décision, approbation, refus, couloirs et gardes.' },
-    ticket: { name: 'Cycle de vie d’un ticket', description: 'Machine à états : Nouveau, Assigné, En cours, Résolu, Fermé.' },
-    microservices: { name: 'Architecture microservices', description: 'Diagramme de composants : services, interfaces et connecteurs d’assemblage.' },
-    cloud: { name: 'Déploiement cloud', description: 'Diagramme de déploiement : équipements, nœuds, environnements d’exécution et artefacts.' },
+    library: {
+      name: 'Gestion de bibliothèque',
+      description:
+        'Diagramme de classes : Livre, Auteur, Membre, Emprunt, Bibliothécaire avec multiplicités.',
+    },
+    ecommerce: {
+      name: 'Domaine e-commerce',
+      description:
+        'Diagramme de classes : Client, Commande, LigneCommande, Produit, Paiement avec composition et généralisation.',
+    },
+    university: {
+      name: 'Inscription universitaire',
+      description:
+        'Diagramme de cas d’utilisation : Étudiant, Enseignant, Administrateur avec include/extend.',
+    },
+    login: {
+      name: 'Authentification',
+      description:
+        'Diagramme de séquence : Utilisateur, IHM, ServiceAuth, BaseDeDonnées avec un fragment alt.',
+    },
+    checkout: {
+      name: 'Validation de commande',
+      description:
+        'Diagramme de séquence : Panier, PasserellePaiement, ServiceCommande avec activations et alt.',
+    },
+    loan: {
+      name: 'Demande de prêt',
+      description: 'Diagramme d’activité : décision, approbation, refus, couloirs et gardes.',
+    },
+    ticket: {
+      name: 'Cycle de vie d’un ticket',
+      description: 'Machine à états : Nouveau, Assigné, En cours, Résolu, Fermé.',
+    },
+    microservices: {
+      name: 'Architecture microservices',
+      description: 'Diagramme de composants : services, interfaces et connecteurs d’assemblage.',
+    },
+    cloud: {
+      name: 'Déploiement cloud',
+      description: 'Diagramme de déploiement : équipements, nœuds, environnements d’exécution et artefacts.',
+    },
   },
   history: {
     add: 'Ajouter {name}',
@@ -863,14 +916,16 @@ export const fr: Dictionary = {
   },
   error: {
     boundaryTitle: 'Une erreur est survenue',
-    boundaryBody: 'Une erreur inattendue s’est produite dans l’interface. Votre document est conservé en mémoire et dans l’instantané de récupération.',
+    boundaryBody:
+      'Une erreur inattendue s’est produite dans l’interface. Votre document est conservé en mémoire et dans l’instantané de récupération.',
     reload: 'Recharger l’application',
     tryAgain: 'Réessayer',
     saveFirst: 'Télécharger une copie du projet',
   },
   mdj: {
     title: 'Importer un projet StarUML (expérimental)',
-    intro: 'Import au mieux du sous-ensemble classes, cas d’utilisation et paquetages des fichiers .mdj de StarUML. Ce n’est PAS une compatibilité complète avec StarUML ; les constructions non prises en charge sont listées dans le rapport.',
+    intro:
+      'Import au mieux du sous-ensemble classes, cas d’utilisation et paquetages des fichiers .mdj de StarUML. Ce n’est PAS une compatibilité complète avec StarUML ; les constructions non prises en charge sont listées dans le rapport.',
     report: 'Rapport d’import',
     imported: '{elements} éléments et {diagrams} diagrammes importés',
     unsupported: 'Non pris en charge : {items}',

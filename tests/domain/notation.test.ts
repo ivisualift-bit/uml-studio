@@ -7,7 +7,12 @@ import {
   parseOperationText,
   splitTopLevel,
 } from '@/domain/notation/members';
-import { formatTransitionLabel, parseGuard, parseMessageLabel, parseTransitionLabel } from '@/domain/notation/labels';
+import {
+  formatTransitionLabel,
+  parseGuard,
+  parseMessageLabel,
+  parseTransitionLabel,
+} from '@/domain/notation/labels';
 import { makeAttribute, makeOperation, makeParameter } from '@/domain/model/factory';
 
 describe('multiplicity', () => {
@@ -37,9 +42,27 @@ describe('multiplicity', () => {
 
 describe('feature notation', () => {
   it('formats attributes in UML syntax', () => {
-    const a = makeAttribute({ id: 'a', name: 'items', type: 'Item', visibility: 'private', multiplicity: '0..*', isReadOnly: true });
+    const a = makeAttribute({
+      id: 'a',
+      name: 'items',
+      type: 'Item',
+      visibility: 'private',
+      multiplicity: '0..*',
+      isReadOnly: true,
+    });
     expect(formatAttribute(a)).toBe('- items: Item [0..*] {readOnly}');
-    expect(formatAttribute(makeAttribute({ id: 'b', name: 'age', type: 'Integer', isDerived: true, defaultValue: '0', visibility: 'protected' }))).toBe('# /age: Integer = 0');
+    expect(
+      formatAttribute(
+        makeAttribute({
+          id: 'b',
+          name: 'age',
+          type: 'Integer',
+          isDerived: true,
+          defaultValue: '0',
+          visibility: 'protected',
+        }),
+      ),
+    ).toBe('# /age: Integer = 0');
   });
 
   it('formats operations with parameters', () => {
@@ -47,10 +70,15 @@ describe('feature notation', () => {
       id: 'o',
       name: 'enroll',
       returnType: 'void',
-      parameters: [makeParameter({ id: 'p', name: 'course', type: 'Course' }), makeParameter({ id: 'q', name: 'out', type: 'Receipt', direction: 'out' })],
+      parameters: [
+        makeParameter({ id: 'p', name: 'course', type: 'Course' }),
+        makeParameter({ id: 'q', name: 'out', type: 'Receipt', direction: 'out' }),
+      ],
     });
     expect(formatOperation(op)).toBe('+ enroll(course: Course, out out: Receipt): void');
-    expect(formatOperation(op, { showVisibility: false, showTypes: true, showSignature: false })).toBe('enroll(…): void');
+    expect(formatOperation(op, { showVisibility: false, showTypes: true, showSignature: false })).toBe(
+      'enroll(…): void',
+    );
   });
 
   it('parses attribute text', () => {
@@ -62,8 +90,14 @@ describe('feature notation', () => {
       defaultValue: '"x"',
       isReadOnly: true,
     });
-    expect(parseAttributeText('static count: int')).toMatchObject({ isStatic: true, name: 'count', type: 'int' });
-    expect(parseAttributeText('+ map: Map<String, List<Integer>>')).toMatchObject({ type: 'Map<String, List<Integer>>' });
+    expect(parseAttributeText('static count: int')).toMatchObject({
+      isStatic: true,
+      name: 'count',
+      type: 'int',
+    });
+    expect(parseAttributeText('+ map: Map<String, List<Integer>>')).toMatchObject({
+      type: 'Map<String, List<Integer>>',
+    });
     expect(parseAttributeText('two words')).toBeNull();
     expect(parseAttributeText('x [9..1]')).toBeNull();
   });
@@ -78,7 +112,11 @@ describe('feature notation', () => {
         { name: 'value', type: 'Map<K, V>' },
       ],
     });
-    expect(parseOperationText('- reset()')).toMatchObject({ name: 'reset', visibility: 'private', parameters: [] });
+    expect(parseOperationText('- reset()')).toMatchObject({
+      name: 'reset',
+      visibility: 'private',
+      parameters: [],
+    });
     expect(parseOperationText('total: Money')).toMatchObject({ name: 'total', returnType: 'Money' });
     expect(parseOperationText('broken(')).toBeNull();
   });
@@ -95,7 +133,11 @@ describe('behaviour labels', () => {
     expect(parseTransitionLabel('publish [approved] / notifySubscribers')).toEqual(label);
     expect(parseTransitionLabel('[x > 0]')).toEqual({ trigger: '', guard: 'x > 0', effect: '' });
     expect(parseTransitionLabel('/ log')).toEqual({ trigger: '', guard: '', effect: 'log' });
-    expect(parseTransitionLabel('[a[0] == 1] / f()')).toEqual({ trigger: '', guard: 'a[0] == 1', effect: 'f()' });
+    expect(parseTransitionLabel('[a[0] == 1] / f()')).toEqual({
+      trigger: '',
+      guard: 'a[0] == 1',
+      effect: 'f()',
+    });
     expect(formatTransitionLabel({ trigger: '', guard: '', effect: 'e' })).toBe('/ e');
   });
   it('parses guards and message labels', () => {

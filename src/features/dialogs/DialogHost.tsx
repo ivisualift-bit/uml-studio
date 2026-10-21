@@ -2,9 +2,20 @@ import { CommandPalette, QuickSearch } from '@/features/palette/CommandPalette';
 import { useEditorStore } from '@/stores/editorStore';
 import { useDocumentStore } from '@/stores/documentStore';
 import { AboutDialog, GettingStartedDialog, SettingsDialog, ShortcutsDialog } from './AppDialogs';
-import { DeleteDiagramDialog, DeleteFromModelDialog, NewDiagramDialog, RenameDiagramDialog } from './DiagramDialogs';
+import {
+  DeleteDiagramDialog,
+  DeleteFromModelDialog,
+  NewDiagramDialog,
+  RenameDiagramDialog,
+} from './DiagramDialogs';
 import { CodegenDialog, ExportDialog, TextExportDialog } from './ExportDialogs';
-import { LoadErrorDialog, NewProjectDialog, RecoveryDialog, TemplatesDialog, UnsavedDialog } from './ProjectDialogs';
+import {
+  LoadErrorDialog,
+  NewProjectDialog,
+  RecoveryDialog,
+  TemplatesDialog,
+  UnsavedDialog,
+} from './ProjectDialogs';
 
 /** Renders the single active dialog (dialogs are ephemeral editor state). */
 export function DialogHost() {

@@ -13,28 +13,53 @@ export function SettingsDialog() {
   const t = useT();
   const settings = useSettingsStore();
   return (
-    <Modal open onClose={close} title={t('settings.title')} width="sm" testId="settings-dialog" footer={<Button onClick={close}>{t('common.close')}</Button>}>
+    <Modal
+      open
+      onClose={close}
+      title={t('settings.title')}
+      width="sm"
+      testId="settings-dialog"
+      footer={<Button onClick={close}>{t('common.close')}</Button>}
+    >
       <div className="flex flex-col gap-4">
         <section className="flex flex-col gap-2">
-          <h3 className="text-[11px] font-semibold tracking-wider text-muted uppercase">{t('settings.appearance')}</h3>
+          <h3 className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+            {t('settings.appearance')}
+          </h3>
           <Field label={t('settings.theme')} htmlFor="settings-theme">
-            <Select id="settings-theme" value={settings.theme} onChange={(e) => settings.update({ theme: e.target.value as ThemePreference })} data-testid="settings-theme">
+            <Select
+              id="settings-theme"
+              value={settings.theme}
+              onChange={(e) => settings.update({ theme: e.target.value as ThemePreference })}
+              data-testid="settings-theme"
+            >
               <option value="system">{t('cmd.themeSystem')}</option>
               <option value="light">{t('cmd.themeLight')}</option>
               <option value="dark">{t('cmd.themeDark')}</option>
             </Select>
           </Field>
           <Field label={t('settings.language')} htmlFor="settings-language">
-            <Select id="settings-language" value={settings.language} onChange={(e) => settings.update({ language: e.target.value as 'en' | 'fr' })} data-testid="settings-language">
+            <Select
+              id="settings-language"
+              value={settings.language}
+              onChange={(e) => settings.update({ language: e.target.value as 'en' | 'fr' })}
+              data-testid="settings-language"
+            >
               <option value="en">English</option>
               <option value="fr">Français</option>
             </Select>
           </Field>
         </section>
         <section className="flex flex-col gap-2">
-          <h3 className="text-[11px] font-semibold tracking-wider text-muted uppercase">{t('settings.canvas')}</h3>
+          <h3 className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+            {t('settings.canvas')}
+          </h3>
           <Field label={t('settings.gridSize')} htmlFor="settings-grid">
-            <Select id="settings-grid" value={settings.gridSize} onChange={(e) => settings.update({ gridSize: Number(e.target.value) })}>
+            <Select
+              id="settings-grid"
+              value={settings.gridSize}
+              onChange={(e) => settings.update({ gridSize: Number(e.target.value) })}
+            >
               {[5, 10, 16, 20].map((n) => (
                 <option key={n} value={n}>
                   {n} px
@@ -42,12 +67,26 @@ export function SettingsDialog() {
               ))}
             </Select>
           </Field>
-          <Checkbox label={t('settings.showGrid')} checked={settings.showGrid} onChange={(v) => settings.update({ showGrid: v })} />
-          <Checkbox label={t('settings.snapToGrid')} checked={settings.snapToGrid} onChange={(v) => settings.update({ snapToGrid: v })} />
-          <Checkbox label={t('settings.showMinimap')} checked={settings.showMinimap} onChange={(v) => settings.update({ showMinimap: v })} />
+          <Checkbox
+            label={t('settings.showGrid')}
+            checked={settings.showGrid}
+            onChange={(v) => settings.update({ showGrid: v })}
+          />
+          <Checkbox
+            label={t('settings.snapToGrid')}
+            checked={settings.snapToGrid}
+            onChange={(v) => settings.update({ snapToGrid: v })}
+          />
+          <Checkbox
+            label={t('settings.showMinimap')}
+            checked={settings.showMinimap}
+            onChange={(v) => settings.update({ showMinimap: v })}
+          />
         </section>
         <section className="flex flex-col gap-2">
-          <h3 className="text-[11px] font-semibold tracking-wider text-muted uppercase">{t('settings.data')}</h3>
+          <h3 className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+            {t('settings.data')}
+          </h3>
           <p className="text-[12px] text-muted">{t('settings.recoveryInfo')}</p>
           <Button
             size="sm"
@@ -70,7 +109,15 @@ export function ShortcutsDialog() {
   const t = useT();
   const rows = COMMANDS.filter((c) => c.shortcuts?.length);
   return (
-    <Modal open onClose={close} title={t('shortcuts.title')} description={t('shortcuts.note')} width="md" testId="shortcuts-dialog" footer={<Button onClick={close}>{t('common.close')}</Button>}>
+    <Modal
+      open
+      onClose={close}
+      title={t('shortcuts.title')}
+      description={t('shortcuts.note')}
+      width="md"
+      testId="shortcuts-dialog"
+      footer={<Button onClick={close}>{t('common.close')}</Button>}
+    >
       <table className="w-full text-[12.5px]">
         <thead>
           <tr className="text-left text-[11px] tracking-wide text-muted uppercase">
@@ -112,7 +159,13 @@ export function ShortcutsDialog() {
 export function AboutDialog() {
   const t = useT();
   return (
-    <Modal open onClose={close} title={t('help.aboutTitle')} width="sm" footer={<Button onClick={close}>{t('common.close')}</Button>}>
+    <Modal
+      open
+      onClose={close}
+      title={t('help.aboutTitle')}
+      width="sm"
+      footer={<Button onClick={close}>{t('common.close')}</Button>}
+    >
       <p className="text-[13px]">{t('help.aboutBody')}</p>
       <p className="mt-2 text-[12px] text-muted">{t('help.version', { version: __APP_VERSION__ })}</p>
     </Modal>
@@ -122,7 +175,13 @@ export function AboutDialog() {
 export function GettingStartedDialog() {
   const t = useT();
   return (
-    <Modal open onClose={close} title={t('help.gettingStartedTitle')} width="md" footer={<Button onClick={close}>{t('common.close')}</Button>}>
+    <Modal
+      open
+      onClose={close}
+      title={t('help.gettingStartedTitle')}
+      width="md"
+      footer={<Button onClick={close}>{t('common.close')}</Button>}
+    >
       <ol className="flex list-decimal flex-col gap-2 pl-5 text-[13px]">
         {(['gs1', 'gs2', 'gs3', 'gs4', 'gs5', 'gs6'] as const).map((k) => (
           <li key={k}>{t(`help.${k}`)}</li>

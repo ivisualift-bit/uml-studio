@@ -1,12 +1,24 @@
 import type { ID } from '../schemas/common';
-import { hasFeatures, isRelationship, type ElementOf, type ModelElement, type Relationship } from '../schemas/elements';
+import {
+  hasFeatures,
+  isRelationship,
+  type ElementOf,
+  type ModelElement,
+  type Relationship,
+} from '../schemas/elements';
 import type { ProjectDocument } from '../schemas/project';
 import { checkRelationshipEndpoints } from '../model/metadata';
 import { parseMultiplicity } from '../notation/multiplicity';
 import { endpointInfo } from '../services/queries';
 import type { Severity, ValidationCode, ValidationIssue } from './types';
 
-type Emit = (code: ValidationCode, severity: Severity, elementId: ID | undefined, params?: Record<string, string | number>, suffix?: string) => void;
+type Emit = (
+  code: ValidationCode,
+  severity: Severity,
+  elementId: ID | undefined,
+  params?: Record<string, string | number>,
+  suffix?: string,
+) => void;
 
 interface RuleContext {
   doc: ProjectDocument;
@@ -47,8 +59,15 @@ const NAMED_KINDS = new Set<string>([
 function checkGenericRules(ctx: RuleContext): void {
   const byOwnerAndName = new Map<string, ModelElement[]>();
   for (const el of ctx.elements) {
-    if (NAMED_KINDS.has(el.kind) && !el.name.trim()) ctx.emit('nameRequired', 'warning', el.id, { kind: el.kind });
-    if (NAMED_KINDS.has(el.kind) && el.name.trim() && el.ownerId && el.kind !== 'lifeline' && el.kind !== 'action') {
+    if (NAMED_KINDS.has(el.kind) && !el.name.trim())
+      ctx.emit('nameRequired', 'warning', el.id, { kind: el.kind });
+    if (
+      NAMED_KINDS.has(el.kind) &&
+      el.name.trim() &&
+      el.ownerId &&
+      el.kind !== 'lifeline' &&
+      el.kind !== 'action'
+    ) {
       const key = `${el.ownerId}\u0000${el.kind}\u0000${el.name.trim()}`;
       const list = byOwnerAndName.get(key);
       if (list) list.push(el);
@@ -56,7 +75,8 @@ function checkGenericRules(ctx: RuleContext): void {
     }
   }
   for (const list of byOwnerAndName.values()) {
-    if (list.length > 1) for (const el of list) ctx.emit('duplicateName', 'warning', el.id, { name: el.name });
+    if (list.length > 1)
+      for (const el of list) ctx.emit('duplicateName', 'warning', el.id, { name: el.name });
   }
   for (const rel of ctx.relationships) {
     const source = ctx.doc.modelElements[rel.sourceId];
@@ -64,13 +84,19 @@ function checkGenericRules(ctx: RuleContext): void {
     if (!source || !target) continue;
     const problem = checkRelationshipEndpoints(rel.kind, endpointInfo(source), endpointInfo(target));
     if (problem) {
-      ctx.emit('invalidEndpoints', 'error', rel.id, { kind: rel.kind, source: source.name, target: target.name, problem });
+      ctx.emit('invalidEndpoints', 'error', rel.id, {
+        kind: rel.kind,
+        source: source.name,
+        target: target.name,
+        problem,
+      });
     }
   }
 }
 
 function checkMultiplicity(ctx: RuleContext, elementId: ID, value: string, where: string): void {
-  if (value && !parseMultiplicity(value).ok) ctx.emit('invalidMultiplicity', 'error', elementId, { value, where }, where);
+  if (value && !parseMultiplicity(value).ok)
+    ctx.emit('invalidMultiplicity', 'error', elementId, { value, where }, where);
 }
 
 function hasCycle(start: ID, next: (id: ID) => ID[]): boolean {
@@ -87,7 +113,9 @@ function hasCycle(start: ID, next: (id: ID) => ID[]): boolean {
 }
 
 function checkClassRules(ctx: RuleContext): void {
-  const generalizations = ctx.relationships.filter((r): r is ElementOf<'generalization'> => r.kind === 'generalization');
+  const generalizations = ctx.relationships.filter(
+    (r): r is ElementOf<'generalization'> => r.kind === 'generalization',
+  );
   const parents = new Map<ID, ID[]>();
   const pairCount = new Map<string, number>();
   for (const g of generalizations) {
@@ -97,11 +125,13 @@ function checkClassRules(ctx: RuleContext): void {
     pairCount.set(key, (pairCount.get(key) ?? 0) + 1);
   }
   for (const g of generalizations) {
-    if ((pairCount.get(`${g.sourceId}>${g.targetId}`) ?? 0) > 1) ctx.emit('duplicateGeneralization', 'warning', g.id);
+    if ((pairCount.get(`${g.sourceId}>${g.targetId}`) ?? 0) > 1)
+      ctx.emit('duplicateGeneralization', 'warning', g.id);
   }
   const cyclic = new Set<ID>();
   for (const id of parents.keys()) if (hasCycle(id, (x) => parents.get(x) ?? [])) cyclic.add(id);
-  for (const id of cyclic) ctx.emit('inheritanceCycle', 'error', id, { name: ctx.doc.modelElements[id]?.name ?? '' });
+  for (const id of cyclic)
+    ctx.emit('inheritanceCycle', 'error', id, { name: ctx.doc.modelElements[id]?.name ?? '' });
 
   // Composition: whole → part edges.
   const wholes = new Map<ID, ID[]>();
@@ -110,11 +140,14 @@ function checkClassRules(ctx: RuleContext): void {
     checkMultiplicity(ctx, rel.id, rel.sourceEnd.multiplicity, 'source');
     checkMultiplicity(ctx, rel.id, rel.targetEnd.multiplicity, 'target');
     if (rel.sourceId === rel.targetId) continue;
-    if (rel.sourceEnd.aggregation === 'composite') wholes.set(rel.sourceId, [...(wholes.get(rel.sourceId) ?? []), rel.targetId]);
-    if (rel.targetEnd.aggregation === 'composite') wholes.set(rel.targetId, [...(wholes.get(rel.targetId) ?? []), rel.sourceId]);
+    if (rel.sourceEnd.aggregation === 'composite')
+      wholes.set(rel.sourceId, [...(wholes.get(rel.sourceId) ?? []), rel.targetId]);
+    if (rel.targetEnd.aggregation === 'composite')
+      wholes.set(rel.targetId, [...(wholes.get(rel.targetId) ?? []), rel.sourceId]);
   }
   for (const id of wholes.keys()) {
-    if (hasCycle(id, (x) => wholes.get(x) ?? [])) ctx.emit('compositionCycle', 'error', id, { name: ctx.doc.modelElements[id]?.name ?? '' });
+    if (hasCycle(id, (x) => wholes.get(x) ?? []))
+      ctx.emit('compositionCycle', 'error', id, { name: ctx.doc.modelElements[id]?.name ?? '' });
   }
 
   for (const el of ctx.elements) {
@@ -133,7 +166,8 @@ function checkClassRules(ctx: RuleContext): void {
       }
       for (const p of op.parameters) {
         checkMultiplicity(ctx, el.id, p.multiplicity, `parameter:${p.id}`);
-        if (!p.name.trim() && p.direction !== 'return') ctx.emit('unnamedParameter', 'warning', el.id, { operation: op.name }, p.id);
+        if (!p.name.trim() && p.direction !== 'return')
+          ctx.emit('unnamedParameter', 'warning', el.id, { operation: op.name }, p.id);
       }
     }
   }
@@ -144,11 +178,14 @@ function checkUseCaseRules(ctx: RuleContext): void {
   for (const rel of ctx.relationships) {
     const s = ctx.doc.modelElements[rel.sourceId];
     const t = ctx.doc.modelElements[rel.targetId];
-    if (rel.kind === 'association' && s?.kind === 'actor' && t?.kind === 'actor') ctx.emit('actorAssociation', 'warning', rel.id);
-    if (rel.kind === 'include') includes.set(rel.sourceId, [...(includes.get(rel.sourceId) ?? []), rel.targetId]);
+    if (rel.kind === 'association' && s?.kind === 'actor' && t?.kind === 'actor')
+      ctx.emit('actorAssociation', 'warning', rel.id);
+    if (rel.kind === 'include')
+      includes.set(rel.sourceId, [...(includes.get(rel.sourceId) ?? []), rel.targetId]);
   }
   for (const id of includes.keys()) {
-    if (hasCycle(id, (x) => includes.get(x) ?? [])) ctx.emit('includeCycle', 'error', id, { name: ctx.doc.modelElements[id]?.name ?? '' });
+    if (hasCycle(id, (x) => includes.get(x) ?? []))
+      ctx.emit('includeCycle', 'error', id, { name: ctx.doc.modelElements[id]?.name ?? '' });
   }
   for (const el of ctx.elements) {
     if (el.kind !== 'useCase') continue;
@@ -178,7 +215,10 @@ function checkSequenceRules(ctx: RuleContext): void {
         ctx.emit(code, severity, msg.id, issueParams, diagram.id);
       };
       if (view.sendY < 0 || view.receiveY < 0) emit('messageNegativeY', 'error');
-      if ((msg.sort === 'create' || msg.sort === 'destroy') && msg.sourceLifelineId === msg.targetLifelineId) {
+      if (
+        (msg.sort === 'create' || msg.sort === 'destroy') &&
+        msg.sourceLifelineId === msg.targetLifelineId
+      ) {
         emit('selfCreateOrDestroy', 'error');
       }
       for (const lifelineId of [msg.sourceLifelineId, msg.targetLifelineId]) {
@@ -193,7 +233,8 @@ function checkSequenceRules(ctx: RuleContext): void {
       for (const lifelineId of [msg.sourceLifelineId, msg.targetLifelineId]) {
         if (lifelineId && !firstMessageY.has(lifelineId)) firstMessageY.set(lifelineId, view.sendY);
       }
-      if (msg.sort === 'destroy' && msg.targetLifelineId) destroyedAt.set(msg.targetLifelineId, view.receiveY);
+      if (msg.sort === 'destroy' && msg.targetLifelineId)
+        destroyedAt.set(msg.targetLifelineId, view.receiveY);
     }
     for (const view of Object.values(diagram.views)) {
       if (view.kind === 'fragment') {
@@ -206,7 +247,8 @@ function checkSequenceRules(ctx: RuleContext): void {
           if (y === undefined || y <= previous || y >= view.y + view.height) ordered = false;
           else previous = y;
         }
-        if (!ordered) ctx.emit('fragmentOperandOrder', 'error', frag.id, { operator: frag.operator }, diagram.id);
+        if (!ordered)
+          ctx.emit('fragmentOperandOrder', 'error', frag.id, { operator: frag.operator }, diagram.id);
       }
       if (view.kind === 'activation' && view.endY <= view.startY) {
         ctx.emit('activationRange', 'error', view.elementId, {}, diagram.id);
@@ -218,16 +260,25 @@ function checkSequenceRules(ctx: RuleContext): void {
 function checkActivityRules(ctx: RuleContext): void {
   const activities = ctx.elements.filter((e) => e.kind === 'activity');
   for (const activity of activities) {
-    const nodes = ctx.elements.filter((e) => e.ownerId === activity.id && (e.kind === 'action' || e.kind === 'controlNode' || e.kind === 'objectNode'));
+    const nodes = ctx.elements.filter(
+      (e) =>
+        e.ownerId === activity.id &&
+        (e.kind === 'action' || e.kind === 'controlNode' || e.kind === 'objectNode'),
+    );
     if (nodes.length === 0) continue;
     const controls = nodes.filter((n): n is ElementOf<'controlNode'> => n.kind === 'controlNode');
-    if (!controls.some((c) => c.nodeKind === 'initial')) ctx.emit('missingInitialNode', 'info', activity.id, { name: activity.name });
+    if (!controls.some((c) => c.nodeKind === 'initial'))
+      ctx.emit('missingInitialNode', 'info', activity.id, { name: activity.name });
     if (!controls.some((c) => c.nodeKind === 'activityFinal' || c.nodeKind === 'flowFinal')) {
       ctx.emit('missingFinalNode', 'info', activity.id, { name: activity.name });
     }
     for (const node of nodes) {
-      const out = (ctx.outgoing.get(node.id) ?? []).filter((r) => r.kind === 'controlFlow' || r.kind === 'objectFlow');
-      const inc = (ctx.incoming.get(node.id) ?? []).filter((r) => r.kind === 'controlFlow' || r.kind === 'objectFlow');
+      const out = (ctx.outgoing.get(node.id) ?? []).filter(
+        (r) => r.kind === 'controlFlow' || r.kind === 'objectFlow',
+      );
+      const inc = (ctx.incoming.get(node.id) ?? []).filter(
+        (r) => r.kind === 'controlFlow' || r.kind === 'objectFlow',
+      );
       if (node.kind === 'controlNode') {
         switch (node.nodeKind) {
           case 'initial':
@@ -239,7 +290,10 @@ function checkActivityRules(ctx: RuleContext): void {
             break;
           case 'decision':
             if (out.length < 2) ctx.emit('decisionOutgoing', 'warning', node.id, { count: out.length });
-            if (out.length >= 2 && out.some((f) => (f.kind === 'controlFlow' || f.kind === 'objectFlow') && !f.guard.trim())) {
+            if (
+              out.length >= 2 &&
+              out.some((f) => (f.kind === 'controlFlow' || f.kind === 'objectFlow') && !f.guard.trim())
+            ) {
               ctx.emit('decisionGuardMissing', 'warning', node.id);
             }
             break;
@@ -264,22 +318,32 @@ function checkActivityRules(ctx: RuleContext): void {
     if (rel.kind !== 'objectFlow') continue;
     const s = ctx.doc.modelElements[rel.sourceId];
     const t = ctx.doc.modelElements[rel.targetId];
-    if (s?.kind !== 'objectNode' && t?.kind !== 'objectNode') ctx.emit('objectFlowWithoutObject', 'warning', rel.id);
+    if (s?.kind !== 'objectNode' && t?.kind !== 'objectNode')
+      ctx.emit('objectFlowWithoutObject', 'warning', rel.id);
   }
 }
 
 function checkStateRules(ctx: RuleContext): void {
   const containers = ctx.elements.filter((e) => e.kind === 'stateMachine' || e.kind === 'state');
   for (const container of containers) {
-    const vertices = ctx.elements.filter((e) => e.ownerId === container.id && (e.kind === 'state' || e.kind === 'pseudostate' || e.kind === 'finalState'));
+    const vertices = ctx.elements.filter(
+      (e) =>
+        e.ownerId === container.id &&
+        (e.kind === 'state' || e.kind === 'pseudostate' || e.kind === 'finalState'),
+    );
     if (vertices.length === 0) continue;
-    const initials = vertices.filter((v): v is ElementOf<'pseudostate'> => v.kind === 'pseudostate' && v.pseudoKind === 'initial');
+    const initials = vertices.filter(
+      (v): v is ElementOf<'pseudostate'> => v.kind === 'pseudostate' && v.pseudoKind === 'initial',
+    );
     if (initials.length === 0 && container.kind === 'stateMachine') {
       ctx.emit('missingInitialState', 'info', container.id, { name: container.name });
     }
-    if (initials.length > 1) for (const i of initials) ctx.emit('multipleInitialStates', 'warning', i.id, { name: container.name });
+    if (initials.length > 1)
+      for (const i of initials) ctx.emit('multipleInitialStates', 'warning', i.id, { name: container.name });
     for (const initial of initials) {
-      const out = (ctx.outgoing.get(initial.id) ?? []).filter((r): r is ElementOf<'transition'> => r.kind === 'transition');
+      const out = (ctx.outgoing.get(initial.id) ?? []).filter(
+        (r): r is ElementOf<'transition'> => r.kind === 'transition',
+      );
       if (out.length !== 1) ctx.emit('initialStateOutgoing', 'warning', initial.id, { count: out.length });
       for (const t of out) if (t.trigger.trim()) ctx.emit('initialTransitionTrigger', 'warning', t.id);
     }
@@ -297,7 +361,10 @@ function checkStateRules(ctx: RuleContext): void {
     while (stack.length) {
       const id = stack.pop()!;
       for (const el of ctx.elements) {
-        if (el.ownerId === id && (el.kind === 'state' || el.kind === 'pseudostate' || el.kind === 'finalState')) {
+        if (
+          el.ownerId === id &&
+          (el.kind === 'state' || el.kind === 'pseudostate' || el.kind === 'finalState')
+        ) {
           inside.add(el.id);
           stack.push(el.id);
         }
@@ -312,8 +379,12 @@ function checkStateRules(ctx: RuleContext): void {
     const queue = [...roots];
     while (queue.length) {
       const id = queue.shift()!;
-      const targets = (ctx.outgoing.get(id) ?? []).filter((r) => r.kind === 'transition').map((r) => r.targetId);
-      const nested = ctx.elements.filter((e) => e.ownerId === id && e.kind === 'pseudostate' && e.pseudoKind === 'initial').map((e) => e.id);
+      const targets = (ctx.outgoing.get(id) ?? [])
+        .filter((r) => r.kind === 'transition')
+        .map((r) => r.targetId);
+      const nested = ctx.elements
+        .filter((e) => e.ownerId === id && e.kind === 'pseudostate' && e.pseudoKind === 'initial')
+        .map((e) => e.id);
       const owner = ctx.doc.modelElements[id]?.ownerId;
       // Leaving a substate via its parent's transitions is implied: parent reached ⇒ children may exit.
       for (const next of [...targets, ...nested, ...(owner && inside.has(owner) ? [owner] : [])]) {
@@ -338,7 +409,12 @@ function checkStructureRules(ctx: RuleContext): void {
     const assoc = ctx.doc.modelElements[rel.associationId];
     const s = ctx.doc.modelElements[rel.sourceId];
     const t = ctx.doc.modelElements[rel.targetId];
-    if (assoc?.kind !== 'association' || s?.kind !== 'instanceSpecification' || t?.kind !== 'instanceSpecification') continue;
+    if (
+      assoc?.kind !== 'association' ||
+      s?.kind !== 'instanceSpecification' ||
+      t?.kind !== 'instanceSpecification'
+    )
+      continue;
     const ends = new Set([assoc.sourceId, assoc.targetId]);
     if ((s.classifierId && !ends.has(s.classifierId)) || (t.classifierId && !ends.has(t.classifierId))) {
       ctx.emit('linkClassifierMismatch', 'warning', rel.id);

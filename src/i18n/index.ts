@@ -22,7 +22,9 @@ function lookup(dictionary: Dictionary, key: string): string | undefined {
 export function translate(language: Language, key: MessageKey, params?: TranslateParams): string {
   const template = lookup(DICTIONARIES[language], key) ?? lookup(en, key) ?? key;
   if (!params) return template;
-  return template.replace(/\{(\w+)\}/g, (match, name: string) => (name in params ? String(params[name]) : match));
+  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
+    name in params ? String(params[name]) : match,
+  );
 }
 
 /** Runtime check for dynamic keys built from data (e.g. `problems.${code}`). */
@@ -34,7 +36,10 @@ export type Translate = (key: MessageKey, params?: TranslateParams) => string;
 
 export function useT(): Translate {
   const language = useSettingsStore((s) => s.language);
-  return useCallback((key: MessageKey, params?: TranslateParams) => translate(language, key, params), [language]);
+  return useCallback(
+    (key: MessageKey, params?: TranslateParams) => translate(language, key, params),
+    [language],
+  );
 }
 
 /** Non-React access (actions, services) using the current language. */

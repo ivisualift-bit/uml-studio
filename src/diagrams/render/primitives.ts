@@ -26,7 +26,16 @@ export interface Hit {
 }
 
 export type Primitive =
-  | ({ type: 'rect'; x: number; y: number; width: number; height: number; rx?: number; fill: string } & Stroke & Hit)
+  | ({
+      type: 'rect';
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      rx?: number;
+      fill: string;
+    } & Stroke &
+      Hit)
   | ({ type: 'ellipse'; cx: number; cy: number; rx: number; ry: number; fill: string } & Stroke & Hit)
   | ({ type: 'line'; x1: number; y1: number; x2: number; y2: number } & Stroke & Hit)
   | ({ type: 'polyline'; points: Point[]; fill?: string } & Stroke & Hit)
@@ -52,7 +61,12 @@ export function translate(primitives: Primitive[], dx: number, dy: number): Prim
 }
 
 export function emptyBounds(): Bounds {
-  return { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY, width: Number.NEGATIVE_INFINITY, height: Number.NEGATIVE_INFINITY };
+  return {
+    x: Number.POSITIVE_INFINITY,
+    y: Number.POSITIVE_INFINITY,
+    width: Number.NEGATIVE_INFINITY,
+    height: Number.NEGATIVE_INFINITY,
+  };
 }
 
 export function unionBounds(a: Bounds | null, b: Bounds | null): Bounds | null {
@@ -60,7 +74,12 @@ export function unionBounds(a: Bounds | null, b: Bounds | null): Bounds | null {
   if (!b) return a;
   const x = Math.min(a.x, b.x);
   const y = Math.min(a.y, b.y);
-  return { x, y, width: Math.max(a.x + a.width, b.x + b.width) - x, height: Math.max(a.y + a.height, b.y + b.height) - y };
+  return {
+    x,
+    y,
+    width: Math.max(a.x + a.width, b.x + b.width) - x,
+    height: Math.max(a.y + a.height, b.y + b.height) - y,
+  };
 }
 
 function pointsBounds(points: Point[]): Bounds | null {
@@ -89,7 +108,12 @@ export function primitivesBounds(primitives: Primitive[], dx = 0, dy = 0): Bound
   let result: Bounds | null = null;
   const grow = (b: Bounds | null, sw = 0) => {
     if (!b) return;
-    result = unionBounds(result, { x: b.x + dx - sw / 2, y: b.y + dy - sw / 2, width: b.width + sw, height: b.height + sw });
+    result = unionBounds(result, {
+      x: b.x + dx - sw / 2,
+      y: b.y + dy - sw / 2,
+      width: b.width + sw,
+      height: b.height + sw,
+    });
   };
   for (const p of primitives) {
     switch (p.type) {
@@ -100,7 +124,13 @@ export function primitivesBounds(primitives: Primitive[], dx = 0, dy = 0): Bound
         grow({ x: p.cx - p.rx, y: p.cy - p.ry, width: p.rx * 2, height: p.ry * 2 }, p.strokeWidth);
         break;
       case 'line':
-        grow(pointsBounds([{ x: p.x1, y: p.y1 }, { x: p.x2, y: p.y2 }]), p.strokeWidth);
+        grow(
+          pointsBounds([
+            { x: p.x1, y: p.y1 },
+            { x: p.x2, y: p.y2 },
+          ]),
+          p.strokeWidth,
+        );
         break;
       case 'polyline':
       case 'polygon':

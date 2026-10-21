@@ -144,7 +144,8 @@ export const en = {
   },
   start: {
     title: 'Welcome to UML Studio',
-    subtitle: 'Create a project, open a .umls file or start from a template. Everything stays on this device.',
+    subtitle:
+      'Create a project, open a .umls file or start from a template. Everything stays on this device.',
     newBlank: 'New blank project',
     newBlankHint: 'Empty model, add diagrams as you go',
     open: 'Open project…',
@@ -158,7 +159,8 @@ export const en = {
     recovery: 'Unsaved work found',
     browserNoticeTitle: 'Browser mode',
     browserNoticeFsAccess: 'Save writes directly to the file you opened (File System Access API).',
-    browserNoticeFallback: 'This browser cannot overwrite files on disk: Save downloads a new copy of the .umls file. Recovery snapshots are kept in this browser.',
+    browserNoticeFallback:
+      'This browser cannot overwrite files on disk: Save downloads a new copy of the .umls file. Recovery snapshots are kept in this browser.',
   },
   project: {
     newTitle: 'New Project',
@@ -192,7 +194,8 @@ export const en = {
     duplicateKeys: 'The file contains duplicate keys (possibly duplicate identifiers).',
     invalidJson: 'The file is not valid JSON.',
     notAProject: 'This is not a UML Studio project (.umls).',
-    newerVersion: 'This project was saved by a newer version of UML Studio (schema {version}). Update the application to open it.',
+    newerVersion:
+      'This project was saved by a newer version of UML Studio (schema {version}). Update the application to open it.',
     unsupportedVersion: 'The project schema version is unknown or unsupported.',
     schema: 'The project data does not match the expected structure.',
     integrity: 'The project contains broken references or duplicate identifiers.',
@@ -490,7 +493,8 @@ export const en = {
     inheritanceCycle: 'Inheritance cycle involving “{name}”.',
     duplicateGeneralization: 'Duplicate generalization between the same elements.',
     compositionCycle: 'Composition cycle involving “{name}”: an object cannot (indirectly) contain itself.',
-    abstractOperationInConcreteClass: 'Abstract operation “{operation}” in a concrete class — make the class abstract.',
+    abstractOperationInConcreteClass:
+      'Abstract operation “{operation}” in a concrete class — make the class abstract.',
     duplicateAttributeName: 'Several attributes are named “{name}”.',
     unnamedParameter: 'A parameter of “{operation}” has no name.',
     actorAssociation: 'Actors should not be associated with each other; use generalization or a use case.',
@@ -567,7 +571,8 @@ export const en = {
     compositeStructure: 'Internal structure of a classifier: parts, ports and connectors.',
     communication: 'Lifelines connected by links carrying numbered messages.',
     timing: 'State/value timelines with timing constraints (requires a dedicated timeline editor).',
-    interactionOverview: 'Activity-style control flow between interaction uses (requires interaction references).',
+    interactionOverview:
+      'Activity-style control flow between interaction uses (requires interaction references).',
     profile: 'Profiles, stereotypes with tag definitions and metaclass extensions.',
     informationFlow: 'Information items flowing between classifiers.',
   },
@@ -729,7 +734,8 @@ export const en = {
     done: 'Exported {file}',
     failed: 'Export failed: {reason}',
     tooLarge: 'The image would be too large ({width} × {height} px). Choose a smaller scale.',
-    rasterFallback: 'The diagram contains characters that the built-in PDF font cannot encode; the PDF embeds a high-resolution image instead of vector text.',
+    rasterFallback:
+      'The diagram contains characters that the built-in PDF font cannot encode; the PDF embeds a high-resolution image instead of vector text.',
     vectorNote: 'Vector PDF (selectable text, Helvetica).',
     empty: 'This diagram is empty.',
     json: 'JSON snapshot of the whole project',
@@ -740,7 +746,8 @@ export const en = {
   codegen: {
     title: 'Generate Code',
     language: 'Language',
-    intro: 'Generates class/interface/enum skeletons (stubs) from the class model. Method bodies are placeholders — this is not executable business logic.',
+    intro:
+      'Generates class/interface/enum skeletons (stubs) from the class model. Method bodies are placeholders — this is not executable business logic.',
     files: '{count} file(s)',
     noClassifiers: 'The model has no classes, interfaces or enumerations.',
     warnings: 'Warnings',
@@ -785,7 +792,8 @@ export const en = {
   },
   help: {
     aboutTitle: 'About UML Studio',
-    aboutBody: 'UML Studio is an original, offline-first semantic UML modeler. It is not affiliated with StarUML. Projects are stored as versioned .umls JSON files.',
+    aboutBody:
+      'UML Studio is an original, offline-first semantic UML modeler. It is not affiliated with StarUML. Projects are stored as versioned .umls JSON files.',
     version: 'Version {version}',
     gettingStartedTitle: 'Getting Started',
     gs1: 'Create a project, then add a diagram with Diagram → New Diagram (or the + in the explorer).',
@@ -807,15 +815,43 @@ export const en = {
     intro: 'Real, editable example projects. Identifiers are regenerated for every new project.',
     use: 'Use template',
     blank: { name: 'Blank UML Project', description: 'An empty model.' },
-    library: { name: 'Library Management', description: 'Class diagram: Book, Author, Member, Loan, Librarian with multiplicities.' },
-    ecommerce: { name: 'E-Commerce Domain', description: 'Class diagram: Customer, Order, OrderItem, Product, Payment with composition and generalization.' },
-    university: { name: 'University Enrollment', description: 'Use case diagram: Student, Instructor, Administrator with include/extend.' },
-    login: { name: 'Login Authentication', description: 'Sequence diagram: User, UI, AuthService, Database with an alt fragment.' },
-    checkout: { name: 'Order Checkout', description: 'Sequence diagram: Cart, PaymentGateway, OrderService with activations and alt.' },
-    loan: { name: 'Loan Request', description: 'Activity diagram: decision, approval, rejection, swimlanes and guards.' },
-    ticket: { name: 'Ticket Lifecycle', description: 'State machine: New, Assigned, In Progress, Resolved, Closed.' },
-    microservices: { name: 'Microservices Architecture', description: 'Component diagram: services, interfaces and assembly connectors.' },
-    cloud: { name: 'Cloud Deployment', description: 'Deployment diagram: devices, nodes, execution environments and artifacts.' },
+    library: {
+      name: 'Library Management',
+      description: 'Class diagram: Book, Author, Member, Loan, Librarian with multiplicities.',
+    },
+    ecommerce: {
+      name: 'E-Commerce Domain',
+      description:
+        'Class diagram: Customer, Order, OrderItem, Product, Payment with composition and generalization.',
+    },
+    university: {
+      name: 'University Enrollment',
+      description: 'Use case diagram: Student, Instructor, Administrator with include/extend.',
+    },
+    login: {
+      name: 'Login Authentication',
+      description: 'Sequence diagram: User, UI, AuthService, Database with an alt fragment.',
+    },
+    checkout: {
+      name: 'Order Checkout',
+      description: 'Sequence diagram: Cart, PaymentGateway, OrderService with activations and alt.',
+    },
+    loan: {
+      name: 'Loan Request',
+      description: 'Activity diagram: decision, approval, rejection, swimlanes and guards.',
+    },
+    ticket: {
+      name: 'Ticket Lifecycle',
+      description: 'State machine: New, Assigned, In Progress, Resolved, Closed.',
+    },
+    microservices: {
+      name: 'Microservices Architecture',
+      description: 'Component diagram: services, interfaces and assembly connectors.',
+    },
+    cloud: {
+      name: 'Cloud Deployment',
+      description: 'Deployment diagram: devices, nodes, execution environments and artifacts.',
+    },
   },
   history: {
     add: 'Add {name}',
@@ -864,14 +900,16 @@ export const en = {
   },
   error: {
     boundaryTitle: 'Something went wrong',
-    boundaryBody: 'An unexpected error occurred in the interface. Your document is kept in memory and in the recovery snapshot.',
+    boundaryBody:
+      'An unexpected error occurred in the interface. Your document is kept in memory and in the recovery snapshot.',
     reload: 'Reload application',
     tryAgain: 'Try again',
     saveFirst: 'Download a copy of the project',
   },
   mdj: {
     title: 'Import StarUML project (experimental)',
-    intro: 'Best-effort import of the class, use case and package subset of StarUML .mdj files. This is NOT full StarUML compatibility; unsupported constructs are listed in the report.',
+    intro:
+      'Best-effort import of the class, use case and package subset of StarUML .mdj files. This is NOT full StarUML compatibility; unsupported constructs are listed in the report.',
     report: 'Import report',
     imported: 'Imported {elements} elements and {diagrams} diagrams',
     unsupported: 'Unsupported: {items}',

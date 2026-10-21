@@ -21,7 +21,8 @@ export function remapIds<T>(value: T, map: ReadonlyMap<ID, ID>): T {
   const visit = (node: unknown, key: string | null): unknown => {
     if (typeof node === 'string') return key !== null && isIdField(key) ? (map.get(node) ?? node) : node;
     if (Array.isArray(node)) {
-      if (key !== null && key.endsWith('Ids')) return node.map((v) => (typeof v === 'string' ? (map.get(v) ?? v) : v));
+      if (key !== null && key.endsWith('Ids'))
+        return node.map((v) => (typeof v === 'string' ? (map.get(v) ?? v) : v));
       return node.map((v) => visit(v, null));
     }
     if (isPlainObject(node)) {
@@ -148,7 +149,9 @@ export function cloneFragment(
   }
   // Drop elements that lost every view (e.g. a message whose lifeline view was not copied).
   const shown = new Set(views.flatMap((v) => ('elementId' in v ? [v.elementId] : [])));
-  const finalElements = elements.filter((e) => shown.has(e.id) || !payload.views.some((v) => 'elementId' in v && map.get(v.elementId) === e.id));
+  const finalElements = elements.filter(
+    (e) => shown.has(e.id) || !payload.views.some((v) => 'elementId' in v && map.get(v.elementId) === e.id),
+  );
   return { elements: finalElements, views, skipped: skipped + (elements.length - finalElements.length) };
 }
 
@@ -189,7 +192,8 @@ function offsetView(
         ...view,
         x: view.x + offset.x,
         y: view.y + offset.y,
-        containerViewId: view.containerViewId && keptNew.has(view.containerViewId) ? view.containerViewId : null,
+        containerViewId:
+          view.containerViewId && keptNew.has(view.containerViewId) ? view.containerViewId : null,
       };
     case 'edge':
     case 'noteLink':

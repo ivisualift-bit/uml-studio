@@ -41,7 +41,9 @@ const ProjectHeaderSchema = ProjectDocumentSchema.pick({ name: true, description
 function canonicalProblems(schema: z.ZodType, value: unknown, label: string): string[] {
   const result = schema.safeParse(value);
   if (!result.success) {
-    return result.error.issues.slice(0, 5).map((i) => `${label}.${i.path.map(String).join('.')}: ${i.message}`);
+    return result.error.issues
+      .slice(0, 5)
+      .map((i) => `${label}.${i.path.map(String).join('.')}: ${i.message}`);
   }
   return deepEqual(result.data, value) ? [] : [`${label}: not in canonical form (missing or unknown fields)`];
 }
@@ -108,7 +110,12 @@ export function executeCommands(
   }
   const schemaProblems = validateTouched(next, tx);
   if (schemaProblems.length) {
-    return { ok: false, code: 'schema', message: 'The change would produce invalid data', details: schemaProblems };
+    return {
+      ok: false,
+      code: 'schema',
+      message: 'The change would produce invalid data',
+      details: schemaProblems,
+    };
   }
   const integrity = checkIntegrity(next);
   if (integrity.length) {

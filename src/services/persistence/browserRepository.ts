@@ -1,6 +1,14 @@
 import { PROJECT_FILE_EXTENSION, PROJECT_MIME_TYPE } from '@/domain/serialization/projectFile';
 import { database } from './db';
-import { MAX_RECENTS, UserCancelled, type ExportFilter, type FileRef, type OpenedFile, type ProjectRepository, type RecentEntry } from './types';
+import {
+  MAX_RECENTS,
+  UserCancelled,
+  type ExportFilter,
+  type FileRef,
+  type OpenedFile,
+  type ProjectRepository,
+  type RecentEntry,
+} from './types';
 
 /* Minimal typings for the File System Access API (not yet in lib.dom). */
 interface FilePickerAcceptType {
@@ -8,8 +16,15 @@ interface FilePickerAcceptType {
   accept: Record<string, string[]>;
 }
 interface FsAccessWindow {
-  showOpenFilePicker?: (options: { types?: FilePickerAcceptType[]; multiple?: boolean; excludeAcceptAllOption?: boolean }) => Promise<FileSystemFileHandle[]>;
-  showSaveFilePicker?: (options: { suggestedName?: string; types?: FilePickerAcceptType[] }) => Promise<FileSystemFileHandle>;
+  showOpenFilePicker?: (options: {
+    types?: FilePickerAcceptType[];
+    multiple?: boolean;
+    excludeAcceptAllOption?: boolean;
+  }) => Promise<FileSystemFileHandle[]>;
+  showSaveFilePicker?: (options: {
+    suggestedName?: string;
+    types?: FilePickerAcceptType[];
+  }) => Promise<FileSystemFileHandle>;
 }
 interface PermissionedHandle extends FileSystemFileHandle {
   queryPermission?: (d: { mode: 'read' | 'readwrite' }) => Promise<PermissionState>;
@@ -17,7 +32,10 @@ interface PermissionedHandle extends FileSystemFileHandle {
 }
 
 const PROJECT_TYPES: FilePickerAcceptType[] = [
-  { description: 'UML Studio project', accept: { [PROJECT_MIME_TYPE]: [`.${PROJECT_FILE_EXTENSION}`], 'application/json': ['.json'] } },
+  {
+    description: 'UML Studio project',
+    accept: { [PROJECT_MIME_TYPE]: [`.${PROJECT_FILE_EXTENSION}`], 'application/json': ['.json'] },
+  },
 ];
 
 export function supportsFileSystemAccess(): boolean {
@@ -25,7 +43,8 @@ export function supportsFileSystemAccess(): boolean {
   return typeof w.showOpenFilePicker === 'function' && typeof w.showSaveFilePicker === 'function';
 }
 
-const isAbort = (error: unknown) => error instanceof DOMException && (error.name === 'AbortError' || error.name === 'NotAllowedError');
+const isAbort = (error: unknown) =>
+  error instanceof DOMException && (error.name === 'AbortError' || error.name === 'NotAllowedError');
 
 function ensureExtension(name: string, ext: string): string {
   return name.toLowerCase().endsWith(`.${ext}`) ? name : `${name}.${ext}`;
@@ -33,8 +52,12 @@ function ensureExtension(name: string, ext: string): string {
 
 /** Strip characters that are invalid in file names on common platforms. */
 export function safeFileName(name: string, fallback = 'project'): string {
-  // eslint-disable-next-line no-control-regex
-  const cleaned = name.replace(/[\u0000-\u001f<>:"/\\|?*]+/g, '_').replace(/^\.+/, '').trim().slice(0, 120);
+  const cleaned = name
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f<>:"/\\|?*]+/g, '_')
+    .replace(/^\.+/, '')
+    .trim()
+    .slice(0, 120);
   return cleaned || fallback;
 }
 
@@ -74,7 +97,8 @@ function pickFileWithInput(accept: string): Promise<File | null> {
 async function writeHandle(handle: FileSystemFileHandle, text: string): Promise<void> {
   const h = handle as PermissionedHandle;
   if (h.queryPermission && (await h.queryPermission({ mode: 'readwrite' })) !== 'granted') {
-    if (!h.requestPermission || (await h.requestPermission({ mode: 'readwrite' })) !== 'granted') throw new UserCancelled();
+    if (!h.requestPermission || (await h.requestPermission({ mode: 'readwrite' })) !== 'granted')
+      throw new UserCancelled();
   }
   // createWritable writes to a swap file that replaces the target only on close() — atomic from the
   // user's perspective; an aborted write leaves the original untouched.
@@ -148,7 +172,10 @@ export class BrowserProjectRepository implements ProjectRepository {
   }
 
   async saveAs(text: string, suggestedName: string): Promise<FileRef | null> {
-    const name = ensureExtension(safeFileName(suggestedName.replace(/\.(umls|json)$/i, '')), PROJECT_FILE_EXTENSION);
+    const name = ensureExtension(
+      safeFileName(suggestedName.replace(/\.(umls|json)$/i, '')),
+      PROJECT_FILE_EXTENSION,
+    );
     if (this.canOverwrite) {
       const w = window as unknown as FsAccessWindow;
       try {
@@ -192,7 +219,11 @@ export class BrowserProjectRepository implements ProjectRepository {
     await db.copies.delete(id);
   }
 
-  async recordRecent(file: FileRef, info: { projectId: string; projectName: string }, text?: string): Promise<void> {
+  async recordRecent(
+    file: FileRef,
+    info: { projectId: string; projectName: string },
+    text?: string,
+  ): Promise<void> {
     const db = database();
     const id = file.kind === 'fsAccess' && file.handleKey ? file.handleKey : `copy:${info.projectId}`;
     if (id.startsWith('copy:') && text !== undefined) await db.copies.put({ id, text, savedAt: Date.now() });
@@ -215,7 +246,9 @@ export class BrowserProjectRepository implements ProjectRepository {
       try {
         const handle = await w.showSaveFilePicker!({
           suggestedName: name,
-          types: [{ description: filter.name, accept: { [filter.mime]: filter.extensions.map((e) => `.${e}`) } }],
+          types: [
+            { description: filter.name, accept: { [filter.mime]: filter.extensions.map((e) => `.${e}`) } },
+          ],
         });
         const writable = await handle.createWritable();
         await writable.write(data);

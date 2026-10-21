@@ -51,7 +51,10 @@ describe('project serialization', () => {
     const text = serializeProject(sampleDoc());
     const raw = JSON.parse(text);
     const firstId = Object.keys(raw.modelElements)[1] as string;
-    const duplicated = text.replace(`"${firstId}": {`, `"${firstId}": {"kind":"class"},\n    "${firstId}": {`);
+    const duplicated = text.replace(
+      `"${firstId}": {`,
+      `"${firstId}": {"kind":"class"},\n    "${firstId}": {`,
+    );
     const result = parseProjectText(duplicated);
     expect(!result.ok && result.error.code).toBe('duplicateKeys');
   });
@@ -72,7 +75,9 @@ describe('project serialization', () => {
 
   it('rejects dangling references', () => {
     const raw = JSON.parse(serializeProject(sampleDoc()));
-    const assoc = Object.values(raw.modelElements).find((e) => (e as { kind: string }).kind === 'association') as { targetId: string };
+    const assoc = Object.values(raw.modelElements).find(
+      (e) => (e as { kind: string }).kind === 'association',
+    ) as { targetId: string };
     assoc.targetId = 'does-not-exist';
     const result = parseProjectText(JSON.stringify(raw));
     expect(!result.ok && result.error.code).toBe('integrity');
@@ -80,7 +85,9 @@ describe('project serialization', () => {
 
   it('rejects schema violations with readable paths', () => {
     const raw = JSON.parse(serializeProject(sampleDoc()));
-    const cls = Object.values(raw.modelElements).find((e) => (e as { kind: string }).kind === 'class') as { isAbstract: unknown };
+    const cls = Object.values(raw.modelElements).find((e) => (e as { kind: string }).kind === 'class') as {
+      isAbstract: unknown;
+    };
     cls.isAbstract = 'yes';
     const result = parseProjectText(JSON.stringify(raw));
     expect(!result.ok && result.error.code).toBe('schema');
@@ -110,7 +117,12 @@ describe('json scanner', () => {
 
 describe('migrations', () => {
   const steps: Migration[] = [
-    { from: 0, to: 1, description: 'rename title → name', migrate: (raw) => ({ ...raw, name: raw.title, title: undefined }) },
+    {
+      from: 0,
+      to: 1,
+      description: 'rename title → name',
+      migrate: (raw) => ({ ...raw, name: raw.title, title: undefined }),
+    },
   ];
   it('applies a chain of injected migrations', () => {
     const result = migrateToCurrent({ schemaVersion: 0, title: 'Old' }, steps, 1);
@@ -123,6 +135,9 @@ describe('migrations', () => {
   it('reports gaps and newer versions', () => {
     expect(migrateToCurrent({ schemaVersion: 0 }, [], 1)).toMatchObject({ ok: false, reason: 'gap' });
     expect(migrateToCurrent({ schemaVersion: 3 }, steps, 1)).toMatchObject({ ok: false, reason: 'newer' });
-    expect(migrateToCurrent({ schemaVersion: 'x' }, steps, 1)).toMatchObject({ ok: false, reason: 'unknown-version' });
+    expect(migrateToCurrent({ schemaVersion: 'x' }, steps, 1)).toMatchObject({
+      ok: false,
+      reason: 'unknown-version',
+    });
   });
 });

@@ -1,6 +1,27 @@
-import { addDiagram, byName, comparable, connect, edge, elementsOfKind, expect, exportDiagram, newProject, node, openFile, parseSvg, place, saveProject, selectEdge, setInspectorField, snapshot, test } from './helpers';
+import {
+  addDiagram,
+  byName,
+  comparable,
+  connect,
+  edge,
+  elementsOfKind,
+  expect,
+  exportDiagram,
+  newProject,
+  node,
+  openFile,
+  parseSvg,
+  place,
+  saveProject,
+  selectEdge,
+  setInspectorField,
+  snapshot,
+  test,
+} from './helpers';
 
-test('E2E-005 activity: guarded decision, swimlanes, move an action between lanes keeps flows, save/reopen/export', async ({ page }) => {
+test('E2E-005 activity: guarded decision, swimlanes, move an action between lanes keeps flows, save/reopen/export', async ({
+  page,
+}) => {
   await newProject(page, 'Loans');
   await addDiagram(page, 'activity', 'Approval');
   await place(page, 'act.partition', 250, 330, 'Customer');
@@ -16,8 +37,10 @@ test('E2E-005 activity: guarded decision, swimlanes, move an action between lane
   let doc = await snapshot(page);
   const controls = elementsOfKind(doc, 'controlNode');
   const kinds = (k: string) => controls.find((c) => c.nodeKind === k)!;
-  const viewOf = (elementId: string) => Object.values(Object.values(doc.diagrams)[0]!.views).find((v) => v.elementId === elementId)!;
-  const nodeAt = async (elementId: string) => page.locator(`[data-testid="uml-node"][data-element-id="${elementId}"]`);
+  const viewOf = (elementId: string) =>
+    Object.values(Object.values(doc.diagrams)[0]!.views).find((v) => v.elementId === elementId)!;
+  const nodeAt = async (elementId: string) =>
+    page.locator(`[data-testid="uml-node"][data-element-id="${elementId}"]`);
 
   const flows: Array<[string, string]> = [
     [kinds('initial').id, byName(doc, 'Submit').id],
@@ -39,7 +62,10 @@ test('E2E-005 activity: guarded decision, swimlanes, move an action between lane
   await selectEdge(page, 'controlFlow', 3);
   await setInspectorField(page, 'prop-guard', '[amount > limit]');
   doc = await snapshot(page);
-  const guards = elementsOfKind(doc, 'controlFlow').map((f) => f.guard).filter(Boolean).sort();
+  const guards = elementsOfKind(doc, 'controlFlow')
+    .map((f) => f.guard)
+    .filter(Boolean)
+    .sort();
   expect(guards).toEqual(['amount <= limit', 'amount > limit']);
   await expect(edge(page, 'controlFlow').locator('text', { hasText: '[amount <= limit]' })).toHaveCount(1);
 
@@ -49,14 +75,20 @@ test('E2E-005 activity: guarded decision, swimlanes, move an action between lane
   const rejectBox = (await node(page, 'Reject').boundingBox())!;
   await page.mouse.move(rejectBox.x + rejectBox.width / 2, rejectBox.y + rejectBox.height / 2);
   await page.mouse.down();
-  await page.mouse.move(rejectBox.x + rejectBox.width / 2 + 100, rejectBox.y + rejectBox.height / 2, { steps: 8 });
-  await page.mouse.move(rejectBox.x + rejectBox.width / 2 + 220, rejectBox.y + rejectBox.height / 2, { steps: 8 });
+  await page.mouse.move(rejectBox.x + rejectBox.width / 2 + 100, rejectBox.y + rejectBox.height / 2, {
+    steps: 8,
+  });
+  await page.mouse.move(rejectBox.x + rejectBox.width / 2 + 220, rejectBox.y + rejectBox.height / 2, {
+    steps: 8,
+  });
   await page.mouse.up();
   doc = await snapshot(page);
   expect(byName(doc, 'Reject').partitionId).toBe(byName(doc, 'Bank').id);
   expect(viewOf(byName(doc, 'Reject').id).containerViewId).toBe(viewOf(byName(doc, 'Bank').id).id);
   // Flows still attached to the moved action.
-  const rejectFlows = elementsOfKind(doc, 'controlFlow').filter((f) => f.sourceId === reject.id || f.targetId === reject.id);
+  const rejectFlows = elementsOfKind(doc, 'controlFlow').filter(
+    (f) => f.sourceId === reject.id || f.targetId === reject.id,
+  );
   expect(rejectFlows).toHaveLength(2);
   const edgeViews = Object.values(Object.values(doc.diagrams)[0]!.views).filter((v) => v.kind === 'edge');
   expect(edgeViews).toHaveLength(7);
@@ -68,10 +100,21 @@ test('E2E-005 activity: guarded decision, swimlanes, move an action between lane
   expect(comparable(await snapshot(page))).toEqual(comparable(doc));
   const svg = await exportDiagram(page, 'svg');
   const parsed = await parseSvg(page, svg.bytes.toString('utf8'));
-  for (const text of ['Customer', 'Bank', 'Submit', 'Approve', 'Reject', '[amount <= limit]', '[amount > limit]']) expect(parsed.texts).toContain(text);
+  for (const text of [
+    'Customer',
+    'Bank',
+    'Submit',
+    'Approve',
+    'Reject',
+    '[amount <= limit]',
+    '[amount > limit]',
+  ])
+    expect(parsed.texts).toContain(text);
 });
 
-test('E2E-006 state machine: transitions with trigger [guard] / effect, rename, no dead references after reopen, export', async ({ page }) => {
+test('E2E-006 state machine: transitions with trigger [guard] / effect, rename, no dead references after reopen, export', async ({
+  page,
+}) => {
   await newProject(page, 'Publishing');
   await addDiagram(page, 'stateMachine', 'Article');
   await place(page, 'sm.initial', 100, 250);
@@ -97,7 +140,9 @@ test('E2E-006 state machine: transitions with trigger [guard] / effect, rename, 
   await setInspectorField(page, 'prop-trigger', 'publish');
   await setInspectorField(page, 'prop-guard', 'approved');
   await setInspectorField(page, 'prop-effect', 'notifySubscribers');
-  await expect(edge(page, 'transition').locator('text', { hasText: 'publish [approved] / notifySubscribers' })).toHaveCount(1);
+  await expect(
+    edge(page, 'transition').locator('text', { hasText: 'publish [approved] / notifySubscribers' }),
+  ).toHaveCount(1);
 
   // Rename a state inline (double-click).
   await node(page, 'Draft').dblclick();
@@ -107,7 +152,12 @@ test('E2E-006 state machine: transitions with trigger [guard] / effect, rename, 
 
   doc = await snapshot(page);
   const t = elementsOfKind(doc, 'transition').find((x) => x.trigger === 'publish')!;
-  expect(t).toMatchObject({ guard: 'approved', effect: 'notifySubscribers', sourceId: byName(doc, 'Editing').id, targetId: byName(doc, 'Published').id });
+  expect(t).toMatchObject({
+    guard: 'approved',
+    effect: 'notifySubscribers',
+    sourceId: byName(doc, 'Editing').id,
+    targetId: byName(doc, 'Published').id,
+  });
   await expect(page.getByTestId('problem-item').and(page.locator('[data-severity="error"]'))).toHaveCount(0);
 
   const saved = await saveProject(page);

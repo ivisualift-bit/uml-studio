@@ -41,11 +41,17 @@ function load(): Settings {
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw) as Partial<Settings>;
     return {
-      theme: parsed.theme === 'light' || parsed.theme === 'dark' || parsed.theme === 'system' ? parsed.theme : DEFAULTS.theme,
+      theme:
+        parsed.theme === 'light' || parsed.theme === 'dark' || parsed.theme === 'system'
+          ? parsed.theme
+          : DEFAULTS.theme,
       language: parsed.language === 'fr' || parsed.language === 'en' ? parsed.language : DEFAULTS.language,
       showGrid: typeof parsed.showGrid === 'boolean' ? parsed.showGrid : DEFAULTS.showGrid,
       snapToGrid: typeof parsed.snapToGrid === 'boolean' ? parsed.snapToGrid : DEFAULTS.snapToGrid,
-      gridSize: typeof parsed.gridSize === 'number' && parsed.gridSize >= 2 && parsed.gridSize <= 100 ? parsed.gridSize : DEFAULTS.gridSize,
+      gridSize:
+        typeof parsed.gridSize === 'number' && parsed.gridSize >= 2 && parsed.gridSize <= 100
+          ? parsed.gridSize
+          : DEFAULTS.gridSize,
       showMinimap: typeof parsed.showMinimap === 'boolean' ? parsed.showMinimap : DEFAULTS.showMinimap,
     };
   } catch {

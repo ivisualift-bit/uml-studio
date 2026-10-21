@@ -4,7 +4,16 @@ import type { ModelElement, Relationship } from '@/domain/schemas/elements';
 import type { ProjectDocument } from '@/domain/schemas/project';
 import type { EdgeLabelKey, EdgeView, Routing, ViewStyle } from '@/domain/schemas/views';
 import { formatGuard, formatTransitionLabel } from '@/domain/notation/labels';
-import { center, distance, pointAlong, polylineLength, pointsToPath, trimEnd, trimStart, type ShapeOutline } from './geometry';
+import {
+  center,
+  distance,
+  pointAlong,
+  polylineLength,
+  pointsToPath,
+  trimEnd,
+  trimStart,
+  type ShapeOutline,
+} from './geometry';
 import type { Bounds, Primitive } from './primitives';
 import { measureText } from './textMetrics';
 import { BASE_FONT_SIZE, type DiagramTheme } from './theme';
@@ -63,32 +72,84 @@ export function edgeNotation(_doc: ProjectDocument, rel: Relationship): EdgeNota
         },
       };
     case 'generalization':
-      return { dashed: false, sourceMarker: 'none', targetMarker: 'hollowTriangle', labels: { name: named, stereotype: stereo(userStereotype) } };
+      return {
+        dashed: false,
+        sourceMarker: 'none',
+        targetMarker: 'hollowTriangle',
+        labels: { name: named, stereotype: stereo(userStereotype) },
+      };
     case 'realization':
-      return { dashed: true, sourceMarker: 'none', targetMarker: 'hollowTriangle', labels: { name: named, stereotype: stereo(userStereotype) } };
+      return {
+        dashed: true,
+        sourceMarker: 'none',
+        targetMarker: 'hollowTriangle',
+        labels: { name: named, stereotype: stereo(userStereotype) },
+      };
     case 'dependency':
-      return { dashed: true, sourceMarker: 'none', targetMarker: 'openArrow', labels: { name: named, stereotype: stereo(userStereotype) } };
+      return {
+        dashed: true,
+        sourceMarker: 'none',
+        targetMarker: 'openArrow',
+        labels: { name: named, stereotype: stereo(userStereotype) },
+      };
     case 'include':
-      return { dashed: true, sourceMarker: 'none', targetMarker: 'openArrow', labels: { name: named, stereotype: keyword('include') } };
+      return {
+        dashed: true,
+        sourceMarker: 'none',
+        targetMarker: 'openArrow',
+        labels: { name: named, stereotype: keyword('include') },
+      };
     case 'extend':
       return {
         dashed: true,
         sourceMarker: 'none',
         targetMarker: 'openArrow',
-        labels: { stereotype: keyword('extend'), name: [named, rel.condition.trim() ? `[${rel.condition.trim()}]` : ''].filter(Boolean).join(' ') },
+        labels: {
+          stereotype: keyword('extend'),
+          name: [named, rel.condition.trim() ? `[${rel.condition.trim()}]` : ''].filter(Boolean).join(' '),
+        },
       };
     case 'packageImport':
-      return { dashed: true, sourceMarker: 'none', targetMarker: 'openArrow', labels: { name: named, stereotype: keyword('import') } };
+      return {
+        dashed: true,
+        sourceMarker: 'none',
+        targetMarker: 'openArrow',
+        labels: { name: named, stereotype: keyword('import') },
+      };
     case 'packageMerge':
-      return { dashed: true, sourceMarker: 'none', targetMarker: 'openArrow', labels: { name: named, stereotype: keyword('merge') } };
+      return {
+        dashed: true,
+        sourceMarker: 'none',
+        targetMarker: 'openArrow',
+        labels: { name: named, stereotype: keyword('merge') },
+      };
     case 'deployment':
-      return { dashed: true, sourceMarker: 'none', targetMarker: 'openArrow', labels: { name: named, stereotype: keyword('deploy') } };
+      return {
+        dashed: true,
+        sourceMarker: 'none',
+        targetMarker: 'openArrow',
+        labels: { name: named, stereotype: keyword('deploy') },
+      };
     case 'manifestation':
-      return { dashed: true, sourceMarker: 'none', targetMarker: 'openArrow', labels: { name: named, stereotype: keyword('manifest') } };
+      return {
+        dashed: true,
+        sourceMarker: 'none',
+        targetMarker: 'openArrow',
+        labels: { name: named, stereotype: keyword('manifest') },
+      };
     case 'controlFlow':
     case 'objectFlow': {
-      const parts = [named, formatGuard(rel.guard), rel.weight.trim() ? `{weight=${rel.weight.trim()}}` : ''].filter(Boolean);
-      return { dashed: false, sourceMarker: 'none', targetMarker: 'openArrow', labels: { name: parts.join(' '), stereotype: stereo(userStereotype) } };
+      const parts = [
+        named,
+        formatGuard(rel.guard),
+        rel.weight.trim() ? `{weight=${rel.weight.trim()}}` : '',
+      ].filter(Boolean);
+      return {
+        dashed: false,
+        sourceMarker: 'none',
+        targetMarker: 'openArrow',
+        labels: { name: parts.join(' '), stereotype: stereo(userStereotype) },
+      };
     }
     case 'transition':
       return {
@@ -100,8 +161,14 @@ export function edgeNotation(_doc: ProjectDocument, rel: Relationship): EdgeNota
     case 'connector':
       return {
         dashed: false,
-        sourceMarker: rel.connectorKind === 'delegation' ? 'none' : associationMarker({ ...rel.sourceEnd, aggregation: 'none' }),
-        targetMarker: rel.connectorKind === 'delegation' ? 'openArrow' : associationMarker({ ...rel.targetEnd, aggregation: 'none' }),
+        sourceMarker:
+          rel.connectorKind === 'delegation'
+            ? 'none'
+            : associationMarker({ ...rel.sourceEnd, aggregation: 'none' }),
+        targetMarker:
+          rel.connectorKind === 'delegation'
+            ? 'openArrow'
+            : associationMarker({ ...rel.targetEnd, aggregation: 'none' }),
         assembly: rel.connectorKind === 'assembly',
         messages: rel.messages,
         labels: {
@@ -114,9 +181,19 @@ export function edgeNotation(_doc: ProjectDocument, rel: Relationship): EdgeNota
         },
       };
     case 'extension':
-      return { dashed: false, sourceMarker: 'none', targetMarker: 'filledTriangle', labels: { name: rel.isRequired ? '{required}' : named } };
+      return {
+        dashed: false,
+        sourceMarker: 'none',
+        targetMarker: 'filledTriangle',
+        labels: { name: rel.isRequired ? '{required}' : named },
+      };
     case 'informationFlow': {
-      return { dashed: true, sourceMarker: 'none', targetMarker: 'openArrow', labels: { name: named, stereotype: keyword('flow') } };
+      return {
+        dashed: true,
+        sourceMarker: 'none',
+        targetMarker: 'openArrow',
+        labels: { name: named, stereotype: keyword('flow') },
+      };
     }
     default:
       return { dashed: false, sourceMarker: 'none', targetMarker: 'none', labels: { name: named } };
@@ -284,7 +361,8 @@ export function routeEdge(input: RouteInput): Point[] {
     const ny = (tc.x - sc.x) / len;
     const so = { x: sc.x + nx * input.parallelOffset, y: sc.y + ny * input.parallelOffset };
     const to = { x: tc.x + nx * input.parallelOffset, y: tc.y + ny * input.parallelOffset };
-    if (insideShape(source, so) && insideShape(target, to)) return [rayExit(source, so, to), rayExit(target, to, so)];
+    if (insideShape(source, so) && insideShape(target, to))
+      return [rayExit(source, so, to), rayExit(target, to, so)];
   }
   const first = waypoints[0] ?? tc;
   const last = waypoints[waypoints.length - 1] ?? sc;
@@ -312,16 +390,39 @@ export function markerLength(kind: MarkerKind): number {
 }
 
 /** Marker primitives with the tip at `tip`, pointing along `angle` (radians, direction of travel). */
-export function markerPrimitives(kind: MarkerKind, tip: Point, angle: number, color: string, background: string, strokeWidth: number): Primitive[] {
+export function markerPrimitives(
+  kind: MarkerKind,
+  tip: Point,
+  angle: number,
+  color: string,
+  background: string,
+  strokeWidth: number,
+): Primitive[] {
   const back = (d: number, side: number): Point => ({
     x: tip.x - Math.cos(angle) * d - Math.sin(angle) * side,
     y: tip.y - Math.sin(angle) * d + Math.cos(angle) * side,
   });
   switch (kind) {
     case 'openArrow':
-      return [{ type: 'polyline', points: [back(12, -6), tip, back(12, 6)], stroke: color, strokeWidth, fill: 'none' }];
+      return [
+        {
+          type: 'polyline',
+          points: [back(12, -6), tip, back(12, 6)],
+          stroke: color,
+          strokeWidth,
+          fill: 'none',
+        },
+      ];
     case 'filledArrow':
-      return [{ type: 'polygon', points: [tip, back(11, -5), back(11, 5)], fill: color, stroke: color, strokeWidth }];
+      return [
+        {
+          type: 'polygon',
+          points: [tip, back(11, -5), back(11, 5)],
+          fill: color,
+          stroke: color,
+          strokeWidth,
+        },
+      ];
     case 'hollowTriangle':
     case 'filledTriangle':
       return [
@@ -392,7 +493,13 @@ export interface EdgeLayoutInput {
 
 const LABEL_SIZE = BASE_FONT_SIZE - 1;
 
-function labelBox(x: number, y: number, value: string, size: number, anchor: 'start' | 'middle' | 'end'): Bounds {
+function labelBox(
+  x: number,
+  y: number,
+  value: string,
+  size: number,
+  anchor: 'start' | 'middle' | 'end',
+): Bounds {
   const w = measureText(value, size);
   const left = anchor === 'start' ? x : anchor === 'middle' ? x - w / 2 : x - w;
   return { x: left - 2, y: y - size, width: w + 4, height: size * 1.35 };
@@ -401,7 +508,9 @@ function labelBox(x: number, y: number, value: string, size: number, anchor: 'st
 export function layoutEdge(input: EdgeLayoutInput): EdgeLayout {
   const { relationship: rel, points, theme } = input;
   const base = edgeNotation(input.doc, rel);
-  const notation: EdgeNotation = input.providedInterfaceBall ? { ...base, dashed: false, targetMarker: 'none' } : base;
+  const notation: EdgeNotation = input.providedInterfaceBall
+    ? { ...base, dashed: false, targetMarker: 'none' }
+    : base;
   const style: ViewStyle = input.view.style;
   const color = style.stroke ?? theme.edge;
   const textColor = style.textColor ?? theme.text;
@@ -414,16 +523,41 @@ export function layoutEdge(input: EdgeLayoutInput): EdgeLayout {
   const endCut = markerLength(notation.targetMarker);
   if (endCut) line = trimEnd(line, endCut);
   if (startCut) line = trimStart(line, startCut);
-  primitives.push({ type: 'polyline', points: line, stroke: color, strokeWidth: sw, dash: notation.dashed ? '7 5' : undefined, fill: 'none' });
+  primitives.push({
+    type: 'polyline',
+    points: line,
+    stroke: color,
+    strokeWidth: sw,
+    dash: notation.dashed ? '7 5' : undefined,
+    fill: 'none',
+  });
 
   const n = points.length;
   if (n >= 2) {
     const tip = points[n - 1]!;
     const prev = points[n - 2]!;
-    primitives.push(...markerPrimitives(notation.targetMarker, tip, Math.atan2(tip.y - prev.y, tip.x - prev.x), color, theme.background, sw));
+    primitives.push(
+      ...markerPrimitives(
+        notation.targetMarker,
+        tip,
+        Math.atan2(tip.y - prev.y, tip.x - prev.x),
+        color,
+        theme.background,
+        sw,
+      ),
+    );
     const sTip = points[0]!;
     const sNext = points[1]!;
-    primitives.push(...markerPrimitives(notation.sourceMarker, sTip, Math.atan2(sTip.y - sNext.y, sTip.x - sNext.x), color, theme.background, sw));
+    primitives.push(
+      ...markerPrimitives(
+        notation.sourceMarker,
+        sTip,
+        Math.atan2(sTip.y - sNext.y, sTip.x - sNext.x),
+        color,
+        theme.background,
+        sw,
+      ),
+    );
   }
 
   if (notation.assembly && n >= 2) {
@@ -432,7 +566,16 @@ export function layoutEdge(input: EdgeLayoutInput): EdgeLayout {
     const ux = Math.cos(mid.angle);
     const uy = Math.sin(mid.angle);
     const ball = { x: mid.point.x + ux * 3, y: mid.point.y + uy * 3 };
-    primitives.push({ type: 'ellipse', cx: ball.x, cy: ball.y, rx: r, ry: r, fill: theme.background, stroke: color, strokeWidth: sw });
+    primitives.push({
+      type: 'ellipse',
+      cx: ball.x,
+      cy: ball.y,
+      rx: r,
+      ry: r,
+      fill: theme.background,
+      stroke: color,
+      strokeWidth: sw,
+    });
     // Socket: arc of radius r+4 opening towards the ball.
     const R = r + 4;
     const a0 = mid.angle + Math.PI / 2;
@@ -451,12 +594,27 @@ export function layoutEdge(input: EdgeLayoutInput): EdgeLayout {
 
   const labels: EdgeLabelLayout[] = [];
   const offsetOf = (key: EdgeLabelKey) => input.view.labelOffsets[key] ?? { x: 0, y: 0 };
-  const push = (key: EdgeLabelKey, value: string, x: number, y: number, anchor: 'start' | 'middle' | 'end', underline?: boolean) => {
+  const push = (
+    key: EdgeLabelKey,
+    value: string,
+    x: number,
+    y: number,
+    anchor: 'start' | 'middle' | 'end',
+    underline?: boolean,
+  ) => {
     if (!value) return;
     const off = offsetOf(key);
     const lx = x + off.x;
     const ly = y + off.y;
-    labels.push({ key, text: value, x: lx, y: ly, anchor, bounds: labelBox(lx, ly, value, fontSize, anchor), underline });
+    labels.push({
+      key,
+      text: value,
+      x: lx,
+      y: ly,
+      anchor,
+      bounds: labelBox(lx, ly, value, fontSize, anchor),
+      underline,
+    });
   };
 
   if (n >= 2) {
@@ -470,7 +628,14 @@ export function layoutEdge(input: EdgeLayoutInput): EdgeLayout {
     const nameText = [notation.labels.name, input.extraName].filter(Boolean).join(' ');
     const horizontalish = Math.abs(Math.cos(mid.angle)) > 0.5;
     const anchor = horizontalish ? 'middle' : ox > 0 ? 'start' : 'end';
-    push('name', nameText, mid.point.x + ox * 10, mid.point.y + oy * 10 + (horizontalish ? -2 : 4), anchor, notation.underlineName);
+    push(
+      'name',
+      nameText,
+      mid.point.x + ox * 10,
+      mid.point.y + oy * 10 + (horizontalish ? -2 : 4),
+      anchor,
+      notation.underlineName,
+    );
     const stereoY = mid.point.y + oy * 10 + (horizontalish ? -2 : 4) - (nameText ? fontSize * 1.25 : 0);
     push('stereotype', notation.labels.stereotype ?? '', mid.point.x + ox * 10, stereoY, anchor);
 
@@ -480,16 +645,46 @@ export function layoutEdge(input: EdgeLayoutInput): EdgeLayout {
       notation.messages.forEach((m, i) => {
         const label = `${m.sequence ? `${m.sequence}: ` : ''}${m.name}`;
         const y = base.y + i * fontSize * 1.4;
-        labels.push({ key: 'name', text: '', x: base.x, y, anchor: 'middle', bounds: labelBox(base.x, y, label, fontSize, 'middle') });
-        primitives.push({ type: 'text', x: base.x, y, text: label, fontSize, anchor: 'middle', fill: textColor });
+        labels.push({
+          key: 'name',
+          text: '',
+          x: base.x,
+          y,
+          anchor: 'middle',
+          bounds: labelBox(base.x, y, label, fontSize, 'middle'),
+        });
+        primitives.push({
+          type: 'text',
+          x: base.x,
+          y,
+          text: label,
+          fontSize,
+          anchor: 'middle',
+          fill: textColor,
+        });
         const dir = m.direction === 'forward' ? 1 : -1;
         const ax = base.x - (measureText(label, fontSize) / 2 + 18) * along.x;
         const ay = y - fontSize * 0.35 - (measureText(label, fontSize) / 2 + 18) * along.y;
         const tail = { x: ax - along.x * 8 * dir, y: ay - along.y * 8 * dir };
         const tip = { x: ax + along.x * 8 * dir, y: ay + along.y * 8 * dir };
-        primitives.push({ type: 'line', x1: tail.x, y1: tail.y, x2: tip.x, y2: tip.y, stroke: color, strokeWidth: 1 });
+        primitives.push({
+          type: 'line',
+          x1: tail.x,
+          y1: tail.y,
+          x2: tip.x,
+          y2: tip.y,
+          stroke: color,
+          strokeWidth: 1,
+        });
         primitives.push(
-          ...markerPrimitives(m.sort === 'asynchronous' ? 'openArrow' : 'filledArrow', tip, Math.atan2(tip.y - tail.y, tip.x - tail.x), color, theme.background, 1),
+          ...markerPrimitives(
+            m.sort === 'asynchronous' ? 'openArrow' : 'filledArrow',
+            tip,
+            Math.atan2(tip.y - tail.y, tip.x - tail.x),
+            color,
+            theme.background,
+            1,
+          ),
         );
       });
     }
@@ -523,7 +718,8 @@ export function layoutEdge(input: EdgeLayoutInput): EdgeLayout {
         };
       };
       const role = which === 'source' ? notation.labels.sourceRole : notation.labels.targetRole;
-      const mult = which === 'source' ? notation.labels.sourceMultiplicity : notation.labels.targetMultiplicity;
+      const mult =
+        which === 'source' ? notation.labels.sourceMultiplicity : notation.labels.targetMultiplicity;
       const r = place(-1);
       const m = place(1);
       push(which === 'source' ? 'sourceRole' : 'targetRole', role ?? '', r.x, r.y, r.anchor);

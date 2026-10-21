@@ -18,7 +18,10 @@ function bigProject(classes: number, edgesPerClass: number) {
   const d = b.diagram('class', 'Large');
   const views: string[] = [];
   for (let i = 0; i < classes; i += 1) {
-    const n = b.node(d, 'class', `Class${i}`, (i % 10) * 220, Math.floor(i / 10) * 160, { width: 160, height: 80 });
+    const n = b.node(d, 'class', `Class${i}`, (i % 10) * 220, Math.floor(i / 10) * 160, {
+      width: 160,
+      height: 80,
+    });
     b.attribute(n.elementId, `- field${i}: String`);
     b.operation(n.elementId, `+ op${i}(arg: Integer): Boolean`);
     views.push(n.viewId);
@@ -44,12 +47,20 @@ describe('performance', () => {
     const diagram = doc.diagrams[diagramId]!;
     expect(Object.values(diagram.views).filter((v) => v.kind === 'edge').length).toBeGreaterThanOrEqual(190);
     const [, layoutMs] = time(() => layoutGraphDiagram(doc, diagram, PRINT_THEME));
-    const [, layoutWarmMs] = time(() => layoutGraphDiagram(doc, diagram, PRINT_THEME, { boxes: new Map([[firstView, { x: 15, y: 15 }]]) }));
-    const [outcome, moveMs] = time(() => executeCommands(doc, [{ type: 'view/move', diagramId, viewIds: [firstView], dx: 20, dy: 10 }], { measure: measureView }));
+    const [, layoutWarmMs] = time(() =>
+      layoutGraphDiagram(doc, diagram, PRINT_THEME, { boxes: new Map([[firstView, { x: 15, y: 15 }]]) }),
+    );
+    const [outcome, moveMs] = time(() =>
+      executeCommands(doc, [{ type: 'view/move', diagramId, viewIds: [firstView], dx: 20, dy: 10 }], {
+        measure: measureView,
+      }),
+    );
     expect(outcome.ok).toBe(true);
     const [svg, svgMs] = time(() => renderDiagramSvg(doc, diagramId));
     expect(svg.svg.length).toBeGreaterThan(10_000);
-    console.log(`[perf] 100 nodes/200 edges: build ${buildMs.toFixed(0)} ms, layout cold ${layoutMs.toFixed(1)} ms, layout per drag frame ${layoutWarmMs.toFixed(1)} ms, move commit ${moveMs.toFixed(1)} ms, SVG ${svgMs.toFixed(1)} ms`);
+    console.log(
+      `[perf] 100 nodes/200 edges: build ${buildMs.toFixed(0)} ms, layout cold ${layoutMs.toFixed(1)} ms, layout per drag frame ${layoutWarmMs.toFixed(1)} ms, move commit ${moveMs.toFixed(1)} ms, SVG ${svgMs.toFixed(1)} ms`,
+    );
     expect(layoutWarmMs).toBeLessThan(150);
     expect(moveMs).toBeLessThan(250);
   });
@@ -61,7 +72,9 @@ describe('performance', () => {
     const [parsed, openMs] = time(() => parseProjectText(text));
     expect(parsed.ok).toBe(true);
     const [, validateMs] = time(() => validateProject(doc));
-    console.log(`[perf] ${Object.keys(doc.modelElements).length} elements, ${(text.length / 1024).toFixed(0)} KiB: save ${saveMs.toFixed(0)} ms, open+validate ${openMs.toFixed(0)} ms, rules ${validateMs.toFixed(0)} ms`);
+    console.log(
+      `[perf] ${Object.keys(doc.modelElements).length} elements, ${(text.length / 1024).toFixed(0)} KiB: save ${saveMs.toFixed(0)} ms, open+validate ${openMs.toFixed(0)} ms, rules ${validateMs.toFixed(0)} ms`,
+    );
     expect(openMs).toBeLessThan(3000);
     expect(validateMs).toBeLessThan(2000);
   });

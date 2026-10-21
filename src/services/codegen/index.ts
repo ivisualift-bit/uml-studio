@@ -6,7 +6,11 @@ import { generateTypeScript } from './typescript';
 
 export type CodegenLanguage = 'typescript' | 'java' | 'python';
 
-export function generateCode(doc: ProjectDocument, language: CodegenLanguage, options: { dataclasses?: boolean } = {}): GenerationResult {
+export function generateCode(
+  doc: ProjectDocument,
+  language: CodegenLanguage,
+  options: { dataclasses?: boolean } = {},
+): GenerationResult {
   const model = extractModel(doc);
   switch (language) {
     case 'typescript':

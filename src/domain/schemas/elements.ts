@@ -1,5 +1,12 @@
 import * as z from 'zod';
-import { IdSchema, LongTextSchema, NameSchema, ShortTextSchema, TaggedValuesSchema, VisibilitySchema } from './common';
+import {
+  IdSchema,
+  LongTextSchema,
+  NameSchema,
+  ShortTextSchema,
+  TaggedValuesSchema,
+  VisibilitySchema,
+} from './common';
 import {
   AppliedStereotypeSchema,
   AttributeSchema,
@@ -116,12 +123,26 @@ export const SubjectSchema = el('subject', {});
 // Activities
 // ---------------------------------------------------------------------------------------------
 export const ActivitySchema = el('activity', {});
-export const ActionKindSchema = z.enum(['opaque', 'callBehavior', 'sendSignal', 'acceptEvent', 'acceptTimeEvent']);
+export const ActionKindSchema = z.enum([
+  'opaque',
+  'callBehavior',
+  'sendSignal',
+  'acceptEvent',
+  'acceptTimeEvent',
+]);
 export const ActionSchema = el('action', {
   actionKind: ActionKindSchema.default('opaque'),
   partitionId: IdSchema.nullable().default(null),
 });
-export const ControlNodeKindSchema = z.enum(['initial', 'activityFinal', 'flowFinal', 'decision', 'merge', 'fork', 'join']);
+export const ControlNodeKindSchema = z.enum([
+  'initial',
+  'activityFinal',
+  'flowFinal',
+  'decision',
+  'merge',
+  'fork',
+  'join',
+]);
 export const ControlNodeSchema = el('controlNode', {
   nodeKind: ControlNodeKindSchema,
   partitionId: IdSchema.nullable().default(null),

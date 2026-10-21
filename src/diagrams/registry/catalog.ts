@@ -101,7 +101,13 @@ const node = (
   labelKey: MessageKey,
   glyph: GlyphName,
   kind: NodeElementKind,
-  extra: { subKind?: string; init?: Record<string, unknown>; variant?: 'alternate'; size?: Size; labelParams?: Record<string, string> } = {},
+  extra: {
+    subKind?: string;
+    init?: Record<string, unknown>;
+    variant?: 'alternate';
+    size?: Size;
+    labelParams?: Record<string, string>;
+  } = {},
 ): ToolDef => ({
   id,
   type: 'node',
@@ -114,7 +120,13 @@ const node = (
   variant: extra.variant,
 });
 
-const rel = (id: string, labelKey: MessageKey, glyph: GlyphName, preset: RelationshipPreset): ToolDef => ({ id, type: 'relationship', labelKey, glyph, preset });
+const rel = (id: string, labelKey: MessageKey, glyph: GlyphName, preset: RelationshipPreset): ToolDef => ({
+  id,
+  type: 'relationship',
+  labelKey,
+  glyph,
+  preset,
+});
 
 const annotations: ToolGroup = {
   titleKey: 'toolbox.groups.annotations',
@@ -145,7 +157,9 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
         titleKey: 'toolbox.groups.basic',
         tools: [
           node('class.class', 'elementKind.class', 'class', 'class'),
-          node('class.abstract', 'toolbox.abstractClass', 'abstractClass', 'class', { init: { isAbstract: true } }),
+          node('class.abstract', 'toolbox.abstractClass', 'abstractClass', 'class', {
+            init: { isAbstract: true },
+          }),
           node('class.interface', 'elementKind.interface', 'interface', 'interface'),
           node('class.enumeration', 'elementKind.enumeration', 'enumeration', 'enumeration'),
           node('class.dataType', 'elementKind.dataType', 'dataType', 'dataType'),
@@ -158,7 +172,12 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
         titleKey: 'toolbox.groups.relationships',
         tools: [
           rel('class.association', 'elementKind.association', 'association', 'association'),
-          rel('class.directedAssociation', 'toolbox.directedAssociation', 'directedAssociation', 'directedAssociation'),
+          rel(
+            'class.directedAssociation',
+            'toolbox.directedAssociation',
+            'directedAssociation',
+            'directedAssociation',
+          ),
           rel('class.aggregation', 'toolbox.aggregation', 'aggregation', 'aggregation'),
           rel('class.composition', 'toolbox.composition', 'composition', 'composition'),
           rel('class.generalization', 'elementKind.generalization', 'generalization', 'generalization'),
@@ -209,29 +228,102 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
       {
         titleKey: 'toolbox.groups.lifelines',
         tools: [
-          { id: 'seq.lifeline', type: 'lifeline', headStyle: 'object', labelKey: 'toolbox.lifeline', glyph: 'lifeline' },
-          { id: 'seq.actorLifeline', type: 'lifeline', headStyle: 'actor', labelKey: 'toolbox.actorLifeline', glyph: 'actor' },
+          {
+            id: 'seq.lifeline',
+            type: 'lifeline',
+            headStyle: 'object',
+            labelKey: 'toolbox.lifeline',
+            glyph: 'lifeline',
+          },
+          {
+            id: 'seq.actorLifeline',
+            type: 'lifeline',
+            headStyle: 'actor',
+            labelKey: 'toolbox.actorLifeline',
+            glyph: 'actor',
+          },
           { id: 'seq.activation', type: 'activation', labelKey: 'toolbox.activation', glyph: 'activation' },
         ],
       },
       {
         titleKey: 'toolbox.groups.messages',
         tools: [
-          { id: 'seq.sync', type: 'message', sort: 'synchronous', mode: 'between', labelKey: 'toolbox.syncMessage', glyph: 'syncMessage' },
-          { id: 'seq.async', type: 'message', sort: 'asynchronous', mode: 'between', labelKey: 'toolbox.asyncMessage', glyph: 'asyncMessage' },
-          { id: 'seq.reply', type: 'message', sort: 'reply', mode: 'between', labelKey: 'toolbox.replyMessage', glyph: 'replyMessage' },
-          { id: 'seq.self', type: 'message', sort: 'synchronous', mode: 'self', labelKey: 'toolbox.selfMessage', glyph: 'selfMessage' },
-          { id: 'seq.create', type: 'message', sort: 'create', mode: 'between', labelKey: 'toolbox.createMessage', glyph: 'createMessage' },
-          { id: 'seq.destroy', type: 'message', sort: 'destroy', mode: 'between', labelKey: 'toolbox.destroyMessage', glyph: 'destroyMessage' },
-          { id: 'seq.found', type: 'message', sort: 'asynchronous', mode: 'found', labelKey: 'toolbox.foundMessage', glyph: 'foundMessage' },
-          { id: 'seq.lost', type: 'message', sort: 'asynchronous', mode: 'lost', labelKey: 'toolbox.lostMessage', glyph: 'lostMessage' },
+          {
+            id: 'seq.sync',
+            type: 'message',
+            sort: 'synchronous',
+            mode: 'between',
+            labelKey: 'toolbox.syncMessage',
+            glyph: 'syncMessage',
+          },
+          {
+            id: 'seq.async',
+            type: 'message',
+            sort: 'asynchronous',
+            mode: 'between',
+            labelKey: 'toolbox.asyncMessage',
+            glyph: 'asyncMessage',
+          },
+          {
+            id: 'seq.reply',
+            type: 'message',
+            sort: 'reply',
+            mode: 'between',
+            labelKey: 'toolbox.replyMessage',
+            glyph: 'replyMessage',
+          },
+          {
+            id: 'seq.self',
+            type: 'message',
+            sort: 'synchronous',
+            mode: 'self',
+            labelKey: 'toolbox.selfMessage',
+            glyph: 'selfMessage',
+          },
+          {
+            id: 'seq.create',
+            type: 'message',
+            sort: 'create',
+            mode: 'between',
+            labelKey: 'toolbox.createMessage',
+            glyph: 'createMessage',
+          },
+          {
+            id: 'seq.destroy',
+            type: 'message',
+            sort: 'destroy',
+            mode: 'between',
+            labelKey: 'toolbox.destroyMessage',
+            glyph: 'destroyMessage',
+          },
+          {
+            id: 'seq.found',
+            type: 'message',
+            sort: 'asynchronous',
+            mode: 'found',
+            labelKey: 'toolbox.foundMessage',
+            glyph: 'foundMessage',
+          },
+          {
+            id: 'seq.lost',
+            type: 'message',
+            sort: 'asynchronous',
+            mode: 'lost',
+            labelKey: 'toolbox.lostMessage',
+            glyph: 'lostMessage',
+          },
         ],
       },
       {
         titleKey: 'toolbox.groups.fragments',
-        tools: (['alt', 'opt', 'loop', 'par', 'break', 'critical', 'neg', 'ref'] as FragmentOperator[]).map(fragment),
+        tools: (['alt', 'opt', 'loop', 'par', 'break', 'critical', 'neg', 'ref'] as FragmentOperator[]).map(
+          fragment,
+        ),
       },
-      { titleKey: 'toolbox.groups.annotations', tools: [{ id: 'note', type: 'note', labelKey: 'toolbox.note', glyph: 'note' }] },
+      {
+        titleKey: 'toolbox.groups.annotations',
+        tools: [{ id: 'note', type: 'note', labelKey: 'toolbox.note', glyph: 'note' }],
+      },
     ],
   },
   activity: {
@@ -248,7 +340,10 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
           node('act.callBehavior', 'toolbox.callBehavior', 'action', 'action', { subKind: 'callBehavior' }),
           node('act.sendSignal', 'toolbox.sendSignal', 'sendSignal', 'action', { subKind: 'sendSignal' }),
           node('act.acceptEvent', 'toolbox.acceptEvent', 'acceptEvent', 'action', { subKind: 'acceptEvent' }),
-          node('act.acceptTimeEvent', 'toolbox.acceptTimeEvent', 'timeEvent', 'action', { subKind: 'acceptTimeEvent', size: { width: 60, height: 60 } }),
+          node('act.acceptTimeEvent', 'toolbox.acceptTimeEvent', 'timeEvent', 'action', {
+            subKind: 'acceptTimeEvent',
+            size: { width: 60, height: 60 },
+          }),
           node('act.objectNode', 'elementKind.objectNode', 'objectNode', 'objectNode'),
           node('act.partition', 'elementKind.activityPartition', 'swimlane', 'activityPartition'),
         ],
@@ -286,7 +381,9 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
         titleKey: 'toolbox.groups.states',
         tools: [
           node('sm.state', 'elementKind.state', 'state', 'state'),
-          node('sm.composite', 'toolbox.compositeState', 'compositeState', 'state', { size: { width: 300, height: 200 } }),
+          node('sm.composite', 'toolbox.compositeState', 'compositeState', 'state', {
+            size: { width: 300, height: 200 },
+          }),
           node('sm.initial', 'toolbox.initialState', 'initial', 'pseudostate', { subKind: 'initial' }),
           node('sm.final', 'toolbox.finalState', 'final', 'finalState'),
         ],
@@ -298,14 +395,19 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
           node('sm.junction', 'toolbox.junction', 'junction', 'pseudostate', { subKind: 'junction' }),
           node('sm.fork', 'toolbox.fork', 'bar', 'pseudostate', { subKind: 'fork' }),
           node('sm.join', 'toolbox.join', 'bar', 'pseudostate', { subKind: 'join' }),
-          node('sm.shallowHistory', 'toolbox.shallowHistory', 'history', 'pseudostate', { subKind: 'shallowHistory' }),
+          node('sm.shallowHistory', 'toolbox.shallowHistory', 'history', 'pseudostate', {
+            subKind: 'shallowHistory',
+          }),
           node('sm.deepHistory', 'toolbox.deepHistory', 'history', 'pseudostate', { subKind: 'deepHistory' }),
           node('sm.entryPoint', 'toolbox.entryPoint', 'entryPoint', 'pseudostate', { subKind: 'entryPoint' }),
           node('sm.exitPoint', 'toolbox.exitPoint', 'exitPoint', 'pseudostate', { subKind: 'exitPoint' }),
           node('sm.terminate', 'toolbox.terminate', 'terminate', 'pseudostate', { subKind: 'terminate' }),
         ],
       },
-      { titleKey: 'toolbox.groups.relationships', tools: [rel('sm.transition', 'elementKind.transition', 'flow', 'transition')] },
+      {
+        titleKey: 'toolbox.groups.relationships',
+        tools: [rel('sm.transition', 'elementKind.transition', 'flow', 'transition')],
+      },
       annotations,
     ],
   },
@@ -346,11 +448,17 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
     groups: [
       {
         titleKey: 'toolbox.groups.basic',
-        tools: [node('obj.instance', 'elementKind.instanceSpecification', 'object', 'instanceSpecification'), node('obj.class', 'elementKind.class', 'class', 'class')],
+        tools: [
+          node('obj.instance', 'elementKind.instanceSpecification', 'object', 'instanceSpecification'),
+          node('obj.class', 'elementKind.class', 'class', 'class'),
+        ],
       },
       {
         titleKey: 'toolbox.groups.relationships',
-        tools: [rel('obj.link', 'elementKind.link', 'association', 'link'), rel('obj.dependency', 'elementKind.dependency', 'dependency', 'dependency')],
+        tools: [
+          rel('obj.link', 'elementKind.link', 'association', 'link'),
+          rel('obj.dependency', 'elementKind.dependency', 'dependency', 'dependency'),
+        ],
       },
       annotations,
     ],
@@ -367,7 +475,10 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
         tools: [
           node('cmp.component', 'elementKind.component', 'component', 'component'),
           node('cmp.interface', 'elementKind.interface', 'interface', 'interface'),
-          node('cmp.lollipop', 'toolbox.lollipop', 'lollipop', 'interface', { variant: 'alternate', size: { width: 60, height: 44 } }),
+          node('cmp.lollipop', 'toolbox.lollipop', 'lollipop', 'interface', {
+            variant: 'alternate',
+            size: { width: 60, height: 44 },
+          }),
           node('cmp.port', 'elementKind.port', 'port', 'port'),
           node('cmp.artifact', 'elementKind.artifact', 'artifact', 'artifact'),
           node('cmp.class', 'elementKind.class', 'class', 'class'),
@@ -400,7 +511,9 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
         tools: [
           node('dep.node', 'elementKind.node', 'node', 'node'),
           node('dep.device', 'toolbox.device', 'node', 'node', { subKind: 'device' }),
-          node('dep.env', 'toolbox.executionEnvironment', 'node', 'node', { subKind: 'executionEnvironment' }),
+          node('dep.env', 'toolbox.executionEnvironment', 'node', 'node', {
+            subKind: 'executionEnvironment',
+          }),
           node('dep.artifact', 'elementKind.artifact', 'artifact', 'artifact'),
           node('dep.component', 'elementKind.component', 'component', 'component'),
         ],
@@ -452,12 +565,25 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
     glyph: 'communication',
     supportsCodegen: false,
     groups: [
-      { titleKey: 'toolbox.groups.lifelines', tools: [node('com.lifeline', 'elementKind.lifeline', 'lifeline', 'lifeline')] },
-      { titleKey: 'toolbox.groups.relationships', tools: [rel('com.link', 'elementKind.connector', 'association', 'connector')] },
+      {
+        titleKey: 'toolbox.groups.lifelines',
+        tools: [node('com.lifeline', 'elementKind.lifeline', 'lifeline', 'lifeline')],
+      },
+      {
+        titleKey: 'toolbox.groups.relationships',
+        tools: [rel('com.link', 'elementKind.connector', 'association', 'connector')],
+      },
       annotations,
     ],
   },
-  timing: { kind: 'timing', category: 'interaction', status: 'planned', glyph: 'timing', supportsCodegen: false, groups: [] },
+  timing: {
+    kind: 'timing',
+    category: 'interaction',
+    status: 'planned',
+    glyph: 'timing',
+    supportsCodegen: false,
+    groups: [],
+  },
   interactionOverview: {
     kind: 'interactionOverview',
     category: 'interaction',
@@ -513,7 +639,10 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
       },
       {
         titleKey: 'toolbox.groups.relationships',
-        tools: [rel('if.flow', 'elementKind.informationFlow', 'dependency', 'informationFlow'), rel('if.dependency', 'elementKind.dependency', 'dependency', 'dependency')],
+        tools: [
+          rel('if.flow', 'elementKind.informationFlow', 'dependency', 'informationFlow'),
+          rel('if.dependency', 'elementKind.dependency', 'dependency', 'dependency'),
+        ],
       },
       annotations,
     ],
@@ -521,7 +650,8 @@ export const DIAGRAM_CATALOG: Record<DiagramKind, DiagramCatalogEntry> = {
 };
 
 const TOOL_INDEX = new Map<string, ToolDef>();
-for (const entry of Object.values(DIAGRAM_CATALOG)) for (const g of entry.groups) for (const tool of g.tools) TOOL_INDEX.set(tool.id, tool);
+for (const entry of Object.values(DIAGRAM_CATALOG))
+  for (const g of entry.groups) for (const tool of g.tools) TOOL_INDEX.set(tool.id, tool);
 
 export function findTool(id: string): ToolDef | undefined {
   return TOOL_INDEX.get(id);

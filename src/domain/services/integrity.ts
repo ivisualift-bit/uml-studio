@@ -58,7 +58,8 @@ export function checkIntegrity(doc: ProjectDocument): IntegrityIssue[] {
   }
 
   for (const [key, el] of Object.entries(elements)) {
-    if (key !== el.id) report('record-key-mismatch', `Element record key "${key}" does not match its id "${el.id}"`, key);
+    if (key !== el.id)
+      report('record-key-mismatch', `Element record key "${key}" does not match its id "${el.id}"`, key);
     claim(el.id, `element ${el.kind}`);
     for (const memberId of collectMemberIds(el)) {
       claim(memberId, `member of ${el.id}`);
@@ -98,9 +99,19 @@ export function checkIntegrity(doc: ProjectDocument): IntegrityIssue[] {
     for (const ref of collectReferences(el)) {
       const target = elements[ref.targetId];
       if (!target) {
-        report('dangling-reference', `"${el.name || el.kind}" references a missing element (${ref.field})`, el.id, ref.targetId);
+        report(
+          'dangling-reference',
+          `"${el.name || el.kind}" references a missing element (${ref.field})`,
+          el.id,
+          ref.targetId,
+        );
       } else if (ref.targetKinds && !ref.targetKinds.includes(target.kind)) {
-        report('reference-kind', `"${el.name || el.kind}".${ref.field} must reference ${ref.targetKinds.join('/')}`, el.id, target.id);
+        report(
+          'reference-kind',
+          `"${el.name || el.kind}".${ref.field} must reference ${ref.targetKinds.join('/')}`,
+          el.id,
+          target.id,
+        );
       }
     }
   }
@@ -110,7 +121,12 @@ export function checkIntegrity(doc: ProjectDocument): IntegrityIssue[] {
     if (el.kind === 'instanceSpecification') {
       for (const slot of el.slots) {
         if (slot.definingFeatureId && !memberIds.has(slot.definingFeatureId)) {
-          report('member-reference', `Slot "${slot.name}" references a missing attribute`, el.id, slot.definingFeatureId);
+          report(
+            'member-reference',
+            `Slot "${slot.name}" references a missing attribute`,
+            el.id,
+            slot.definingFeatureId,
+          );
         }
       }
     }
@@ -118,14 +134,21 @@ export function checkIntegrity(doc: ProjectDocument): IntegrityIssue[] {
       const base = elements[el.targetId];
       const points = new Set(base?.kind === 'useCase' ? base.extensionPoints.map((p) => p.id) : []);
       for (const id of el.extensionPointIds) {
-        if (!points.has(id)) report('member-reference', 'Extend references an extension point not owned by its base use case', el.id, id);
+        if (!points.has(id))
+          report(
+            'member-reference',
+            'Extend references an extension point not owned by its base use case',
+            el.id,
+            id,
+          );
       }
     }
   }
 
   // ---- Diagrams ------------------------------------------------------------------------------
   for (const [key, diagram] of Object.entries(doc.diagrams)) {
-    if (key !== diagram.id) report('record-key-mismatch', `Diagram record key "${key}" does not match its id`, key);
+    if (key !== diagram.id)
+      report('record-key-mismatch', `Diagram record key "${key}" does not match its id`, key);
     claim(diagram.id, 'diagram');
     const info = DIAGRAM_KIND_INFO[diagram.kind];
     const owner = elements[diagram.ownerId];
@@ -150,20 +173,36 @@ function checkDiagramViews(
   const views = diagram.views;
   const elements = doc.modelElements;
   const graphKinds = new Set<DiagramView['kind']>(['node', 'edge', 'note', 'noteLink']);
-  const timelineKinds = new Set<DiagramView['kind']>(['lifeline', 'message', 'activation', 'fragment', 'note']);
-  const allowedViewKinds = info.renderMode === 'sequence' ? timelineKinds : info.renderMode === 'graph' ? graphKinds : new Set();
+  const timelineKinds = new Set<DiagramView['kind']>([
+    'lifeline',
+    'message',
+    'activation',
+    'fragment',
+    'note',
+  ]);
+  const allowedViewKinds =
+    info.renderMode === 'sequence' ? timelineKinds : info.renderMode === 'graph' ? graphKinds : new Set();
 
   for (const [key, view] of Object.entries(views)) {
     if (key !== view.id) report('record-key-mismatch', `View record key "${key}" does not match its id`, key);
     claim(view.id, `view in ${diagram.id}`);
     if (!allowedViewKinds.has(view.kind)) {
-      report('view-kind-not-allowed', `A ${view.kind} view is not allowed in a ${diagram.kind} diagram`, view.id);
+      report(
+        'view-kind-not-allowed',
+        `A ${view.kind} view is not allowed in a ${diagram.kind} diagram`,
+        view.id,
+      );
       continue;
     }
     if ('elementId' in view) {
       const el = elements[view.elementId];
       if (!el) {
-        report('view-element-missing', `View "${view.id}" references a missing element`, view.id, view.elementId);
+        report(
+          'view-element-missing',
+          `View "${view.id}" references a missing element`,
+          view.id,
+          view.elementId,
+        );
         continue;
       }
       const expected: Partial<Record<DiagramView['kind'], (k: string) => boolean>> = {
@@ -175,7 +214,12 @@ function checkDiagramViews(
         fragment: (k) => k === 'combinedFragment',
       };
       if (!expected[view.kind]?.(el.kind)) {
-        report('view-kind-not-allowed', `A ${el.kind} cannot be shown as a ${view.kind} view in a ${diagram.kind} diagram`, view.id, el.id);
+        report(
+          'view-kind-not-allowed',
+          `A ${el.kind} cannot be shown as a ${view.kind} view in a ${diagram.kind} diagram`,
+          view.id,
+          el.id,
+        );
         continue;
       }
     }
@@ -194,10 +238,26 @@ function checkDiagramViews(
         const rel = elements[view.elementId];
         const source = views[view.sourceViewId];
         const target = views[view.targetViewId];
-        if (!rel || !isRelationship(rel) || !source || !target || source.kind !== 'node' || target.kind !== 'node') {
-          report('edge-endpoint', `Edge "${view.id}" is not connected to node views of this diagram`, view.id);
+        if (
+          !rel ||
+          !isRelationship(rel) ||
+          !source ||
+          !target ||
+          source.kind !== 'node' ||
+          target.kind !== 'node'
+        ) {
+          report(
+            'edge-endpoint',
+            `Edge "${view.id}" is not connected to node views of this diagram`,
+            view.id,
+          );
         } else if (source.elementId !== rel.sourceId || target.elementId !== rel.targetId) {
-          report('edge-endpoint', `Edge "${view.id}" endpoints do not match its relationship`, view.id, rel.id);
+          report(
+            'edge-endpoint',
+            `Edge "${view.id}" endpoints do not match its relationship`,
+            view.id,
+            rel.id,
+          );
         }
         break;
       }
@@ -220,7 +280,11 @@ function checkDiagramViews(
           if (viewId === null) return;
           const lv = views[viewId];
           if (!lv || lv.kind !== 'lifeline' || lv.elementId !== lifelineId) {
-            report('timeline-reference', `Message "${msg.name}" ${end} does not reference the lifeline view of its lifeline`, view.id);
+            report(
+              'timeline-reference',
+              `Message "${msg.name}" ${end} does not reference the lifeline view of its lifeline`,
+              view.id,
+            );
           }
         };
         check(view.sourceViewId, msg.sourceLifelineId, 'sender');
@@ -240,7 +304,8 @@ function checkDiagramViews(
         if (frag?.kind !== 'combinedFragment') break;
         const operandIds = new Set(frag.operands.map((o) => o.id));
         for (const operandId of Object.keys(view.operandYs)) {
-          if (!operandIds.has(operandId)) report('timeline-reference', `Fragment view references a missing operand`, view.id, operandId);
+          if (!operandIds.has(operandId))
+            report('timeline-reference', `Fragment view references a missing operand`, view.id, operandId);
         }
         break;
       }

@@ -8,7 +8,9 @@ export const indexedDbRecovery: RecoveryRepository = {
     await database().recovery.put(snapshot);
   },
   async listRecoveries() {
-    return (await database().recovery.orderBy('savedAt').reverse().toArray()).filter((s) => typeof s.text === 'string');
+    return (await database().recovery.orderBy('savedAt').reverse().toArray()).filter(
+      (s) => typeof s.text === 'string',
+    );
   },
   async getRecovery(projectId: ID) {
     return database().recovery.get(projectId);

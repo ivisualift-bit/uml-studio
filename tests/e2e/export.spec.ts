@@ -1,6 +1,18 @@
-import { addDiagram, connect, expect, exportDiagram, newProject, parseSvg, place, pngSize, test } from './helpers';
+import {
+  addDiagram,
+  connect,
+  expect,
+  exportDiagram,
+  newProject,
+  parseSvg,
+  place,
+  pngSize,
+  test,
+} from './helpers';
 
-test('E2E-010 export robustness: accents, <, &, long labels, dashed edge and diamond → valid SVG, PNG and PDF', async ({ page }) => {
+test('E2E-010 export robustness: accents, <, &, long labels, dashed edge and diamond → valid SVG, PNG and PDF', async ({
+  page,
+}) => {
   await newProject(page, 'Exports');
   await addDiagram(page, 'class', 'Tricky <&> "names"');
   await place(page, 'class.class', 250, 200, 'Élève <&> "Test"');

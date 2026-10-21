@@ -7,7 +7,9 @@ import tailwindcss from '@tailwindcss/vite';
 // Tauri expects a fixed dev port and must not clear its own terminal output.
 const host = process.env.TAURI_DEV_HOST;
 
-const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as {
+  version: string;
+};
 
 /**
  * Strict Content-Security-Policy for production builds (no network, no inline scripts). Not applied
@@ -18,7 +20,11 @@ const CSP =
 const cspPlugin = (): Plugin => ({
   name: 'uml-studio-csp',
   apply: 'build',
-  transformIndexHtml: (html) => html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`),
+  transformIndexHtml: (html) =>
+    html.replace(
+      '<meta charset="UTF-8" />',
+      `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`,
+    ),
 });
 
 export default defineConfig({

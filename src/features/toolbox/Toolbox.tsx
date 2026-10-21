@@ -9,7 +9,9 @@ import { useDocumentStore } from '@/stores/documentStore';
 import { useEditorStore, type Tool } from '@/stores/editorStore';
 
 function toolMode(tool: ToolDef): 'place' | 'connect' {
-  return tool.type === 'relationship' || tool.type === 'noteLink' || tool.type === 'message' ? 'connect' : 'place';
+  return tool.type === 'relationship' || tool.type === 'noteLink' || tool.type === 'message'
+    ? 'connect'
+    : 'place';
 }
 
 export function Toolbox() {
@@ -24,16 +26,24 @@ export function Toolbox() {
     return <p className="px-3 py-2 text-[12px] text-faint">{t('toolbox.noDiagram')}</p>;
   }
   const entry = DIAGRAM_CATALOG[kind];
-  if (entry.status === 'planned') return <p className="px-3 py-2 text-[12px] text-faint">{t('toolbox.planned')}</p>;
+  if (entry.status === 'planned')
+    return <p className="px-3 py-2 text-[12px] text-faint">{t('toolbox.planned')}</p>;
 
-  const isActive = (tool: ToolDef) => (current.kind === 'place' || current.kind === 'connect') && current.toolId === tool.id;
+  const isActive = (tool: ToolDef) =>
+    (current.kind === 'place' || current.kind === 'connect') && current.toolId === tool.id;
   const arm = (tool: ToolDef, sticky: boolean) => {
     const next: Tool = { kind: toolMode(tool), toolId: tool.id, sticky };
     setTool(isActive(tool) && !sticky ? { kind: 'select' } : next);
   };
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto pb-2" role="toolbar" aria-orientation="vertical" aria-label={t('toolbox.title')} data-testid="toolbox">
+    <div
+      className="min-h-0 flex-1 overflow-y-auto pb-2"
+      role="toolbar"
+      aria-orientation="vertical"
+      aria-label={t('toolbox.title')}
+      data-testid="toolbox"
+    >
       {entry.groups.map((group) => {
         const open = !collapsed.has(group.titleKey);
         return (
@@ -77,12 +87,19 @@ export function Toolbox() {
                       onDoubleClick={() => arm(tool, true)}
                       className={cn(
                         'flex h-7 items-center gap-2 rounded px-2 text-left text-[12.5px] text-fg hover:bg-surface-3',
-                        active && 'bg-accent-muted text-accent ring-1 ring-accent-border hover:bg-accent-muted',
+                        active &&
+                          'bg-accent-muted text-accent ring-1 ring-accent-border hover:bg-accent-muted',
                       )}
                     >
-                      <UmlGlyph name={tool.glyph} size={16} className={active ? 'text-accent' : 'text-muted'} />
+                      <UmlGlyph
+                        name={tool.glyph}
+                        size={16}
+                        className={active ? 'text-accent' : 'text-muted'}
+                      />
                       <span className="truncate">{label}</span>
-                      {active && 'sticky' in current && current.sticky && <span className="ml-auto text-[10px] text-accent">●</span>}
+                      {active && 'sticky' in current && current.sticky && (
+                        <span className="ml-auto text-[10px] text-accent">●</span>
+                      )}
                     </button>
                   );
                 })}
