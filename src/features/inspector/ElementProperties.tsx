@@ -255,20 +255,33 @@ function ConnectorProperties({ rel }: { rel: ElementOf<'connector'> }) {
         {rel.messages.map((m) => {
           const set = (patch: FieldPatch) => run({ type: 'member/update', elementId: rel.id, collection: 'messages', memberId: m.id, patch }, { label: t('history.edit', { field: m.name }) });
           return (
-            <div key={m.id} className="flex items-center gap-1" data-testid="comm-message-row">
-              <TextField compact label={t('inspector.sequence')} value={m.sequence} onCommit={(v) => set({ sequence: v.trim() })} className="w-12" />
-              <TextField compact label={t('common.name')} value={m.name} onCommit={(v) => set({ name: v.trim() })} />
-              <SelectField compact label={t('inspector.direction')} value={m.direction} options={[{ value: 'forward', label: '→' }, { value: 'backward', label: '←' }]} onChange={(v) => set({ direction: v })} />
-              <SelectField
-                compact
-                label={t('inspector.messageSort')}
-                value={m.sort}
-                options={(['synchronous', 'asynchronous', 'reply'] as const).map((v) => ({ value: v, label: t(`messageSort.${v}`) }))}
-                onChange={(v) => set({ sort: v })}
-              />
-              <IconButton label={t('common.delete')} className="h-6 w-6 shrink-0 hover:text-danger" onClick={() => run({ type: 'member/delete', elementId: rel.id, collection: 'messages', memberId: m.id }, { label: t('history.delete') })}>
-                ×
-              </IconButton>
+            <div key={m.id} className="flex flex-col gap-1 rounded border border-border bg-surface-2 p-1.5" data-testid="comm-message-row">
+              <div className="flex items-center gap-1">
+                <TextField compact label={t('inspector.sequence')} value={m.sequence} onCommit={(v) => set({ sequence: v.trim() })} className="w-14" />
+                <TextField compact label={t('common.name')} value={m.name} onCommit={(v) => set({ name: v.trim() })} />
+                <IconButton label={t('common.delete')} className="h-6 w-6 shrink-0 hover:text-danger" onClick={() => run({ type: 'member/delete', elementId: rel.id, collection: 'messages', memberId: m.id }, { label: t('history.delete') })}>
+                  ×
+                </IconButton>
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                <SelectField
+                  compact
+                  label={t('inspector.direction')}
+                  value={m.direction}
+                  options={[
+                    { value: 'forward', label: `→ ${t('inspector.forward')}` },
+                    { value: 'backward', label: `← ${t('inspector.backward')}` },
+                  ]}
+                  onChange={(v) => set({ direction: v })}
+                />
+                <SelectField
+                  compact
+                  label={t('inspector.messageSort')}
+                  value={m.sort}
+                  options={(['synchronous', 'asynchronous', 'reply'] as const).map((v) => ({ value: v, label: t(`messageSort.${v}`) }))}
+                  onChange={(v) => set({ sort: v })}
+                />
+              </div>
             </div>
           );
         })}

@@ -96,38 +96,98 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
     [tool, pendingSource, hoverNode, diagramId],
   );
 
-  const nodes = useMemo<UmlNodeType[]>(
-    () =>
-      layout.nodes.map((n: GraphNodeRender) => ({
+  // Reuse unchanged node/edge objects between renders so React Flow only re-renders what moved
+  // (a drag frame touches one node and its edges, not the whole diagram).
+  const nodeCache = useRef(new Map<ID, UmlNodeType>());
+  const edgeCache = useRef(new Map<ID, UmlEdgeType>());
+  const edgeTheme = useRef(theme);
+  const nodes = useMemo<UmlNodeType[]>(() => {
+    const previous = nodeCache.current;
+    const next = new Map<ID, UmlNodeType>();
+    const list = layout.nodes.map((n: GraphNodeRender) => {
+      const state = connectState(n.view.id);
+      const selected = selectedSet.has(n.view.id);
+      const zIndex = n.isContainer ? n.depth : 1000 + n.depth;
+      const old = previous.get(n.view.id);
+      if (
+        old &&
+        old.data.render.layout === n.layout &&
+        old.data.render.view === n.view &&
+        old.data.render.element === n.element &&
+        old.position.x === n.x &&
+        old.position.y === n.y &&
+        old.data.connectState === state &&
+        old.selected === selected &&
+        old.zIndex === zIndex &&
+        old.draggable === interactive &&
+        old.selectable === (tool.kind === 'select')
+      ) {
+        next.set(old.id, old);
+        return old;
+      }
+      const created: UmlNodeType = {
         id: n.view.id,
         type: 'uml',
         position: { x: n.x, y: n.y },
         width: n.layout.width,
         height: n.layout.height,
-        data: { render: n, connectState: connectState(n.view.id) },
-        selected: selectedSet.has(n.view.id),
-        zIndex: n.isContainer ? n.depth : 1000 + n.depth,
+        data: { render: n, connectState: state },
+        selected,
+        zIndex,
         draggable: interactive,
         selectable: tool.kind === 'select',
         connectable: false,
-      })),
-    [layout, selectedSet, connectState, interactive, tool.kind],
-  );
-  const edges = useMemo<UmlEdgeType[]>(
-    () =>
-      layout.edges.map((e) => ({
+      };
+      next.set(created.id, created);
+      return created;
+    });
+    nodeCache.current = next;
+    return list;
+  }, [layout, selectedSet, connectState, interactive, tool.kind]);
+  const edges = useMemo<UmlEdgeType[]>(() => {
+    const previous = edgeCache.current;
+    const next = new Map<ID, UmlEdgeType>();
+    const samePoints = (a: { x: number; y: number }[], b: { x: number; y: number }[]) => a.length === b.length && a.every((p, i) => p.x === b[i]!.x && p.y === b[i]!.y);
+    const sameLabels = (a: { text: string; x: number; y: number }[], b: { text: string; x: number; y: number }[]) =>
+      a.length === b.length && a.every((l, i) => l.text === b[i]!.text && l.x === b[i]!.x && l.y === b[i]!.y);
+    const list = layout.edges.map((e) => {
+      const selected = selectedSet.has(e.view.id);
+      const old = previous.get(e.view.id);
+      const oldRender = old?.data?.render;
+      if (
+        old &&
+        oldRender &&
+        oldRender.view === e.view &&
+        oldRender.relationship === e.relationship &&
+        old.selected === selected &&
+        old.selectable === (tool.kind === 'select') &&
+        old.source === e.sourceViewId &&
+        old.target === e.targetViewId &&
+        edgeTheme.current === theme &&
+        samePoints(oldRender.layout.points, e.layout.points) &&
+        sameLabels(oldRender.layout.labels, e.layout.labels)
+      ) {
+        next.set(old.id, old);
+        return old;
+      }
+      const created: UmlEdgeType = {
         id: e.view.id,
         source: e.sourceViewId,
         target: e.targetViewId,
         type: 'uml',
         data: { render: e },
-        selected: selectedSet.has(e.view.id),
+        selected,
         // Edges (and their labels) draw above nodes, as in the SVG export.
         zIndex: 3000,
         selectable: tool.kind === 'select',
-      })),
-    [layout, selectedSet, tool.kind],
-  );
+      };
+      next.set(created.id, created);
+      return created;
+    });
+    edgeCache.current = next;
+    edgeTheme.current = theme;
+    return list;
+  }, [layout, selectedSet, tool.kind, theme]);
 
   // ---- Imperative viewport API for menus/shortcuts
   useEffect(() => {
