@@ -18,11 +18,18 @@ type DragKind =
 
 const EMPTY_POINTS: Point[] = [];
 
+interface PointerLike {
+  clientX: number;
+  clientY: number;
+}
+
 function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
   const ctx = useGraphCanvas();
   const drag = useRef<DragKind | null>(null);
   const moved = useRef(false);
   const [labelShift, setLabelShift] = useState<{ key: EdgeLabelKey; dx: number; dy: number; offset: Point } | null>(null);
+  /** Latest drag handlers; window listeners call through this so re-renders never break a drag. */
+  const handlers = useRef<{ move: (e: PointerLike) => void; up: (e: PointerLike) => void } | null>(null);
   const render = data?.render;
   const primitives = render?.layout.primitives;
   const split = useMemo(() => {
@@ -43,12 +50,19 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
     if (!editable) return;
     e.stopPropagation();
     e.preventDefault();
-    (e.currentTarget as Element).setPointerCapture(e.pointerId);
     drag.current = kind;
     moved.current = false;
+    const move = (ev: PointerEvent) => handlers.current?.move(ev);
+    const up = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      handlers.current?.up(ev);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
   };
 
-  const onMove = (e: ReactPointerEvent) => {
+  const onMove = (e: PointerLike) => {
     const d = drag.current;
     if (!d) return;
     moved.current = true;
@@ -72,11 +86,10 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
     }
   };
 
-  const onUp = (e: ReactPointerEvent) => {
+  const onUp = (e: PointerLike) => {
     const d = drag.current;
     drag.current = null;
     if (!d) return;
-    if ((e.currentTarget as Element).hasPointerCapture(e.pointerId)) (e.currentTarget as Element).releasePointerCapture(e.pointerId);
     const p = ctx.screenToFlow({ x: e.clientX, y: e.clientY });
     const rounded = { x: Math.round(p.x), y: Math.round(p.y) };
     if (d.type === 'waypoint' && moved.current) {
@@ -110,6 +123,8 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
     begin(e, { type: 'label', key, start: p, base });
   };
 
+  handlers.current = { move: onMove, up: onUp };
+
   const removeWaypoint = (index: number) => {
     const next = waypoints.slice();
     next.splice(index, 1);
@@ -117,7 +132,8 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
   };
 
   const chain: Point[] = straight && points.length >= 2 ? [points[0]!, ...waypoints, points[points.length - 1]!] : [];
-  const handle = { onPointerMove: onMove, onPointerUp: onUp, className: 'nodrag nopan' };
+  // React Flow sets `pointer-events: visibleStroke` on edges; handles must opt in to fill hits.
+  const handle = { className: 'nodrag nopan', pointerEvents: 'all' as const };
 
   return (
     <g
@@ -126,8 +142,6 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
       data-kind={render.relationship?.kind ?? 'noteLink'}
       data-selected={selected ? 'true' : 'false'}
       onPointerDown={onLabelPointerDown}
-      onPointerMove={onMove}
-      onPointerUp={onUp}
     >
       {selected && <path d={layout.path} fill="none" stroke="var(--selection)" strokeOpacity={0.28} strokeWidth={7} strokeLinejoin="round" pointerEvents="none" />}
       <path d={layout.path} fill="none" stroke="transparent" strokeWidth={14} className="react-flow__edge-interaction" />
@@ -147,6 +161,7 @@ function UmlEdgeImpl({ id, data, selected }: EdgeProps<UmlEdgeType>) {
           fill="transparent"
           data-label={l.key}
           data-testid={`edge-label-${l.key}`}
+          pointerEvents="all"
           style={{ cursor: editable ? 'move' : 'pointer' }}
         />
       ))}

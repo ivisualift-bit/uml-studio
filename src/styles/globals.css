@@ -191,3 +191,11 @@ select,
 .animate-toast-in {
   animation: toast-in 140ms ease-out;
 }
+.react-flow__attribution {
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 9px;
+}
+.react-flow__attribution a {
+  color: var(--text-faint);
+}
