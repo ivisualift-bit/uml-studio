@@ -44,12 +44,14 @@ export function useRecoveryAutosave(): void {
     const flush = () => {
       if (document.visibilityState === 'hidden') void writeSnapshot();
     };
+    const onPageHide = () => void writeSnapshot();
     document.addEventListener('visibilitychange', flush);
-    window.addEventListener('pagehide', () => void writeSnapshot());
+    window.addEventListener('pagehide', onPageHide);
     return () => {
       unsubscribe();
       window.clearTimeout(timer);
       document.removeEventListener('visibilitychange', flush);
+      window.removeEventListener('pagehide', onPageHide);
     };
   }, []);
 }

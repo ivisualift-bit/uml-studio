@@ -23,6 +23,19 @@ describe('project serialization', () => {
     expect(serializeProject(parsed.doc)).toBe(text);
   });
 
+  it('preserves namespaced extension data verbatim and drops unknown fields', () => {
+    const raw = JSON.parse(serializeProject(sampleDoc())) as Record<string, unknown>;
+    const extensions = { 'acme.tool:layout': { seed: 7, hints: ['a', null, true] } };
+    raw.extensions = extensions;
+    raw.unknownTopLevel = 'dropped';
+    const parsed = parseProjectText(JSON.stringify(raw));
+    if (!parsed.ok) throw new Error(parsed.error.details.join('; '));
+    expect(parsed.doc.extensions).toEqual(extensions);
+    expect('unknownTopLevel' in parsed.doc).toBe(false);
+    const again = parseProjectText(serializeProject(parsed.doc));
+    expect(again.ok && again.doc.extensions).toEqual(extensions);
+  });
+
   it('accepts a UTF-8 BOM', () => {
     const parsed = parseProjectText(`\uFEFF${serializeProject(sampleDoc())}`);
     expect(parsed.ok).toBe(true);
