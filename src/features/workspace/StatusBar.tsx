@@ -43,8 +43,10 @@ export function StatusBar({ problemCount }: { problemCount: number }) {
       >
         {dirty ? (
           <Circle size={9} className="fill-warning text-warning" />
-        ) : (
+        ) : file ? (
           <CircleCheck size={11} className="text-success" />
+        ) : (
+          <Circle size={9} className="text-faint" />
         )}
         {dirty ? t('status.unsaved') : file ? t('status.saved') : t('project.neverSaved')}
       </span>

@@ -12,6 +12,7 @@ import {
 import {
   Background,
   BackgroundVariant,
+  getViewportForBounds,
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
@@ -226,19 +227,33 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
     return list;
   }, [layout, selectedSet, tool.kind, theme]);
 
+  // Fit the rendered diagram (edge bends and labels included, unlike React Flow's node-only fitView).
+  const layoutBounds = useRef(layout.bounds);
+  layoutBounds.current = layout.bounds;
+  const fitContent = useCallback(
+    (maxZoom: number, duration?: number) => {
+      const b = layoutBounds.current;
+      const el = wrapper.current;
+      if (!b || !el?.clientWidth) return;
+      const viewport = getViewportForBounds(b, el.clientWidth, el.clientHeight, 0.1, maxZoom, 0.15);
+      void rf.setViewport(viewport, duration ? { duration } : undefined);
+    },
+    [rf],
+  );
+
   // ---- Imperative viewport API for menus/shortcuts
   useEffect(() => {
     canvasApi.current = {
       zoomIn: () => void rf.zoomIn({ duration: 120 }),
       zoomOut: () => void rf.zoomOut({ duration: 120 }),
       resetZoom: () => void rf.zoomTo(1, { duration: 120 }),
-      fit: () => void rf.fitView({ padding: 0.15, duration: 200, maxZoom: 1.5 }),
+      fit: () => fitContent(1.5, 200),
       getZoom: () => rf.getZoom(),
     };
     return () => {
       canvasApi.current = null;
     };
-  }, [rf]);
+  }, [rf, fitContent]);
 
   // ---- Focus requests (problems panel, search)
   useEffect(() => {
@@ -722,8 +737,7 @@ function GraphCanvasInner({ diagramId }: { diagramId: ID }) {
               onNodeMouseLeave={() => setHoverNode(null)}
               onMoveEnd={onMoveEnd}
               defaultViewport={savedViewport ?? diagram.viewport ?? { x: 40, y: 40, zoom: 1 }}
-              fitView={initialFit}
-              fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
+              onInit={() => initialFit && fitContent(1.2)}
               minZoom={0.1}
               maxZoom={4}
               snapToGrid={snapToGrid}

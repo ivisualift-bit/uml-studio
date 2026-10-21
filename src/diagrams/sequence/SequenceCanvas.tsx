@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -206,6 +207,19 @@ export function SequenceCanvas({ diagramId }: { diagramId: ID }) {
       canvasApi.current = null;
     };
   }, [zoomAround, fit, setViewport, viewport]);
+
+  // First open of a non-empty diagram without a stored viewport: show every lifeline (never
+  // enlarging) from the top, since sequence diagrams read downwards.
+  useLayoutEffect(() => {
+    if (savedViewport || diagram.viewport || Object.keys(diagram.views).length === 0) return;
+    const b = layout.bounds;
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!b || !rect || rect.width === 0) return;
+    const zoom = Math.max(MIN_ZOOM, Math.min(1, (rect.width - 60) / b.width));
+    setViewport({ zoom, x: (rect.width - b.width * zoom) / 2 - b.x * zoom, y: 24 - b.y * zoom });
+    // Once, on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!focusRequest || focusRequest.diagramId !== diagramId) return;

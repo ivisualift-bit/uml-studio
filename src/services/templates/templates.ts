@@ -234,15 +234,16 @@ function ticket(): ProjectDocument {
   const d = b.diagram('stateMachine', 'Ticket', b.root, 'Ticket');
   const init = b.node(d, 'pseudostate', '', 40, 80, { subKind: 'initial' });
   const fresh = b.node(d, 'state', 'New', 120, 60, { width: 120, height: 60 });
-  const assigned = b.node(d, 'state', 'Assigned', 360, 60, { width: 130, height: 60 });
-  const progress = b.node(d, 'state', 'In Progress', 620, 50, {
+  // Gaps leave room for the transition labels between states.
+  const assigned = b.node(d, 'state', 'Assigned', 500, 60, { width: 130, height: 60 });
+  const progress = b.node(d, 'state', 'In Progress', 760, 50, {
     width: 170,
     height: 90,
     patch: { entry: 'startTimer', exit: 'stopTimer' },
   });
-  const resolved = b.node(d, 'state', 'Resolved', 620, 270, { width: 150, height: 60 });
-  const closed = b.node(d, 'state', 'Closed', 360, 270, { width: 130, height: 60 });
-  const fin = b.node(d, 'finalState', '', 180, 287);
+  const resolved = b.node(d, 'state', 'Resolved', 770, 290, { width: 150, height: 60 });
+  const closed = b.node(d, 'state', 'Closed', 440, 290, { width: 130, height: 60 });
+  const fin = b.node(d, 'finalState', '', 260, 307);
   b.connect(d, 'transition', init.viewId, fresh.viewId);
   b.connect(d, 'transition', fresh.viewId, assigned.viewId, {
     trigger: 'assign',
@@ -253,8 +254,8 @@ function ticket(): ProjectDocument {
   b.connect(d, 'transition', progress.viewId, resolved.viewId, { trigger: 'resolve', effect: 'sendSurvey' });
   const reopen = b.connect(d, 'transition', resolved.viewId, progress.viewId, { trigger: 'reopen' });
   b.waypoints(d, reopen.edgeViewId, [
-    { x: 800, y: 300 },
-    { x: 800, y: 110 },
+    { x: 1060, y: 320 },
+    { x: 1060, y: 95 },
   ]);
   b.connect(d, 'transition', resolved.viewId, closed.viewId, {
     trigger: 'close',

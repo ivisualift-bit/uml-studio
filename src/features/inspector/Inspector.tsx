@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Tabs } from 'radix-ui';
 import { run } from '@/app/actions';
 import type { ID } from '@/domain/schemas/common';
+import { DIAGRAM_KIND_INFO } from '@/domain/model/metadata';
 import type { ProjectDocument, UMLDiagram } from '@/domain/schemas/project';
 import { useT } from '@/i18n';
 import { cn } from '@/lib/cn';
@@ -236,6 +237,17 @@ function ProjectProperties({ doc }: { doc: ProjectDocument }) {
   );
 }
 
+/** Element kinds whose views show attribute/operation compartments (affected by the member options). */
+const MEMBER_KINDS: ReadonlySet<string> = new Set([
+  'class',
+  'interface',
+  'enumeration',
+  'dataType',
+  'primitiveType',
+  'signal',
+  'component',
+]);
+
 function DiagramProperties({ diagram }: { diagram: UMLDiagram }) {
   const t = useT();
   const doc = useDocumentStore((s) => s.doc)!;
@@ -247,6 +259,7 @@ function DiagramProperties({ diagram }: { diagram: UMLDiagram }) {
     );
   const owner = doc.modelElements[diagram.ownerId];
   const isSequence = diagram.kind === 'sequence';
+  const showsMembers = DIAGRAM_KIND_INFO[diagram.kind].nodeKinds.some((k) => MEMBER_KINDS.has(k));
   return (
     <>
       <Section>
@@ -281,7 +294,7 @@ function DiagramProperties({ diagram }: { diagram: UMLDiagram }) {
         </div>
       </Section>
       <Section title={t('inspector.diagramOptions')}>
-        {!isSequence && (
+        {showsMembers && (
           <>
             <CheckField
               label={t('inspector.showVisibility')}
@@ -298,16 +311,18 @@ function DiagramProperties({ diagram }: { diagram: UMLDiagram }) {
               checked={o.showOperationSignatures}
               onChange={(v) => set({ showOperationSignatures: v })}
             />
-            <SelectField
-              label={t('inspector.defaultRouting')}
-              value={o.defaultRouting}
-              options={[
-                { value: 'straight', label: t('cmd.routingStraight') },
-                { value: 'orthogonal', label: t('cmd.routingOrthogonal') },
-              ]}
-              onChange={(v) => set({ defaultRouting: v })}
-            />
           </>
+        )}
+        {!isSequence && (
+          <SelectField
+            label={t('inspector.defaultRouting')}
+            value={o.defaultRouting}
+            options={[
+              { value: 'straight', label: t('cmd.routingStraight') },
+              { value: 'orthogonal', label: t('cmd.routingOrthogonal') },
+            ]}
+            onChange={(v) => set({ defaultRouting: v })}
+          />
         )}
         {isSequence && (
           <CheckField
