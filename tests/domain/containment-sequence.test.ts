@@ -52,6 +52,16 @@ describe('state machine nesting', () => {
   });
 });
 
+describe('ports and parts', () => {
+  it('are owned by the component or class they are dropped on, and refused elsewhere', () => {
+    const f = withDiagram('component');
+    const comp = addNode(f, f.diagramId, { kind: 'component', name: 'Orders' }, 0, 0, { width: 200, height: 100 });
+    const port = addNode(f, f.diagramId, { kind: 'port', name: 'api' }, 192, 40, { width: 16, height: 16 });
+    expect(f.doc.modelElements[port.elementId]?.ownerId).toBe(comp.elementId);
+    expect(() => addNode(f, f.diagramId, { kind: 'port', name: 'loose' }, 600, 600, { width: 16, height: 16 })).toThrow(/noOwner/);
+  });
+});
+
 describe('use case boundary', () => {
   it('is a visual container only (no ownership change)', () => {
     const f = withDiagram('useCase');

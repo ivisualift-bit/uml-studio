@@ -80,6 +80,26 @@ export function defaultOwnerFor(doc: ProjectDocument, diagram: UMLDiagram, kind:
   return pkgEl && canOwn(pkgEl.kind, kind) ? pkg : null;
 }
 
+/**
+ * Innermost element shown at `point` that may own `kind` (e.g. a port dropped on a component, a part
+ * inside a structured class). Uses stored view bounds; visual containment refines it afterwards.
+ */
+export function containingOwnerFor(doc: ProjectDocument, diagram: UMLDiagram, kind: ElementKind, point: Point): ID | null {
+  let best: { id: ID; area: number } | null = null;
+  for (const view of Object.values(diagram.views)) {
+    if (view.kind !== 'node') continue;
+    const el = doc.modelElements[view.elementId];
+    if (!el || !canOwn(el.kind, kind)) continue;
+    const slack = kind === 'port' ? 14 : 0;
+    const inside =
+      point.x >= view.x - slack && point.x <= view.x + view.width + slack && point.y >= view.y - slack && point.y <= view.y + view.height + slack;
+    if (!inside) continue;
+    const area = view.width * view.height;
+    if (!best || area < best.area) best = { id: el.id, area };
+  }
+  return best?.id ?? null;
+}
+
 export interface NodeSpec {
   kind: NodeElementKind;
   /** pseudoKind / nodeKind / actionKind / headStyle / operator depending on kind. */
@@ -126,7 +146,8 @@ export function createNodeCommands(
   if (!diagram) return { ok: false, reason: 'notFound' };
   const { spec } = options;
   if (!diagramAllowsElement(diagram.kind, spec.kind)) return { ok: false, reason: 'notAllowed' };
-  const ownerId = defaultOwnerFor(doc, diagram, spec.kind);
+  const center = { x: options.position.x + options.size.width / 2, y: options.position.y + options.size.height / 2 };
+  const ownerId = containingOwnerFor(doc, diagram, spec.kind, center) ?? defaultOwnerFor(doc, diagram, spec.kind);
   if (!ownerId) return { ok: false, reason: 'noOwner' };
   const elementId = options.ids.next();
   const name =

@@ -889,6 +889,10 @@ export function layoutNode(ctx: NodeRenderContext, view: NodeView, el: ModelElem
   const doc = ctx.doc;
   switch (el.kind) {
     case 'class':
+      if (ctx.hasChildren && ctx.diagram.kind === 'compositeStructure') {
+        // Structured classifier: name compartment + internal structure (parts, ports, connectors).
+        return layoutFrameContainer(ctx, view, el, { minWidth: 200, minHeight: 140, headerAlign: 'center' });
+      }
       return classifierBox({
         view,
         theme: ctx.theme,

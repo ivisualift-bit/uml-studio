@@ -64,7 +64,10 @@ export function placeTool(diagramId: ID, tool: ToolDef, point: Point): boolean {
     ids: uuidGenerator,
   });
   if (!created.ok || !created.elementId || !created.viewId) {
-    toast.error(t('commandError.viewNotAllowed'));
+    if (!created.ok && created.reason === 'noOwner') {
+      const container = tool.spec.kind === 'port' ? `${t('elementKind.component')} / ${t('elementKind.class')}` : `${t('elementKind.class')} / ${t('elementKind.component')}`;
+      toast.warning(t('canvas.needsContainer', { kind: t(`elementKind.${tool.spec.kind}`), container }));
+    } else toast.error(t('commandError.viewNotAllowed'));
     return false;
   }
   const commands: Command[] = [...created.commands];

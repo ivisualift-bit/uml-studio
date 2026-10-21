@@ -312,6 +312,7 @@ export const en = {
     invalidMemberText: 'Could not parse “{text}”. Expected UML notation, e.g. “- name: String [0..1]”.',
     minimap: 'Minimap',
     planned: 'This diagram type is planned and cannot be edited yet.',
+    needsContainer: '{kind} must be placed inside a {container}.',
     selectedCount: '{count} selected',
   },
   endpoint: {

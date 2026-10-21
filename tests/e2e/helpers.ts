@@ -88,10 +88,11 @@ export function edge(page: Page, kind: string): Locator {
   return page.locator(`[data-testid="uml-edge"][data-kind="${kind}"]`);
 }
 
-export async function connect(page: Page, toolId: string, from: string, to: string): Promise<void> {
+/** Two-click connection. Containers whose centre is covered by children are clicked near their top. */
+export async function connect(page: Page, toolId: string, from: string, to: string, options: { fromTop?: boolean; toTop?: boolean } = {}): Promise<void> {
   await page.getByTestId(`tool-${toolId}`).click();
-  await node(page, from).click();
-  await node(page, to).click();
+  await node(page, from).click(options.fromTop ? { position: { x: 12, y: 8 } } : undefined);
+  await node(page, to).click(options.toTop ? { position: { x: 12, y: 8 } } : undefined);
 }
 
 /** Select an edge by clicking the middle of its interaction path. */

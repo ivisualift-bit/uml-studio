@@ -311,6 +311,7 @@ export const fr: Dictionary = {
     invalidMemberText: 'Impossible d’analyser « {text} ». Notation UML attendue, par ex. « - nom: String [0..1] ».',
     minimap: 'Mini-carte',
     planned: 'Ce type de diagramme est prévu et ne peut pas encore être édité.',
+    needsContainer: '{kind} doit être placé(e) dans un(e) {container}.',
     selectedCount: '{count} sélectionné(s)',
   },
   endpoint: {
